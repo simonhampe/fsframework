@@ -17,7 +17,7 @@ import org.dom4j.tree.*;
  *  If there is none, the configure()-Method will simply not be called.
  * <br> As for writing, if a node for an ID does not exist yet, it is created. If it exists, the
  *  first occurrence will be overwritten and any further ones ignored. Note, 
- *  that XMLConfigureFileWrite gives no further guarantees as to the order of the
+ *  that XMLConfigureFile gives no further guarantees as to the order of the
  *  nodes.
  *  
  * @author Simon Hampe
@@ -104,10 +104,77 @@ public class XMLConfigureFile {
 	
 	//Sync operations
 
-	public void configure() {
+	/**
+	 * Tries to read a first-level node with the appropriate name (i.e. equal to the ID) for each
+	 * XMLConfigurable and pass it on for configuration.
+	 * @throws XMLWriteConfigurationException - If any XMLConfigurable.configure(Node n) throws this exception. However,
+	 * all correctly written configurations will still be read regardless of any errors occuring. The exception thrown at the
+	 * end contains a list of all errors reported as message. 
+	 */
+	public void configure() throws XMLWriteConfigurationException {
+		//All possible configuration errors are stored in 
+		//one large string and passed on afterwards all at once.
+		//This is supposed to enable correctly written configurations
+		//to be read regardless of incorrectly written ones, while still
+		//giving a full feedback about all errors occuring
+		StringBuilder error = new StringBuilder("Configuration Write error report:");
+		boolean errorOccured = false;
 		for(XMLConfigurable c : configurables) {
 			String id = c.getIdentifier();
-			
+			Node n = internalXML.selectSingleNode("/*/" + id);
+			if(n!=null) {
+				try {
+					//TODO: This is supposed to be different. The first INTERNAL node in 
+					//n should be the configuration node
+					c.configure(n);
+				}
+				catch(XMLWriteConfigurationException e) {
+					errorOccured = true;
+					//Append the message to the general error string
+					error.append("\n * " + e.getMessage());
+				}
+			}
+		}
+		if(errorOccured) {
+			throw new XMLWriteConfigurationException(error.toString());
 		}
 	}
+	
+	public void readConfigurations() throws XMLReadConfigurationException{
+		//All possible configuration errors are stored in 
+		//one large string and passed on afterwards all at once.
+		//This is supposed to enable correctly returned configurations
+		//to be read regardless of any exceptions from other XMLConfigurables, while still
+		//giving a full feedback about all errors occuring
+		StringBuilder error = new StringBuilder("Configuration Read error report:");
+		boolean errorOccured = false;
+		for(XMLConfigurable c : configurables) {
+			try {
+				Node n = c.getConfiguration();
+				//Make sure, the configuration is not empty
+				if(n == null) {
+					throw new XMLReadConfigurationException("The XMLConfigurable " + c + " returned a null configuration.");
+				}
+				else {
+					Node store = internalXML.selectSingleNode("/*/" + c.getIdentifier());
+					//If the node already exists, overwrite it
+					if(store != null) {
+						
+					}
+					else {	//Otherwise create it
+						internalXML.getRootElement().add(n);
+					}
+				}
+			}
+			catch(XMLReadConfigurationException e) {
+				errorOccured = true;
+				//Append the error message to the general error string
+				error.append("\n * " + e.getMessage());
+			}
+		}
+		if(errorOccured) {
+			throw new XMLReadConfigurationException(error.toString());
+		}
+	}
+	
 }

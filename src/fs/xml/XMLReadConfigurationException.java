@@ -8,4 +8,11 @@ package fs.xml;
 
 public class XMLReadConfigurationException extends Exception {
 
+	/**
+	 * Forwards to Exception(String)
+	 */
+	public XMLReadConfigurationException(String message) {
+		super(message);
+	}
+
 }

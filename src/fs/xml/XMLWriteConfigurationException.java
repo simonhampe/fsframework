@@ -10,4 +10,11 @@ package fs.xml;
 
 public class XMLWriteConfigurationException extends Exception {
 
+	/**
+	 * Forwards to Exception(String)
+	 */
+	public XMLWriteConfigurationException(String message) {
+		super(message);
+	}
+	
 }
