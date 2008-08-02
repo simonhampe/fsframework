@@ -14,19 +14,32 @@ import org.dom4j.*;
  */
 public interface XMLConfigurable {
 	/**
-	 * Returns the (supposedly) unique ID
+	 * @return the (supposedly) unique ID
 	 */
 	public String getIdentifier();
 	
 	/**
-	 * Configures the object according to the configuration
-	 * passed
+	 * Indicates whether this Object has been configured
+	 * yet (usually this means that either an appropriate 
+	 * constructor has been used or conigure(Node n) has been
+	 * called successfully at least once)
 	 */
-	public void configure(Node n);
+	public boolean isConfigured();
 	
 	/**
-	 * Returns the current configuration
+	 * Configures the object according to the configuration
+	 * passed
+	 * @throws XMLWriteConfigurationException, if the configuration passed 
+	 * on ist not a valid configuration or null 
 	 */
-	public Node getConfiguration();
+	public void configure(Node n) throws XMLWriteConfigurationException;
+	
+	/**
+	 * @return The current configuration
+	 * @throws XMLReadConfigurationException if isConfigured() == false or the
+	 * configuration can not be returned for some other reason
+
+	 */
+	public Node getConfiguration() throws XMLReadConfigurationException;
 	
 }
