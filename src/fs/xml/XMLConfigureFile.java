@@ -139,6 +139,14 @@ public class XMLConfigureFile {
 		}
 	}
 	
+	/**
+	 * Tries to read all configurations from the registered XMLConfigurables and 
+	 * stores them in appropriate nodes.
+	 * @throws XMLReadConfigurationException - if any of the XMLConfigurables threw this
+	 * exception. However, all correctly returned configurations will still be stored, regardless
+	 * of any exceptions and all errors will be returned as one large error report in the returned
+	 * exception's message
+	 */
 	public void readConfigurations() throws XMLReadConfigurationException{
 		//All possible configuration errors are stored in 
 		//one large string and passed on afterwards all at once.
