@@ -13,12 +13,13 @@ import org.dom4j.tree.*;
  *  can be registered at one instance of a XMLConfigureFile. The XML file will
  *  be interpreted as follows: For each registered XML-Configurable a first-level node
  *  that bears the name of the corresponding ID will be selected and passed on for
- *  configuration. If there are several of this name, only the first one will be passed on.
+ *  configuration. If there are several of this name, only the first one will be used.
  *  If there is none, the configure()-Method will simply not be called.
  * <br> As for writing, if a node for an ID does not exist yet, it is created. If it exists, the
  *  first occurrence will be overwritten and any further ones ignored. Note, 
  *  that XMLConfigureFile gives no further guarantees as to the order of the
- *  nodes.
+ *  nodes. This implies further that non-unique IDs might result in 
+ *  unpredictable behavior.
  *  
  * @author Simon Hampe
  *
@@ -60,7 +61,7 @@ public class XMLConfigureFile {
 		}
 		else {
 			//Create default document
-			internalXML = new DefaultDocument("configuration");
+			internalXML = new DefaultDocument(new DefaultElement("configuration"));
 			//Attempt write
 			store();				
 		}
@@ -124,8 +125,6 @@ public class XMLConfigureFile {
 			Node n = internalXML.selectSingleNode("/*/" + id);
 			if(n!=null) {
 				try {
-					//TODO: This is supposed to be different. The first INTERNAL node in 
-					//n should be the configuration node
 					c.configure(n);
 				}
 				catch(XMLWriteConfigurationException e) {
@@ -159,7 +158,8 @@ public class XMLConfigureFile {
 					Node store = internalXML.selectSingleNode("/*/" + c.getIdentifier());
 					//If the node already exists, overwrite it
 					if(store != null) {
-						
+						store.detach();
+						internalXML.getRootElement().add(n);
 					}
 					else {	//Otherwise create it
 						internalXML.getRootElement().add(n);
