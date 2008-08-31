@@ -3,6 +3,10 @@ package fs.xml;
 import org.dom4j.*;
 import org.dom4j.tree.*;
 
+import java.io.*;
+
+import java.util.*;
+
 /**
  * Implements an XML-based String table that can be used to store
  * e.g. application-related constant strings in different locales.
@@ -33,17 +37,60 @@ public class LocalizedStringTable implements XMLConfigurable {
 	
 	/**
 	 * This constructor will initialize an empty string table
-	 * with no locales
+	 * with no locales and with the specified description string
 	 */
-	public LocalizedStringTable() {
-		xmltable = new DefaultDocument(new DefaultElement("locstringtable"));
+	public LocalizedStringTable(String name) {
+		/*
+		 * Initializdoce standard document
+		 */
+		//First try loading the template
+		try {
+			xmltable = XMLToolbox.createXMLFromTemplate("templates/tmpl_LocalizedStringTable.xml");
+		}
+		catch(DocumentException de) {
+			//Generate it manually (this might not be up to date with  the
+			//current format specification)
+			DefaultElement root = new DefaultElement("fsframework:locstringtable");
+			root.addAttribute("xmlns:fsframework", "fsframework");
+			root.addAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance" );
+			root.addAttribute("xsi:schemaLocation","fsframework ../schema/LocalizedStringTable.xsd " );
+			
+			root.addElement("description");
+			root.addElement("localelist");
+			root.addElement("stringtables");
+			xmltable = new DefaultDocument();
+			xmltable.setRootElement(root);
+		}
+		
+		//Set Name
+		xmltable.selectSingleNode("/*/description").setText(name);
 	}
 	
+	/* ***********************************************
+	 * 
+	 */
 	
-	
+	/**
+	 * This method expects a valid LocalizedStringTable XML Document, conforming to the
+	 *  Schema definition of the same name. <br>
+	 * The current string table will NOT be replaced by the one passed as argument, but
+	 * extended. Additional locales and strings will simply be added, in case of duplicates the 
+	 * old one will be overwritten by the new one. The old description will be preserved.
+	 * This allows an existing string table to be extended e.g. by an additional locale or to be 
+	 * updated 
+	 */
 	public void configure(Node n) throws XMLWriteConfigurationException {
-		// TODO Auto-generated method stub
-
+		//Check out base listing nodes
+		Node loclist = n.selectSingleNode("/*/localelist");
+		Node srglist = n.selectSingleNode("/*/stringtables");
+		if(loclist == null) throw new XMLWriteConfigurationException("Update failed: Invalid LocalizedStringTable. Locale list missing");
+		if(srglist == null) throw new XMLWriteConfigurationException("Update failed: Invalid LocalizedStringTable. String list missing");
+		//Check out locale descriptions
+		List loc = loclist.selectNodes("/locale");
+		for(Object o : loc) {
+			String
+		}
+		
 	}
 
 	public Node getConfiguration() throws XMLReadConfigurationException {
@@ -52,8 +99,7 @@ public class LocalizedStringTable implements XMLConfigurable {
 	}
 
 	public String getIdentifier() {
-		// TODO Auto-generated method stub
-		return null;
+		return "";
 	}
 
 	public boolean isConfigured() {

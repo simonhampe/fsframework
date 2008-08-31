@@ -64,4 +64,17 @@ public class XMLToolbox {
 		writer.close();		
 	}
 	
+	/**
+	 * Tries to open the specified template file. If succesful, it will be stored in a 
+	 * Document object and returned
+	 * @throws DocumentException - If the template file can not be opened or is not a valid
+	 * XML file
+	 */
+	public static Document createXMLFromTemplate(String templateFile) 
+							throws DocumentException {
+		SAXReader reader = new SAXReader();
+		Document doc = reader.read(new File(templateFile));
+		return doc;
+	}
+	
 }
