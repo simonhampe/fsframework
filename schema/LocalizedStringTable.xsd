@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema targetNamespace="fsframework" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:fsframework="fsframework">
+	<xsd:element name="locstringtable" type="fsframework:locstringtable"></xsd:element>   
+   
+    <xsd:complexType name="localelist">
+    	<xsd:sequence maxOccurs="1" minOccurs="1">
+    		<xsd:element name="locale" type="fsframework:locale" maxOccurs="unbounded" minOccurs="0"></xsd:element>
+    	</xsd:sequence>
+    </xsd:complexType>
+    
+    <xsd:complexType name="locale">
+    	<xsd:sequence maxOccurs="1" minOccurs="1">
+    		<xsd:element name="name" type="xsd:string" maxOccurs="1" minOccurs="1">
+    		</xsd:element>
+    		<xsd:element name="desc" type="xsd:string" maxOccurs="1" minOccurs="1">
+    		</xsd:element>
+    	</xsd:sequence>
+    	<xsd:attribute name="default" type="xsd:boolean"></xsd:attribute>
+    </xsd:complexType>
+
+
+
+    <xsd:complexType name="stringtable">
+    	<xsd:sequence maxOccurs="1" minOccurs="1">
+    		<xsd:element name="localstring" type="fsframework:localstring" maxOccurs="unbounded" minOccurs="0"></xsd:element>
+    	</xsd:sequence>
+    	<xsd:attribute name="id" type="xsd:string" use="required"></xsd:attribute>
+    </xsd:complexType>
+
+    <xsd:complexType name="stringtables">
+    	<xsd:sequence maxOccurs="1" minOccurs="1">
+    		<xsd:element name="table" type="fsframework:stringtable" maxOccurs="unbounded" minOccurs="0"></xsd:element>
+    	</xsd:sequence>
+    </xsd:complexType>
+
+
+
+
+    <xsd:complexType name="localstring">
+    	<xsd:simpleContent>
+    		<xsd:extension base="xsd:string">
+    			<xsd:attribute name="locale" type="xsd:string" use="required"></xsd:attribute>
+    		</xsd:extension>
+    	</xsd:simpleContent>
+    </xsd:complexType>
+    
+    <xsd:complexType name="locstringtable">
+    	<xsd:sequence maxOccurs="1" minOccurs="1">
+    		<xsd:element name="localelist" type="fsframework:localelist" maxOccurs="1" minOccurs="1">
+    		</xsd:element>
+    		<xsd:element name="stringtables" type="fsframework:stringtables" maxOccurs="1" minOccurs="1">
+    			<xsd:key name="ids">
+    				<xsd:selector xpath="table"/>
+    				<xsd:field xpath="@id"/>
+    			</xsd:key>
+    		</xsd:element>
+    	</xsd:sequence>
+    </xsd:complexType>
+
+    
+</xsd:schema>

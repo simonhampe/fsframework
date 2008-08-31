@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fsframework:locstringtable xmlns:fsframework="fsframework" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="fsframework ../schema/LocalizedStringTable.xsd ">
+  <localelist>
+    <locale default="true">
+      <name>en</name>
+      <desc>English</desc>
+    </locale>
+    <locale>
+		<name>fr</name>
+    	<desc>Français</desc>
+    </locale>
+    <locale>
+    	<name>de</name>
+    	<desc>Deutsch</desc>
+    </locale>
+  </localelist>
+  <stringtables>
+    <table id="button1text">
+      <localstring locale="en">push me!</localstring>
+    </table>
+    <table id="windowtitle">
+      <localstring locale="en">Window title</localstring>
+      <localstring locale="fr">Titre de la fenêtre</localstring>
+      <localstring locale="de">Fenstertitel</localstring>
+    </table>
+  </stringtables>
+</fsframework:locstringtable>
