@@ -22,6 +22,11 @@ public class LocalizedStringTable implements XMLConfigurable {
 	 */
 	private Document xmltable;
 	
+	/**
+	 * The name of the default locale
+	 */
+	private String default_locale;
+	
 	/* *********************************************
 	 * Constructors
 	 */

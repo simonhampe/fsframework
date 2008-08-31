@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <fsframework:locstringtable xmlns:fsframework="fsframework" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="fsframework ../schema/LocalizedStringTable.xsd ">
   <localelist>
-    <locale default="true">
+    <locale>
       <name>en</name>
       <desc>English</desc>
     </locale>

@@ -16,6 +16,12 @@ import fs.xml.*;
 public class XMLTest {
 
 	public static void main(String[] args) {
-		
+		try {
+			XMLToolbox.validateXML("examples/LocalizedStringTable.xml", 
+					"schema/LocalizedStringTable.xsd");
+		}
+		catch(Exception e) {
+			System.out.println(e.getMessage());
+		}
 	}
 }
