@@ -40,6 +40,6 @@ public interface XMLConfigurable {
 	 * configuration can not be returned for some other reason
 
 	 */
-	public Node getConfiguration() throws XMLReadConfigurationException;
+	public Element getConfiguration() throws XMLReadConfigurationException;
 	
 }

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema targetNamespace="http://www.fsmathe.uni-kl.de/fsframework" xmlns="http://www.w3.org/2001/XMLSchema" xmlns:fsfw="http://www.fsmathe.uni-kl.de/fsframework" xmlns:Q1="http://www.example.org/FsfwPropertyList">
+    <include schemaLocation="FsfwPropertyList.xsd"></include>
+    <annotation>
+    	<documentation>This schema defines the nodes which configure certain fsframework properties. It will never be used for any validation, since the idea is that these configurations can be saved together with any other 
+information e.g. in an application-wide configuration file. However, elements not conforming to any of the names specified here will not be recognized.</documentation></annotation>
+
+
+
+   
+
+
+    <element name="propertylist" type="fsfw:propertylist"></element>
+</schema>

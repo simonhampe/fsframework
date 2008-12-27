@@ -12,8 +12,8 @@ import org.dom4j.tree.*;
  *  configurations in XML formats. Several XMLConfigurable objects
  *  can be registered at one instance of a XMLConfigureFile. The XML file will
  *  be interpreted as follows: For each registered XML-Configurable a first-level node
- *  that bears the name of the corresponding ID will be selected and passed on for
- *  configuration. If there are several of this name, only the first one will be used.
+ *  that has as "id"-Attribute the name of the corresponding ID will be selected and passed on for
+ *  configuration. The name of this node is arbitrary. If there are several of this name, only the first one will be used.
  *  If there is none, the configure()-Method will simply not be called.
  * <br> As for writing, if a node for an ID does not exist yet, it is created. If it exists, the
  *  first occurrence will be overwritten and any further ones ignored. Note, 
@@ -67,6 +67,15 @@ public class XMLConfigureFile {
 		}
 	}
 	
+	//Setter methods
+	
+	/**
+	 * Sets the associated file which the configurations will be stored to
+	 * the File with the specified path. If f == null, this call is ignored
+	 */
+	public void setAssociatedFile(String path) {
+		if(path!= null) internalFile = new File(path);
+	}
 	
 	//Read-Write operations -----------------------------
 	
@@ -122,7 +131,7 @@ public class XMLConfigureFile {
 		boolean errorOccured = false;
 		for(XMLConfigurable c : configurables) {
 			String id = c.getIdentifier();
-			Node n = internalXML.selectSingleNode("/*/" + id);
+			Node n = internalXML.selectSingleNode("/*/*[@id='" + id + "']");
 			if(n!=null) {
 				try {
 					c.configure(n);
@@ -157,13 +166,14 @@ public class XMLConfigureFile {
 		boolean errorOccured = false;
 		for(XMLConfigurable c : configurables) {
 			try {
-				Node n = c.getConfiguration();
+				Element n = c.getConfiguration();
 				//Make sure, the configuration is not empty
 				if(n == null) {
 					throw new XMLReadConfigurationException("The XMLConfigurable " + c + " returned a null configuration.");
 				}
 				else {
-					Node store = internalXML.selectSingleNode("/*/" + c.getIdentifier());
+					n.addAttribute("id", c.getIdentifier());
+					Node store = internalXML.selectSingleNode("/*/*[@id='" + c.getIdentifier() + "']");
 					//If the node already exists, overwrite it
 					if(store != null) {
 						store.detach();

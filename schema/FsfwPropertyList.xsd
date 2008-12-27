@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema targetNamespace="http://www.fsmathe.uni-kl.de/fsframework" xmlns="http://www.w3.org/2001/XMLSchema" xmlns:fsfw="http://www.fsmathe.uni-kl.de/fsframework">
+
+    <annotation>
+    	<documentation>Defines the fsframework properties list. This is defines separately so it can be reused in several schemas.</documentation></annotation>
+    <complexType name="propertylist">
+    	<sequence>
+    		<element name="globalLanguageID" type="string">
+    			<annotation>
+    				<documentation>
+    					Defines the global language ID for all
+    					fsframework components. Should conform to the
+    					copy of FsfwStringTable.xml used in the
+    					application.
+    				</documentation>
+    			</annotation>
+    		</element>
+    		<element name="defaultDirectory" type="string">
+    			<annotation>
+    				<documentation>Defines the default directory to use for allocation of fsframework resourc. FsfwDefaultReference will be configured with this parameter.</documentation></annotation></element>
+    	</sequence>
+    </complexType>
+
+</schema>

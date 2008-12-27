@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema targetNamespace="http://www.fsmathe.uni-kl.de/fsframework" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:fsfw="http://www.fsmathe.uni-kl.de/fsframework">
+    
+    <xsd:element name="polyglotstringtable" type="fsfw:PolyglotStringTable">
+    	<xsd:key name="stringid">
+			<xsd:selector xpath="polyglotstring"/>
+			<xsd:field xpath="@id"/>
+    	</xsd:key>
+    </xsd:element>
+    
+    <xsd:complexType name="PolyglotStringTable">
+        <xsd:sequence>
+        	<xsd:element name="description" type="xsd:string"
+        		maxOccurs="1" minOccurs="1">
+        	</xsd:element>
+        	<xsd:element name="languagetable" type="fsfw:LanguageTable"
+        		maxOccurs="1" minOccurs="1">
+        		<xsd:key name="languageid">
+        			<xsd:selector xpath="language" />
+        			<xsd:field xpath="id" />
+        		</xsd:key>
+        	</xsd:element>
+            <xsd:element name="polyglotstring"
+        		type="fsfw:PolyglotString" maxOccurs="unbounded"
+        		minOccurs="0">
+        		<xsd:key name="variantid">
+        			<xsd:selector xpath="variant" />
+        			<xsd:field xpath="@lang" />
+        		</xsd:key>
+        	</xsd:element>
+        </xsd:sequence>
+        
+    	<xsd:attribute name="id" type="xsd:string" use="required"></xsd:attribute>
+    </xsd:complexType>
+
+
+    <xsd:complexType name="LanguageTable">
+    	<xsd:sequence>
+    		<xsd:element name="language" type="fsfw:Language" maxOccurs="unbounded" minOccurs="0"></xsd:element>
+    	</xsd:sequence>
+    </xsd:complexType>
+    
+    <xsd:complexType name="Language">
+    	<xsd:sequence>
+    		<xsd:element name="id" type="xsd:string" maxOccurs="1" minOccurs="1"></xsd:element>
+    		<xsd:element name="description" type="xsd:string" maxOccurs="1" minOccurs="1"></xsd:element>
+    	</xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="PolyglotString">
+    	<xsd:sequence>
+    		<xsd:element name="variant" type="fsfw:Variant"
+    			maxOccurs="unbounded" minOccurs="0">
+    		</xsd:element>
+    	</xsd:sequence>
+    	<xsd:attribute name="id" type="xsd:string" use="required"></xsd:attribute>
+    	<xsd:attribute name="group" type="xsd:string" use="optional">
+    		<xsd:annotation>
+    			<xsd:documentation>Defines a hierarchical group relation between different polyglotstrings. This mechanism is used for example by POLYGLOT, the fsframework string table editor to group strings in a more intuitive way. The hierarchy is defined in a way equivalent 
+to package naming. This attribute is never actually used in the class PolyglotStringTable itself. If this attribute is empty/whitespace/non-existent, the polyglotstring is in the 'default' group.</xsd:documentation>
+    		</xsd:annotation></xsd:attribute>
+    </xsd:complexType>
+
+    <xsd:complexType name="Variant">
+    	<xsd:simpleContent>
+    		<xsd:extension base="xsd:string">
+    			<xsd:attribute name="lang" type="xsd:string"
+    				use="required">
+    			</xsd:attribute>
+    		</xsd:extension>
+    	</xsd:simpleContent>
+    </xsd:complexType>
+</xsd:schema>

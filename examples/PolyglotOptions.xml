@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fsfw:optionlist xmlns:fsfw="http://www.fsmathe.uni-kl.de/fsframework" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.fsmathe.uni-kl.de/fsframework ../schema/PolyglotOptions.xsd ">
+  <globalLanguageID>globalLanguageID</globalLanguageID>
+  <defaultDirectory>defaultDirectory</defaultDirectory>
+  <maxfilenumber>10</maxfilenumber>
+  <lastfile>/home/user/stringtables/MyStringTable.xml</lastfile>
+</fsfw:optionlist>

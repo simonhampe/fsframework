@@ -9,6 +9,11 @@ package fs.xml;
 public class XMLReadConfigurationException extends Exception {
 
 	/**
+	 * compiler-generated version id
+	 */
+	private static final long serialVersionUID = 3847071888558216833L;
+
+	/**
 	 * Forwards to Exception(String)
 	 */
 	public XMLReadConfigurationException(String message) {

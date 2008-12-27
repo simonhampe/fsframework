@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration> 
+  <config2 id="config2">
+    <meintext>zweites</meintext>
+  </config2>
+  <config1 id="config1">
+    <meintext>erstes</meintext>
+  </config1>
+  <fsfw:polyglotstringtable xmlns:fsfw="http://www.fsmathe.uni-kl.de/fsframework" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.fsmathe.uni-kl.de/fsframework ../schema/PolyglotStringTable.xsd " id="FSFW_PST_EXAMPLE">  
+    <description>Config test table</description>  
+    <languagetable>
+      <language>
+        <id>de</id>
+        <description>Deutsch</description>
+      </language>
+      <language>
+        <id>en</id>
+        <description>English</description>
+      </language>
+      <language>
+        <id>wu</id>
+        <description>Wuselsch</description>
+      </language>
+    </languagetable>
+    <polyglotstring id="EX02">
+      <variant lang="wu">Wusel</variant>
+    </polyglotstring>
+  </fsfw:polyglotstringtable>
+</configuration>

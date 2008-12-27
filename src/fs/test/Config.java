@@ -7,6 +7,12 @@ import fs.xml.XMLConfigurable;
 import fs.xml.XMLReadConfigurationException;
 import fs.xml.XMLWriteConfigurationException;
 
+/**
+ * This is a test class for XMlConfigurable
+ * @author Simon Hampe
+ *
+ */
+
 public class Config implements XMLConfigurable {
 	private String text;
 	private int id;
@@ -33,10 +39,7 @@ public class Config implements XMLConfigurable {
 		}
 	}
 
-	public Node getConfiguration() throws XMLReadConfigurationException {
-		if(id <= 1 ) {
-			throw new XMLReadConfigurationException(id+" test exception thrown");
-		}
+	public Element getConfiguration() throws XMLReadConfigurationException {
 		DefaultElement n = new DefaultElement("config" + id);
 		DefaultElement tn = new DefaultElement("meintext");
 		tn.setText(text);

@@ -11,6 +11,11 @@ package fs.xml;
 public class XMLWriteConfigurationException extends Exception {
 
 	/**
+	 * Compiler-generated version id
+	 */
+	private static final long serialVersionUID = -6210661774717910140L;
+
+	/**
 	 * Forwards to Exception(String)
 	 */
 	public XMLWriteConfigurationException(String message) {

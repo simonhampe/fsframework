@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema targetNamespace="http://www.fsmathe.uni-kl.de/fsframework"
+	xmlns="http://www.w3.org/2001/XMLSchema" xmlns:fsfw="http://www.fsmathe.uni-kl.de/fsframework">
+
+
+
+
+    <include schemaLocation="FsfwPropertyList.xsd"></include>
+    <complexType name="optionlist">
+    	<complexContent>
+    		<extension base="fsfw:propertylist">
+    			<sequence>
+    				<element name="maxfilenumber" type="int"
+    					maxOccurs="1" minOccurs="0">
+    					<annotation>
+    						<documentation>
+    							The maximum number of recently opened
+    							files recoreded
+    						</documentation>
+    					</annotation>
+    				</element>
+    				<element name="lastfile" type="string" maxOccurs="unbounded" minOccurs="0">
+    					<annotation>
+    						<documentation>A list of names of files that were recently opened</documentation>
+    					</annotation></element>
+    			</sequence>
+    		</extension>
+    	</complexContent>
+    </complexType>
+    
+    <element name="optionlist" type="fsfw:optionlist"></element>
+</schema>

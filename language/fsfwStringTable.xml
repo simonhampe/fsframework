@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fsfw:polyglotstringtable xmlns:fsfw="http://www.fsmathe.uni-kl.de/fsframework" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.fsmathe.uni-kl.de/fsframework ../schema/PolyglotStringTable.xsd " id="FSFW_STRINGTABLE">
+  <description>A string table containing a set of strings used by several classes of fsframework</description>
+  <languagetable>
+  	<language>
+  		<id>en</id>
+  		<description>English</description>
+  	</language>
+  	<language>
+  		<id>de</id>
+  		<description>Deutsch</description>
+  	</language></languagetable>
+  <polyglotstring id="fs.global.ok" group="fs.global">
+  	<variant lang="en">OK</variant></polyglotstring>
+  <polyglotstring id="fs.global.cancel" group="fs.global">
+  	<variant lang="en">Cancel</variant></polyglotstring>
+  <polyglotstring id="fs.global.confirmoverwrite" group="fs.global">
+  	<variant lang="en">
+  		The file '%s' already exists. Do you really want to overwrite
+  		it?
+  	</variant>
+  	<variant lang="de">
+  		Die Datei '%s' existiert bereits. Sind Sie sicher, dass Sie
+  		sie überschreiben wollen?
+  	</variant>
+  </polyglotstring>
+  <polyglotstring id="fs.global.confirmtitle" group="fs.global">
+  	<variant lang="en">Confirm Overwrite</variant>
+  	<variant lang="de">Bestätige Überschreiben</variant>
+  </polyglotstring>
+  <polyglotstring id="fs.global.savefailed" group="fs.global">
+  	<variant lang="en">Couldn't save file %s: %s</variant>
+  	<variant lang="de">Konnte Datei %s nicht speichern: %s</variant>
+  </polyglotstring>
+  <polyglotstring id="fs.global.error" group="fs.global">
+  	<variant lang="en">Error</variant>
+  	<variant lang="de">Fehler</variant>
+  </polyglotstring>
+  
+  <polyglotstring id="fs.gui.LogHistoryWindow.defaulttitle" group="fs.gui.LogHistoryWindow">
+  	<variant lang="en">Logging History</variant>
+  	<variant lang="de">Logverlauf</variant>
+  </polyglotstring>
+  <polyglotstring id="fs.gui.LogHistoryWindow.savetooltip" group="fs.gui.LogHistoryWindow">
+  	<variant lang="en">Save the current log text</variant>
+  	<variant lang="de">Den derzeitigen Logtext speichern</variant>
+  </polyglotstring>
+  <polyglotstring id="fs.gui.LogHistoryWindow.filtertip" group="fs.gui.LogHistoryWindow">
+  	<variant lang="en">
+  		Show messages of the following type / level:
+  	</variant>
+  	<variant lang="de">
+  		Zeige Nachrichten des folgenden Typs / Level:
+  	</variant>
+  </polyglotstring><polyglotstring id="fs.gui.SwingAppender.tooltip"
+  	group="fs.gui.SwingAppender">
+  	<variant lang="en">Click to open history</variant>
+  	<variant lang="de">Klicken, um Verlauf zu öffnen</variant>
+</polyglotstring>
+	<polyglotstring id="fs.polyglot.LanguageListCellRenderer.nodescription" group="fs.polyglot.LanguageListCellRenderer">
+		<variant lang="en">(no description available)</variant>
+	</polyglotstring>
+	<polyglotstring id="fs.polyglot.LanguageListCellRenderer.onlyused"
+		group="fs.polyglot.LanguageListCellRenderer">
+		<variant lang="en">This language is actually used for a variant, but not officially described</variant>
+	</polyglotstring>
+	<polyglotstring
+		id="fs.polyglot.LanguageListCellRenderer.notfullysupported"
+		group="fs.polyglot.LanguageListCellRenderer">
+		<variant lang="en">There are strings without a variant for this language</variant>
+	</polyglotstring>
+	<polyglotstring id="fs.polyglot.LanguageListCellRenderer.bartooltip"
+		group="fs.polyglot.LanguageListCellRenderer">
+		<variant lang="en">This indicates the percentage of strings for which a variant for this language exists</variant>
+	</polyglotstring>
+	<polyglotstring id="fs.polyglot.GroupTreeCellRenderer.groupincomplete" group="fs.polyglot.GroupTreeCellRenderer">
+		<variant lang="en">There are variants missing for strings in this group</variant></polyglotstring>
+	<polyglotstring id="fs.polyglot.GroupTreeCellRenderer.stringincomplete" group="fs.polyglot.GroupTreeCellRenderer">
+		<variant lang="en">There are variants missing for this string</variant></polyglotstring>
+	<polyglotstring id="fs.polyglot.LanguageListView.newtooltip" group="fs.polyglot.LanguageListView">
+		<variant lang="en">Add new language</variant></polyglotstring>
+	<polyglotstring id="fs.polyglot.LanguageListView.deletetooltip"
+		group="fs.polyglot.LanguageListView">
+		<variant lang="en">Delete selected language from list</variant>
+	</polyglotstring>
+	<polyglotstring id="fs.polyglot.LanguageListView.edittooltip"
+		group="fs.polyglot.LanguageListView">
+		<variant lang="en">Edit selected language</variant>
+	</polyglotstring>
+	<polyglotstring id="fs.polyglot.LanguageListView.addudtooltip"
+		group="fs.polyglot.LanguageListView">
+		<variant lang="en">Add selcted undescribed language to list</variant>
+	</polyglotstring>
+	<polyglotstring id="fs.polyglot.undo.languagegeneral" group="fs.polyglot.undo">
+		<variant lang="en">Change Language %s to %s</variant>
+	</polyglotstring>
+	<polyglotstring id="fs.polyglot.undo.languageremove" group="fs.polyglot.undo">
+		<variant lang="en">Remove language %s</variant></polyglotstring>
+	<polyglotstring id="fs.polyglot.undo.languageadd" group="fs.polyglot.undo">
+		<variant lang="en">Add language %s</variant></polyglotstring>
+	<polyglotstring id="fs.polyglot.undo.languagedescription"
+		group="fs.polyglot.undo">
+		<variant lang="en">Change language description from '%s' to '%s'</variant>
+	</polyglotstring>
+	<polyglotstring id="fs.polyglot.undo.tableid" group="fs.polyglot.undo">
+		<variant lang="en">Change table ID from '%s' to '%s'</variant></polyglotstring>
+	<polyglotstring id="fs.polyglot.undo.tabledescription" group="fs.polyglot.undo">
+		<variant lang="en">Change table description from '%s' to '%s'</variant></polyglotstring>
+	<polyglotstring id="fs.polyglot.undo.stringgeneral" group="fs.polyglot.undo">
+		<variant lang="en">Change string %s to %s</variant></polyglotstring>
+	<polyglotstring id="fs.polyglot.undo.stringadd" group="fs.polyglot.undo">
+		<variant lang="en">Add string id '%s'</variant></polyglotstring>
+	<polyglotstring id="fs.polyglot.undo.stringremove" group="fs.polyglot.undo">
+		<variant lang="en">Remove string ID '%s'</variant></polyglotstring>
+	<polyglotstring id="fs.polyglot.undo.stringgroup" group="fs.polyglot.undo">
+		<variant lang="en">Change group of string ID '%s' from '%s' to '%s'</variant></polyglotstring>
+	<polyglotstring id="fs.polyglot.undo.variantgeneral" group="fs.polyglot.undo">
+		<variant lang="en">Change variant from %s to %s</variant></polyglotstring>
+	<polyglotstring id="fs.polyglot.undo.variantadd" group="fs.polyglot.undo">
+		<variant lang="en">Add variant for string ID %s and language ID %s </variant>
+	</polyglotstring>
+	<polyglotstring id="fs.polyglot.undo.variantremove" group="fs.polyglot.undo">
+		<variant lang="en">Remove variant for string ID %s and language ID %s</variant></polyglotstring>
+	<polyglotstring id="fs.polyglot.undo.variantvalue" group="fs.polyglot.undo">
+		<variant lang="en">Change value for string ID %s and language ID %s from '%s' to '%s'</variant></polyglotstring>
+	<polyglotstring id="fs.polyglot.LanguageEditor.title" group="fs.polyglot.LanguageEditor">
+		<variant lang="en">Language Editor</variant></polyglotstring>
+	<polyglotstring id="fs.polyglot.LanguageEditor.idnotunique"
+		group="fs.polyglot.LanguageEditor">
+		<variant lang="en">This language ID already exists</variant>
+	</polyglotstring>
+	<polyglotstring id="fs.polyglot.LanguageEditor.idempty" group="fs.polyglot.LanguageEditor">
+		<variant lang="en">The language ID cannot be empty</variant></polyglotstring>
+	<polyglotstring id="fs.polyglot.LanguageEditor.nodescription"
+		group="fs.polyglot.LanguageEditor">
+		<variant lang="en">The description is empty. You should give a short description of the language, for example the full name (e.g. 'English')</variant>
+	</polyglotstring>
+	<polyglotstring id="fs.polyglot.LanguageEditor.id" group="fs.polyglot.LanguageEditor">
+		<variant lang="en">Language ID:</variant>
+	</polyglotstring>
+	<polyglotstring id="fs.polyglot.LanguageEditor.description"
+		group="fs.polyglot.LanguageEditor">
+		<variant lang="en">Description:</variant>
+	</polyglotstring>
+	<polyglotstring id="fs.polyglot.undo.groupgeneral" group="fs.polyglot.undo">
+		<variant lang="en">Change group '%s' to '%s'</variant></polyglotstring>
+	<polyglotstring id="fs.polyglot.GroupTreeView.edit" group="fs.polyglot.GroupTreeView">
+		<variant lang="en">Change group name</variant></polyglotstring>
+	<polyglotstring id="fs.polyglot.GroupTreeView.delete" group="fs.polyglot.GroupTreeView">
+		<variant lang="en">Delete this group (all strings in this group are moved to the root group)</variant></polyglotstring>
+
+</fsfw:polyglotstringtable>
