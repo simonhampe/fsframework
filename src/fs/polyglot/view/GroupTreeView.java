@@ -3,6 +3,7 @@ package fs.polyglot.view;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
+import java.awt.Dialog.ModalityType;
 import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
@@ -13,15 +14,15 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
 import javax.swing.ToolTipManager;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreeSelectionModel;
 
 import org.dom4j.Document;
 
+import fs.event.DataRetrievalListener;
 import fs.gui.GUIToolbox;
+import fs.polyglot.model.Group;
 import fs.polyglot.model.GroupTreeModel;
 import fs.polyglot.model.PolyglotTableModel;
 import fs.polyglot.undo.TableUndoManager;
@@ -43,7 +44,14 @@ import fs.xml.XMLDirectoryTree;
  */
 public class GroupTreeView extends JPanel implements ResourceDependent {
 
-	// Components
+	//TODO: There are actually two different possible operations: Renaming groups and moving group strings
+	
+	/**
+	 * compiler-generated version id
+	 */
+	private static final long serialVersionUID = 8224310045071561424L;
+	
+	//Components
 	private JButton editButton = new JButton();
 	private JButton deleteButton = new JButton();
 	private JTree grouptree = new JTree();
@@ -76,19 +84,37 @@ public class GroupTreeView extends JPanel implements ResourceDependent {
 
 		@Override
 		public void valueChanged(TreeSelectionEvent e) {
-			deleteButton.setEnabled(grouptree.getSelectionCount() > 0);
-			editButton.setEnabled(grouptree.getSelectionCount() > 0);
+			//Enable button, if selection isn't empty and not the root node
+			deleteButton.setEnabled(grouptree.getSelectionCount() >0 && grouptree.getSelectionRows()[0] != 0 );
+			//Enable button, if selection isn't empty
+			editButton.setEnabled(grouptree.getSelectionCount() > 0 );
 		}
 
 	};
-
-	// Effects the group change
+	
+	//Opens up a group editor
 	private Action editListener = new AbstractAction() {
+		/**
+		 * compiler-generated version id
+		 */
+		private static final long serialVersionUID = -763939291634307386L;
 		@Override
 		public void actionPerformed(ActionEvent e) {
-
+			GroupEditor editor = new GroupEditor((((Group)grouptree.getSelectionPath().getLastPathComponent()).path),reference, loader, languageID);
+			editor.setModalityType(ModalityType.APPLICATION_MODAL);
+			editor.addDataRetrievalListener(editorListener);
+			editor.setVisible(true);
 		}
-
+	};
+	
+	//Processes the result of the editor
+	private DataRetrievalListener editorListener = new DataRetrievalListener() {
+		@Override
+		public void dataReady(Object source, Object data) {
+			editFactory.performUndoableGroupEdit(((Group)grouptree.getSelectionPath().getLastPathComponent()).path, data.toString());
+			System.out.println(table.getGroupList());
+			
+		}
 	};
 
 	// CONSTRUCTOR ****************************************************
@@ -118,22 +144,16 @@ public class GroupTreeView extends JPanel implements ResourceDependent {
 		// Copy data
 		super();
 		assignReference(r);
-		this.languageID = languageID != null ? languageID : PolyglotStringTable
-				.getGlobalLanguageID();
-		this.loader = stringloader != null ? stringloader
-				: PolyglotStringLoader.getDefaultLoader();
-		this.table = associatedTable != null ? associatedTable
-				: new PolyglotTableModel("", "");
-		this.editFactory = new UndoableEditFactory(this.table, this.loader,
-				this.languageID, TableUndoManager.getUndoManager(this.table));
-
-		// Init Components
-		// --------------------------------------------------------------
-
-		// Tree
-		treemodel = new GroupTreeModel(table, false, false);
-		treerenderer = new GroupTreeCellRenderer(reference, loader,
-				this.languageID, true);
+		this.languageID = languageID != null ? languageID : PolyglotStringTable.getGlobalLanguageID();
+		this.loader = stringloader != null ? stringloader : PolyglotStringLoader.getDefaultLoader();
+		this.table = associatedTable != null ? associatedTable : new PolyglotTableModel("", "");
+		this.editFactory = new UndoableEditFactory(this.table,this.loader, this.languageID,TableUndoManager.getUndoManager(this.table));
+		
+		//Init Components --------------------------------------------------------------
+		
+		//Tree
+		treemodel = new GroupTreeModel(this.table,false,false);
+		treerenderer = new GroupTreeCellRenderer(reference,loader, this.languageID,true, this.table.getTableID());
 		grouptree.setModel(treemodel);
 		grouptree.setCellRenderer(treerenderer);
 		grouptree.getSelectionModel().setSelectionMode(
@@ -171,6 +191,7 @@ public class GroupTreeView extends JPanel implements ResourceDependent {
 		grouptree.getSelectionModel().addTreeSelectionListener(
 				selectionListener);
 		selectionListener.valueChanged(null);
+		editButton.addActionListener(editListener);
 	}
 
 	// RESOURCE DEPENDENT METHODS *************************************

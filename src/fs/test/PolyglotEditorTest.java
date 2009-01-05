@@ -21,7 +21,7 @@ public class PolyglotEditorTest {
 		editor.addDataRetrievalListener(new DataRetrievalListener() {
 
 			@Override
-			public void dataReady(Object data) {
+			public void dataReady(Object source, Object data) {
 				System.out.println(data);
 			}
 

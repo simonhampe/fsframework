@@ -118,11 +118,20 @@ public class UndoableEditFactory {
 		postEdit(edit);
 		return edit;
 	}
-
-	public UndoableTableEdit createUndoableTableEdit(String oldValue,
-			String newValue, boolean isIdEdit) {
-		return new UndoableTableEdit(oldValue, newValue, isIdEdit, table,
-				loader, languageID);
+	
+	public UndoableGroupEdit createUndoableGroupEdit(String oldValue, String newValue) {
+		return new UndoableGroupEdit(oldValue, newValue, table, loader, languageID);
+	}
+	
+	public UndoableGroupEdit performUndoableGroupEdit(String oldValue, String newValue) throws CannotRedoException {
+		UndoableGroupEdit edit = createUndoableGroupEdit(oldValue, newValue);
+		edit.redo();
+		postEdit(edit);
+		return edit;
+	}
+	
+	public UndoableTableEdit createUndoableTableEdit(String oldValue, String newValue, boolean isIdEdit) {
+		return new UndoableTableEdit(oldValue, newValue, isIdEdit, table, loader, languageID);
 	}
 
 	public UndoableTableEdit performUndoableTableEdit(String oldValue,

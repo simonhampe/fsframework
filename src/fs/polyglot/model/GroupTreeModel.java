@@ -116,6 +116,9 @@ public class GroupTreeModel implements TreeModel, PolyglotTableModelListener {
 		this.table = table;
 		this.includeStrings = includeStrings;
 		this.includeVariants = includeVariants;
+		if(table != null) {
+			table.addChangeListener(this);
+		}
 	}
 
 	// HELPER METHODS ***************************************

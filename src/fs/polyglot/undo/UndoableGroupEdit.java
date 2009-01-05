@@ -11,11 +11,13 @@ import fs.xml.PolyglotStringLoader;
 import fs.xml.PolyglotStringTable;
 
 /**
- * This edit represents a group change, i.e. changing a group name. This will
- * automatically change the group attribute of all strings in this group to the
- * new group attribute. null is also allowed as new group attribute, this will
- * 'move' all strings in the concerned group to the root group
- * 
+ * This edit represents a group change, i.e. essentially changing a group name. This will automatically change the group attribute of all strings in this group
+ * to the new group attribute. null is also allowed as new group attribute, this will 'move' all strings in the concerned group to the root group. Additional
+ * options are: <br>
+ * - rename all strings which have the group path as prefix to have the new path as prefix<br>
+ * - affect subgroups as well. Normally, only strings that are directly in the given group are affected. If this option is activated, subgroup are moved to
+ * the new group as well. <br>
+ * This edit is static, i.e. upon creation it will create a list of all strings to be moved which will remain constant regardless of any changes to the table.
  * @author Simon Hampe
  * 
  */
@@ -25,9 +27,12 @@ public class UndoableGroupEdit extends AbstractUndoableEdit {
 	 * compiler-generated version id
 	 */
 	private static final long serialVersionUID = -1096439921227612760L;
-	// Change parameters
-	private String oldValue;
+	//Change parameters
+	private String oldValue; 
 	private String newValue;
+	private HashSet<String> idsToMove = new HashSet<String>();
+	private boolean renameIDs = false;
+	private boolean affectSubGroups = false;
 	private PolyglotTableModel table;
 
 	// Resource
@@ -39,20 +44,17 @@ public class UndoableGroupEdit extends AbstractUndoableEdit {
 	 * @throws NullPointerException
 	 *             - if table == null
 	 */
-	public UndoableGroupEdit(String oldValue, String newValue,
-			PolyglotTableModel table, PolyglotStringLoader loader,
-			String languageID) {
-		if (table == null)
-			throw new NullPointerException(
-					"Can't create undoable edit for null table");
+	public UndoableGroupEdit(String oldValue, String newValue, boolean renameIDs, boolean affectSubGroups, PolyglotTableModel table, PolyglotStringLoader loader, String languageID) {
+		if(table == null) throw new NullPointerException("Can't create undoable edit for null table");
 		this.oldValue = oldValue;
 		this.newValue = newValue;
-		this.table = table;
-		this.loader = (loader != null) ? loader : PolyglotStringLoader
-				.getDefaultLoader();
-		this.languageID = (languageID != null) ? languageID
-				: PolyglotStringTable.getGlobalLanguageID();
-
+		this.table = table;		
+		this.renameIDs = renameIDs;
+		this.affectSubGroups = affectSubGroups;
+		this.loader = (loader != null) ? loader : PolyglotStringLoader.getDefaultLoader();
+		this.languageID = (languageID != null) ? languageID : PolyglotStringTable.getGlobalLanguageID();
+		//Create static string list
+		idsToMove = affectSubGroups ? table.getStringsInSubgroups(oldValue) : table.getStringsInGroup(oldValue);
 	}
 
 	// GETTERS
@@ -78,9 +80,7 @@ public class UndoableGroupEdit extends AbstractUndoableEdit {
 	// **************************************************************************
 
 	/**
-	 * @return Always true (though the actual edit might have no effect, if
-	 *         there is no string in the group concerned (hence it doesn't
-	 *         exist)
+	 * @return True, if all strings that were registered for group change at creation time are still under the new group path
 	 */
 	@Override
 	public boolean canUndo() {
@@ -88,13 +88,11 @@ public class UndoableGroupEdit extends AbstractUndoableEdit {
 	}
 
 	/**
-	 * @return Always true (though the actual edit might have no effect, if
-	 *         there is no string in the group concerned (hence it doesn't
-	 *         exist)
+	 * @return false, if and only if newValue is a subgroup of oldValue and subgroups are affected (as this would cause recursion)
 	 */
 	@Override
 	public boolean canRedo() {
-		return true;
+		return !(PolyglotTableModel.isSubgroupOf(oldValue, newValue, false) && affectSubGroups);
 	}
 
 	/**
@@ -109,10 +107,8 @@ public class UndoableGroupEdit extends AbstractUndoableEdit {
 	 * Convenience method returning the representation name of a language change
 	 * from oldval to newval (in the language of this edit)
 	 */
-	public String getLanguageEditPresentationName(String oldValue2,
-			String newValue2) {
-		return loader.getString("fs.polyglot.undo.groupgeneral", languageID,
-				oldValue, newValue);
+	public String getLanguageEditPresentationName(String oldValue, String newValue) {
+		return loader.getString("fs.polyglot.undo.groupgeneral",languageID,oldValue, newValue);
 	}
 
 	/**
@@ -140,13 +136,10 @@ public class UndoableGroupEdit extends AbstractUndoableEdit {
 	@Override
 	public void redo() throws CannotRedoException {
 		super.redo();
-		try {
-			performLanguageEdit(table, oldValue, newValue);
-		} catch (UnsupportedOperationException ue) {
-			// Forward exception
-			throw new CannotRedoException();
+		//Just move all registered strings to the new group, renaming them, if necessary
+		for(String s : idsToMove) {
+			//TODO: Argh
 		}
-
 	}
 
 	/**

@@ -66,7 +66,7 @@ public class FrameworkDialog extends JDialog {
 	 */
 	protected void fireDataReady(Object data) {
 		for (DataRetrievalListener l : listeners)
-			l.dataReady(data);
+			l.dataReady(this, data);
 	}
 
 	// FRAMEWORK VALUE SETTING

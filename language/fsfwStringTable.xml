@@ -143,10 +143,30 @@
 		<variant lang="en">Description:</variant>
 	</polyglotstring>
 	<polyglotstring id="fs.polyglot.undo.groupgeneral" group="fs.polyglot.undo">
-		<variant lang="en">Change group '%s' to '%s'</variant></polyglotstring>
+		<variant lang="en">Move strings from group '%s' to group '%s'</variant></polyglotstring>
 	<polyglotstring id="fs.polyglot.GroupTreeView.edit" group="fs.polyglot.GroupTreeView">
 		<variant lang="en">Change group name</variant></polyglotstring>
 	<polyglotstring id="fs.polyglot.GroupTreeView.delete" group="fs.polyglot.GroupTreeView">
 		<variant lang="en">Delete this group (all strings in this group are moved to the root group)</variant></polyglotstring>
+	<polyglotstring id="fs.polyglot.GroupEditor.originalpath"
+		group="fs.polyglot.GroupEditor">
+		<variant lang="en">Original group:</variant>
+	</polyglotstring>
+	<polyglotstring id="fs.polyglot.GroupEditor.nullpath" group="fs.polyglot.GroupEditor">
+		<variant lang="en">(no group)</variant></polyglotstring>
+	<polyglotstring id="fs.polyglot.GroupEditor.newpath" group="fs.polyglot.GroupEditor">
+		<variant lang="en">New path:</variant>
+	</polyglotstring>
+	<polyglotstring id="fs.polyglot.GroupEditor.newtooltip1" group="fs.polyglot.GroupEditor">
+		<variant lang="en">Note: This will not actually 'create' or 'delete' any groups,</variant>
+	</polyglotstring>
+	<polyglotstring id="fs.polyglot.GroupEditor.newtooltip2" group="fs.polyglot.GroupEditor">
+		<variant lang="en">but move all strings in the original group to the new one</variant></polyglotstring>
+	<polyglotstring id="fs.polyglot.GroupEditor.newtooltip3" group="fs.polyglot.GroupEditor">
+		<variant lang="en">If the new group already exists, the strings are simply added.</variant></polyglotstring>
+	<polyglotstring id="fs.polyglot.GroupEditor.changegroup" group="fs.polyglot.GroupEditor">
+		<variant lang="en">Change group</variant></polyglotstring>
+	<polyglotstring id="fs.polyglot.GroupEditor.nogroup" group="fs.polyglot.GroupEditor">
+		<variant lang="en">Move to root group</variant></polyglotstring>
 
 </fsfw:polyglotstringtable>

@@ -179,7 +179,7 @@ public class LanguageListView extends JPanel implements ResourceDependent {
 	 */
 	private DataRetrievalListener newListener = new DataRetrievalListener() {
 		@Override
-		public void dataReady(Object data) {
+		public void dataReady(Object source,  Object data) {
 			editFactory.performUndoableLanguageEdit(null, (Language) data);
 		}
 	};
@@ -189,7 +189,7 @@ public class LanguageListView extends JPanel implements ResourceDependent {
 	 */
 	private DataRetrievalListener editListener = new DataRetrievalListener() {
 		@Override
-		public void dataReady(Object data) {
+		public void dataReady(Object source, Object data) {
 			editFactory.performUndoableLanguageEdit((Language) languageList
 					.getSelectedValue(), (Language) data);
 		}

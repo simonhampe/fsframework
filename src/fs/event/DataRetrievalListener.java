@@ -9,6 +9,11 @@ package fs.event;
  */
 public interface DataRetrievalListener {
 
-	public void dataReady(Object data);
+	/**
+	 * The data is ready for retrieval
+	 * @param source The object processing the data
+	 * @param data The data  prepared
+	 */
+	public void dataReady(Object source, Object data);
 
 }
