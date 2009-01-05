@@ -168,5 +168,24 @@
 		<variant lang="en">Change group</variant></polyglotstring>
 	<polyglotstring id="fs.polyglot.GroupEditor.nogroup" group="fs.polyglot.GroupEditor">
 		<variant lang="en">Move to root group</variant></polyglotstring>
+	<polyglotstring id="fs.polyglot.GroupEditor.rename" group="fs.polyglot.GroupEditor">
+		<variant lang="en">Rename IDs</variant></polyglotstring>
+	<polyglotstring id="fs.polyglot.GroupEditor.renametip" group="fs.polyglot.GroupEditor">
+		<variant lang="en">Renames all string ids which start with the old group path to start with the new one</variant></polyglotstring>
+	
+	<polyglotstring id="fs.polyglot.GroupEditor.affectsubgroups"
+		group="fs.polyglot.GroupEditor">
+		<variant lang="en">Affect subgroups</variant>
+	</polyglotstring>
+	<polyglotstring id="fs.polyglot.GroupEditor.affectsubgroupstip"
+		group="fs.polyglot.GroupEditor">
+		<variant lang="en">Also moves all subgroups to the new group</variant>
+	</polyglotstring>
+	<polyglotstring id="fs.polyglot.GroupEditor.errorequal"
+		group="fs.polyglot.GroupEditor">
+		<variant lang="en">Both paths are equal. This change has no effect</variant>
+	</polyglotstring>
+	<polyglotstring id="fs.polyglot.GroupEditor.title" group="fs.polyglot.GroupEditor">
+		<variant lang="en">Change group</variant></polyglotstring>
 
 </fsfw:polyglotstringtable>

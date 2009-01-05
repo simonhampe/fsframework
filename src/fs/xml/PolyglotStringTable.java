@@ -299,9 +299,10 @@ public class PolyglotStringTable implements ResourceDependent, XMLConfigurable {
 		HashSet<String> groups = new HashSet<String>();
 		// If group id is null, return all strings which have no group
 		if (groupID == null) {
-			for (String sid : stringTable.keySet())
+			for (String sid : stringTable.keySet()) {
 				if (getGroupID(sid) == null)
 					groups.add(sid);
+			}
 			return groups;
 		}
 		// If this group id doesn't exist, return the empty list
@@ -433,6 +434,30 @@ public class PolyglotStringTable implements ResourceDependent, XMLConfigurable {
 		putString(stringID, languageID, value);
 		setGroupID(stringID, groupID);
 	}
+	
+	/**
+	 * This renames a string id, i.e.: All variants that were originally obtained under the old id, are now obtained under the new one and
+	 * the old id is removed from its group and the new id added. If the old id doesn't exist or one of the ids is null, this call is ignored.
+	 * If the new id already exists, it is overwritten.
+	 */
+	public void renameString(String oldID, String newID) {
+		if(oldID == null || newID == null) return;
+		//Move variants
+		
+		HashMap<String, String> variants = stringTable.get(oldID);
+		//If it doesn't exist, stop
+		if(variants ==  null) return;
+		stringTable.remove(oldID);
+		stringTable.put(newID, variants);
+		
+		//Change group association
+		String group = grouptable.get(oldID);
+		if(group != null) {
+			grouptable.remove(oldID);
+			grouptable.put(newID, group);
+		}
+		
+	}
 
 	/**
 	 * Sets the String that identified the table in the context of
@@ -456,11 +481,13 @@ public class PolyglotStringTable implements ResourceDependent, XMLConfigurable {
 
 	/**
 	 * If stringID exists in this table, its group is set to the specified group
-	 * id. Otherwise, this call is ignored.
+	 * id. Otherwise, this call is ignored. 
 	 */
 	public void setGroupID(String stringID, String groupID) {
-		if (containsStringID(stringID))
-			grouptable.put(stringID, groupID);
+		if (containsStringID(stringID)) {
+			if(groupID != null) grouptable.put(stringID, groupID);
+			else grouptable.remove(stringID);
+		}
 	}
 
 	// INTERFACE METHODS *************************

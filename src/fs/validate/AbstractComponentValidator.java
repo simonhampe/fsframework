@@ -28,7 +28,7 @@ import javax.swing.event.ListSelectionListener;
  */
 public abstract class AbstractComponentValidator<T> implements
 		ComponentValidator<T>, DocumentListener, ItemListener,
-		ListSelectionListener {
+		ListSelectionListener, ChangeListener {
 
 	// List of change listeners
 	private HashSet<ChangeListener> listener = new HashSet<ChangeListener>();
@@ -189,4 +189,14 @@ public abstract class AbstractComponentValidator<T> implements
 	public void valueChanged(ListSelectionEvent e) {
 		fireStateChanged(new ChangeEvent(e));
 	}
+
+	/* (non-Javadoc)
+	 * @see javax.swing.event.ChangeListener#stateChanged(javax.swing.event.ChangeEvent)
+	 */
+	@Override
+	public void stateChanged(ChangeEvent e) {
+		fireStateChanged(e);
+	}
+	
+	
 }

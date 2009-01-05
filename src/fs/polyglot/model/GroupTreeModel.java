@@ -55,15 +55,15 @@ public class GroupTreeModel implements TreeModel, PolyglotTableModelListener {
 
 		@Override
 		public int compare(TreeObject o1, TreeObject o2) {
-			if (o1.path == null && o2.path == null)
-				return 0;
 			if (o1.path == null)
 				return -1;
 			if (o2.path == null)
 				return 1;
-			int r1 = o1.path.compareTo(o2.path);
-			if (r1 != 0)
-				return r1;
+			if(o1 != null && o2 != null) {
+				int r1 = o1.path.compareTo(o2.path);
+				if (r1 != 0)
+					return r1;
+			}
 			// If both have a stringID attribute, compare that
 			if (o1 instanceof PolyglotString && o2 instanceof PolyglotString) {
 				if (((PolyglotString) o1).stringID == null
@@ -96,8 +96,8 @@ public class GroupTreeModel implements TreeModel, PolyglotTableModelListener {
 							.compareTo(((Variant) o2).language.id);
 				} else
 					return r2;
-			} else
-				return r1;
+			} 
+			else return 0;
 		}
 
 	};

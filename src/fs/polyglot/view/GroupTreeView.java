@@ -44,8 +44,6 @@ import fs.xml.XMLDirectoryTree;
  */
 public class GroupTreeView extends JPanel implements ResourceDependent {
 
-	//TODO: There are actually two different possible operations: Renaming groups and moving group strings
-	
 	/**
 	 * compiler-generated version id
 	 */
@@ -100,7 +98,7 @@ public class GroupTreeView extends JPanel implements ResourceDependent {
 		private static final long serialVersionUID = -763939291634307386L;
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			GroupEditor editor = new GroupEditor((((Group)grouptree.getSelectionPath().getLastPathComponent()).path),reference, loader, languageID);
+			GroupEditor editor = new GroupEditor((((Group)grouptree.getSelectionPath().getLastPathComponent()).path),e.getSource() == deleteButton ? null : "",reference, loader, languageID);
 			editor.setModalityType(ModalityType.APPLICATION_MODAL);
 			editor.addDataRetrievalListener(editorListener);
 			editor.setVisible(true);
@@ -111,9 +109,8 @@ public class GroupTreeView extends JPanel implements ResourceDependent {
 	private DataRetrievalListener editorListener = new DataRetrievalListener() {
 		@Override
 		public void dataReady(Object source, Object data) {
-			editFactory.performUndoableGroupEdit(((Group)grouptree.getSelectionPath().getLastPathComponent()).path, data.toString());
-			System.out.println(table.getGroupList());
-			
+			GroupEditor editor = (GroupEditor) source;
+			editFactory.performUndoableGroupEdit(editor.getOriginalPath(),editor.getNewPath(), editor.getRenameIDs(), editor.getAffectSubGroups());
 		}
 	};
 
@@ -192,6 +189,7 @@ public class GroupTreeView extends JPanel implements ResourceDependent {
 				selectionListener);
 		selectionListener.valueChanged(null);
 		editButton.addActionListener(editListener);
+		deleteButton.addActionListener(editListener);
 	}
 
 	// RESOURCE DEPENDENT METHODS *************************************

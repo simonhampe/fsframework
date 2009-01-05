@@ -26,7 +26,7 @@ import fs.gui.SwitchIconLabel;
 import fs.polyglot.model.Language;
 import fs.polyglot.validate.NonEmptyWarner;
 import fs.polyglot.validate.TabooValidator;
-import fs.validate.ValidationResult;
+import fs.validate.SingleButtonValidator;
 import fs.validate.ValidationValidator;
 import fs.validate.ValidationResult.Result;
 import fs.xml.FsfwDefaultReference;
@@ -76,23 +76,7 @@ public class LanguageEditor extends FrameworkDialog implements
 	// Validators
 	private TabooValidator idValidator;
 	private NonEmptyWarner descValidator;
-	private ValidationValidator summary = new ValidationValidator() { // Enables
-																		// or
-																		// disables
-																		// the
-																		// okButton
-																		// according
-																		// to
-																		// the
-																		// content
-		@Override
-		public void validationPerformed(ValidationResult result) {
-			if (result.getOverallResult() == Result.INCORRECT)
-				okButton.setEnabled(false);
-			else
-				okButton.setEnabled(true);
-		}
-	};
+	private ValidationValidator summary = new SingleButtonValidator(okButton);
 
 	// Disposal listener for the cancel button and ESCAPE key
 	private Action disposalListener = new AbstractAction() {
@@ -209,14 +193,6 @@ public class LanguageEditor extends FrameworkDialog implements
 
 		idValidator = new TabooValidator(null, null, warnIcon, this.tabooList,
 				false) {
-
-			/*
-			 * (non-Javadoc)
-			 * 
-			 * @see
-			 * fs.polyglot.validate.TabooValidator#validate(javax.swing.text
-			 * .JTextComponent)
-			 */
 			@Override
 			public Result validate(JTextComponent component) {
 				Result result = super.validate(component);

@@ -52,6 +52,7 @@ public class StringTableTest {
 			ex.removeID("EX02");
 			ex.addStringID("EX05");
 			ex.removeLanguage("bz");
+			ex.renameString("EX01", "NEWNAME");
 			showfullReport(ex);
 			HashMap<String, HashSet<String>> ms = ex.getMissingStrings();
 			System.out.println("Missing strings");

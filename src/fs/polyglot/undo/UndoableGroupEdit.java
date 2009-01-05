@@ -1,6 +1,6 @@
 package fs.polyglot.undo;
 
-import java.util.HashSet;
+import java.util.ArrayList;
 
 import javax.swing.undo.AbstractUndoableEdit;
 import javax.swing.undo.CannotRedoException;
@@ -15,8 +15,8 @@ import fs.xml.PolyglotStringTable;
  * to the new group attribute. null is also allowed as new group attribute, this will 'move' all strings in the concerned group to the root group. Additional
  * options are: <br>
  * - rename all strings which have the group path as prefix to have the new path as prefix<br>
- * - affect subgroups as well. Normally, only strings that are directly in the given group are affected. If this option is activated, subgroup are moved to
- * the new group as well. <br>
+ * - affect subgroups as well. Normally, only strings that are directly in the given group are affected. If this option is activated, subgroups are moved to
+ * the new group as well and subgroup relations are preserved.(This is only possible, if the new group is not a subgroup of the old group) <br>
  * This edit is static, i.e. upon creation it will create a list of all strings to be moved which will remain constant regardless of any changes to the table.
  * @author Simon Hampe
  * 
@@ -28,12 +28,19 @@ public class UndoableGroupEdit extends AbstractUndoableEdit {
 	 */
 	private static final long serialVersionUID = -1096439921227612760L;
 	//Change parameters
-	private String oldValue; 
-	private String newValue;
-	private HashSet<String> idsToMove = new HashSet<String>();
-	private boolean renameIDs = false;
-	private boolean affectSubGroups = false;
-	private PolyglotTableModel table;
+	private String oldValue; //old group
+	private String newValue; //new group
+	
+	//These lists should be in 1:1 - correspondance, i.e. each string in one list corresponds to the string at the exact position in one of the
+	//other lists
+	private ArrayList<String> idsToMove = new ArrayList<String>(); //Strings which should be moved, when redo is called
+	private ArrayList<String> idsToMoveBack = new ArrayList<String>(); //Strings which should be moved, when undo is called
+	private ArrayList<String> groupsForRedo = new ArrayList<String>(); //The groups to set on redo
+	private ArrayList<String> groupsForUndo = new ArrayList<String>(); //The groups to set on undo
+	
+	
+	private boolean renameIDs = false;							//Should strings be renamed, which have their group's path as prefix?
+	private PolyglotTableModel table;	
 
 	// Resource
 	PolyglotStringLoader loader;
@@ -50,11 +57,23 @@ public class UndoableGroupEdit extends AbstractUndoableEdit {
 		this.newValue = newValue;
 		this.table = table;		
 		this.renameIDs = renameIDs;
-		this.affectSubGroups = affectSubGroups;
 		this.loader = (loader != null) ? loader : PolyglotStringLoader.getDefaultLoader();
 		this.languageID = (languageID != null) ? languageID : PolyglotStringTable.getGlobalLanguageID();
-		//Create static string list
-		idsToMove = affectSubGroups ? table.getStringsInSubgroups(oldValue) : table.getStringsInGroup(oldValue);
+		//Create static string lists
+		idsToMove = affectSubGroups ? new ArrayList<String>(table.getStringsInSubgroups(oldValue)) : new ArrayList<String>(table.getStringsInGroup(oldValue));
+		for(String id : idsToMove) {
+			//If ids are renamed, all ids which start with oldValue + "." are renamed by replacing oldValue by newValue or, if newValue is null,
+			//by replacing oldValue + "." by newValue
+			idsToMoveBack.add(renameIDs && id.startsWith(oldValue + ".") && oldValue != null ? id.replaceFirst(newValue != null ? oldValue : oldValue + ".", newValue == null ? "" : newValue) : id);
+			String gid = table.getGroupID(id);
+			//Save the original group id
+			groupsForUndo.add(gid);
+			//Create the new group ids
+			//If subgroups are not affected or the string's group IS the oldvalue, the new group is just newValue
+			if(!affectSubGroups || (oldValue == null? gid == null : oldValue.equals(gid))) groupsForRedo.add(newValue);
+			//If newValue == null, replace oldValue + ".", otherwise oldValue
+			else groupsForRedo.add((gid != null ? gid : "").replaceFirst((oldValue == null ? "" : oldValue) + (newValue == null? "." : ""),newValue == null? "" : newValue));
+		}
 	}
 
 	// GETTERS
@@ -80,19 +99,25 @@ public class UndoableGroupEdit extends AbstractUndoableEdit {
 	// **************************************************************************
 
 	/**
-	 * @return True, if all strings that were registered for group change at creation time are still under the new group path
+	 * @return True, if and only if all (possibly renamed) string ids that were registered for group change at creation time still exist (under any group path) 
 	 */
 	@Override
 	public boolean canUndo() {
+		for(String id : idsToMoveBack) {
+			if(!table.containsStringID(id)) return false;
+		}
 		return true;
 	}
 
 	/**
-	 * @return false, if and only if newValue is a subgroup of oldValue and subgroups are affected (as this would cause recursion)
+	 * @return True, if and only if all string ids that were registered for group change at creation time still exist (under any group)
 	 */
 	@Override
 	public boolean canRedo() {
-		return !(PolyglotTableModel.isSubgroupOf(oldValue, newValue, false) && affectSubGroups);
+		for(String id : idsToMove) {
+			if(!table.containsStringID(id)) return false;
+		}
+		return true;
 	}
 
 	/**
@@ -137,8 +162,11 @@ public class UndoableGroupEdit extends AbstractUndoableEdit {
 	public void redo() throws CannotRedoException {
 		super.redo();
 		//Just move all registered strings to the new group, renaming them, if necessary
-		for(String s : idsToMove) {
-			//TODO: Argh
+		for(int i = 0; i < idsToMove.size(); i++) {
+			//Rename
+			if(renameIDs) table.renameString(idsToMove.get(i), idsToMoveBack.get(i));
+			//Move to group
+			table.setGroupID(idsToMoveBack.get(i), groupsForRedo.get(i));
 		}
 	}
 
@@ -151,37 +179,12 @@ public class UndoableGroupEdit extends AbstractUndoableEdit {
 	@Override
 	public void undo() throws CannotUndoException {
 		super.undo();
-		try {
-			performLanguageEdit(table, newValue, oldValue);
-		} catch (UnsupportedOperationException ue) {
-			// Forward exception
-			throw new CannotUndoException();
-		}
-	}
-
-	/**
-	 * Convenience method which changes a group oldval to newval in the
-	 * specified table, i.e. does the following: All strings that are in group
-	 * oldval are moved to group newval.
-	 * 
-	 * @param table
-	 *            The table in which the change should be effected (If null,
-	 *            then this call has no effect)
-	 * @param oldValue
-	 *            The old value.
-	 * @param newValue
-	 *            The new value.
-	 * @throws UnsupportedOperationException
-	 *             - If this operation cannot be performed (never thrown)
-	 */
-	public static void performLanguageEdit(PolyglotTableModel table,
-			String oldValue, String newValue)
-			throws UnsupportedOperationException {
-		if (table == null || (oldValue == null && newValue == null))
-			return;
-		HashSet<String> groupstrings = table.getStringsInGroup(oldValue);
-		for (String s : groupstrings) {
-			table.setGroupID(s, newValue);
+		//Just move all registered strings to the new group, renaming them, if necessary
+		for(int i = 0; i < idsToMoveBack.size(); i++) {
+			//Rename
+			if(renameIDs) table.renameString(idsToMoveBack.get(i), idsToMove.get(i));
+			//Move to group
+			table.setGroupID(idsToMove.get(i), groupsForUndo.get(i));
 		}
 	}
 
