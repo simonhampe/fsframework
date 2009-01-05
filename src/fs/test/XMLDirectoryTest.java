@@ -4,8 +4,9 @@ import fs.xml.*;
 
 /**
  * Tests features of the XMLDirectoryTree class
+ * 
  * @author Simon Hampe
- *
+ * 
  */
 public class XMLDirectoryTest {
 
@@ -16,9 +17,8 @@ public class XMLDirectoryTest {
 			tree.addPath("eins/zwei/drei1");
 			tree.removePath("eins/zwei/drei");
 			System.out.println(XMLToolbox.getDocumentAsPrettyString(tree));
-			
-		}
-		catch(Exception e) {
+
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}

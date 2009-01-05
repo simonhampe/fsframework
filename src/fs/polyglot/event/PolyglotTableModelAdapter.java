@@ -3,10 +3,11 @@ package fs.polyglot.event;
 import fs.polyglot.model.PolyglotTableModel;
 
 /**
- * This is a convenience class for creating PolyglotTableModelListeners. All methods of this interface
- * are implemented as empty stubs.
+ * This is a convenience class for creating PolyglotTableModelListeners. All
+ * methods of this interface are implemented as empty stubs.
+ * 
  * @author Simon Hampe
- *
+ * 
  */
 public class PolyglotTableModelAdapter implements PolyglotTableModelListener {
 

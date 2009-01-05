@@ -26,43 +26,45 @@ import fs.xml.XMLToolbox;
 
 /**
  * This tests all the model and renderer classes of Polyglot
+ * 
  * @author Simon Hampe
- *
+ * 
  */
 public class PolyglotModelTest {
 
-	
 	public static void main(String[] args) {
 		try {
 			JFrame main = new JFrame("polyglot model test");
 			main.setBounds(100, 100, 300, 300);
 			main.setLayout(new FlowLayout());
-			
-			
+
 			String filename = "language/fsfwStringTable.xml";
-			//String filename = "examples/PolyglotStringTable.xml";
-			PolyglotTableModel table = new PolyglotTableModel(XMLToolbox.loadXMLFile(new File(filename)), null);
-			
+			// String filename = "examples/PolyglotStringTable.xml";
+			PolyglotTableModel table = new PolyglotTableModel(XMLToolbox
+					.loadXMLFile(new File(filename)), null);
+
 			final UndoManager manager = TableUndoManager.getUndoManager(table);
-			
-			
-			LanguageListView view = new LanguageListView(null,null,null,table);
-			GroupTreeView tview = new GroupTreeView(null,null,null,table);
-			
-//			JTree tree = new JTree();
-//			tree.setModel(new GroupTreeModel(table, true, true));
-//			GroupTreeCellRenderer render =new GroupTreeCellRenderer(null,null,null,true);
-//			render.setNullString(table.getTableID());
-//			tree.setCellRenderer(render);
-//			tree.repaint();
-//			ToolTipManager.sharedInstance().registerComponent(tree);
-//			
-//			JTree gtree = new JTree();
-//			gtree.setModel(new GroupTreeModel(table,false,false));
-//			gtree.setCellRenderer(new GroupTreeCellRenderer(null,null,null,false));
-//			ToolTipManager.sharedInstance().registerComponent(gtree);
-			
-			JButton undo = new JButton("undo") ;
+
+			LanguageListView view = new LanguageListView(null, null, null,
+					table);
+			GroupTreeView tview = new GroupTreeView(null, null, null, table);
+
+			// JTree tree = new JTree();
+			// tree.setModel(new GroupTreeModel(table, true, true));
+			// GroupTreeCellRenderer render =new
+			// GroupTreeCellRenderer(null,null,null,true);
+			// render.setNullString(table.getTableID());
+			// tree.setCellRenderer(render);
+			// tree.repaint();
+			// ToolTipManager.sharedInstance().registerComponent(tree);
+			//			
+			// JTree gtree = new JTree();
+			// gtree.setModel(new GroupTreeModel(table,false,false));
+			// gtree.setCellRenderer(new
+			// GroupTreeCellRenderer(null,null,null,false));
+			// ToolTipManager.sharedInstance().registerComponent(gtree);
+
+			JButton undo = new JButton("undo");
 			undo.addActionListener(new ActionListener() {
 
 				@Override
@@ -70,27 +72,24 @@ public class PolyglotModelTest {
 					System.out.println(manager.getUndoPresentationName());
 					manager.undo();
 				}
-				
+
 			});
-			
-//			main.getContentPane().add(tree);
-//			main.getContentPane().add(gtree);
-			//main.getContentPane().add(stree);
+
+			// main.getContentPane().add(tree);
+			// main.getContentPane().add(gtree);
+			// main.getContentPane().add(stree);
 			main.getContentPane().add(view);
 			main.getContentPane().add(tview);
 			main.getContentPane().add(undo);
 			main.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 			main.pack();
 			main.setVisible(true);
-			
-			
-			
+
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		
+
 	}
 
 }

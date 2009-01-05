@@ -12,8 +12,9 @@ import fs.xml.XMLToolbox;
 
 /**
  * Tests the class PolyglotOptions
+ * 
  * @author Simon Hampe
- *
+ * 
  */
 public class PolyglotOptionsTest {
 
@@ -23,7 +24,8 @@ public class PolyglotOptionsTest {
 	public static void main(String[] args) {
 		PolyglotOptions options = new PolyglotOptions();
 		options.setMaxfilenumber(2);
-		options.setLastfiles(new ArrayList<File>(Arrays.<File>asList(new File("a.xml"),new File("b.xml"), new File("c.xml"))));
+		options.setLastfiles(new ArrayList<File>(Arrays.<File> asList(new File(
+				"a.xml"), new File("b.xml"), new File("c.xml"))));
 		Element e;
 		try {
 			e = options.getConfiguration();
@@ -34,7 +36,7 @@ public class PolyglotOptionsTest {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		
+
 	}
 
 }

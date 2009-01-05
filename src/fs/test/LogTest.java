@@ -8,19 +8,21 @@ import fs.log.*;
 
 /**
  * Tests features of the log4j api
+ * 
  * @author Simon Hampe
- *
+ * 
  */
 public class LogTest {
 
 	public static void main(String[] args) {
 		BasicConfigurator.configure();
-		//CHAINSAW connection
-		/*SocketAppender sa = new SocketAppender("localhost",4445);
-		sa.setLocationInfo(true);
-		sa.setLayout(new XMLLayout());
-		Logger.getRootLogger().setLevel(Level.DEBUG);
-		Logger.getRootLogger().addAppender(sa);*/
+		// CHAINSAW connection
+		/*
+		 * SocketAppender sa = new SocketAppender("localhost",4445);
+		 * sa.setLocationInfo(true); sa.setLayout(new XMLLayout());
+		 * Logger.getRootLogger().setLevel(Level.DEBUG);
+		 * Logger.getRootLogger().addAppender(sa);
+		 */
 		Logger l = Logger.getLogger("fs.logtest");
 		DefaultLogHistoryWindowModel a = new DefaultLogHistoryWindowModel();
 		l.addAppender(a);

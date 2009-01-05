@@ -11,21 +11,22 @@ import fs.xml.ResourceReference;
 import fs.xml.XMLWriteConfigurationException;
 
 /**
- * An extension of PolyglotStringTable which notifies registered change listeners of all
- * write method calls.
+ * An extension of PolyglotStringTable which notifies registered change
+ * listeners of all write method calls.
+ * 
  * @author Simon Hampe
- *
+ * 
  */
 public class PolyglotTableModel extends PolyglotStringTable {
-	
+
 	/**
-	 * A list of registered listeners 
+	 * A list of registered listeners
 	 */
 	private HashSet<PolyglotTableModelListener> listeners = new HashSet<PolyglotTableModelListener>();
-	
+
 	// CONSTRUCTORS *******************************************
 	// ********************************************************
-	
+
 	public PolyglotTableModel(String id, String description) {
 		super(id, description);
 	}
@@ -34,67 +35,72 @@ public class PolyglotTableModel extends PolyglotStringTable {
 			throws XMLWriteConfigurationException {
 		super(doc, r);
 	}
-	
+
 	// NOTIFY METHODS *****************************************
 	// ********************************************************
-	
+
 	/**
 	 * Registers l as a listener (if l != null)
 	 */
-	public void addChangeListener(PolyglotTableModelListener l)  {
-		if(l!= null) listeners.add(l);
+	public void addChangeListener(PolyglotTableModelListener l) {
+		if (l != null)
+			listeners.add(l);
 	}
-	
+
 	/**
 	 * Removes l from the set of registered listeners (if it is in the list)
 	 */
 	public void removeListener(PolyglotTableModelListener l) {
 		listeners.remove(l);
 	}
-	
+
 	/**
 	 * Notifies all listeners of a table id change
 	 */
 	private void notifyIDChanged() {
-		if(listeners == null) return;
-		for(PolyglotTableModelListener l : listeners) {
+		if (listeners == null)
+			return;
+		for (PolyglotTableModelListener l : listeners) {
 			l.tableIDChanged(this);
 		}
 	}
-	
+
 	/**
 	 * Notifies all listeners of a table description change
 	 */
 	private void notifyDescChanged() {
-		if(listeners == null) return;
-		for(PolyglotTableModelListener l : listeners) {
+		if (listeners == null)
+			return;
+		for (PolyglotTableModelListener l : listeners) {
 			l.tableDescriptionChanged(this);
 		}
 	}
-	
+
 	/**
-	 * Notifies all listeners of a change in the language list 
+	 * Notifies all listeners of a change in the language list
 	 */
 	private void notifyLanguageListChanged() {
-		if(listeners == null) return;
-		for(PolyglotTableModelListener l : listeners ) {
+		if (listeners == null)
+			return;
+		for (PolyglotTableModelListener l : listeners) {
 			l.languageListChanged(this);
 		}
 	}
-	
+
 	/**
 	 * Notifies all listeners of a change in the string table
 	 */
 	private void notifyStringTableChanged() {
-		if(listeners == null) return;
-		for(PolyglotTableModelListener l : listeners) {
+		if (listeners == null)
+			return;
+		for (PolyglotTableModelListener l : listeners) {
 			l.stringTableChanged(this);
 		}
 	}
-	
+
 	/**
-	 * Notifies all listeners, that everything might have changed. In fact, all interface methods
-	 * are called on after the other
+	 * Notifies all listeners, that everything might have changed. In fact, all
+	 * interface methods are called on after the other
 	 */
 	private void notifyChanged() {
 		notifyIDChanged();
@@ -102,11 +108,13 @@ public class PolyglotTableModel extends PolyglotStringTable {
 		notifyLanguageListChanged();
 		notifyStringTableChanged();
 	}
-	
+
 	// OVERWRITTEN WRITE METHODS ******************************
 	// ********************************************************
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see fs.xml.PolyglotStringTable#addStringID(java.lang.String)
 	 */
 	@Override
@@ -115,18 +123,23 @@ public class PolyglotTableModel extends PolyglotStringTable {
 		notifyStringTableChanged();
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see fs.xml.PolyglotStringTable#configure(org.dom4j.Node)
 	 */
 	@Override
 	public void configure(Node n) throws XMLWriteConfigurationException {
 		super.configure(n);
-		//All properties may have been changed,
+		// All properties may have been changed,
 		notifyChanged();
 	}
 
-	/* (non-Javadoc)
-	 * @see fs.xml.PolyglotStringTable#putLanguage(java.lang.String, java.lang.String)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see fs.xml.PolyglotStringTable#putLanguage(java.lang.String,
+	 * java.lang.String)
 	 */
 	@Override
 	public void putLanguage(String languageID, String description) {
@@ -134,8 +147,11 @@ public class PolyglotTableModel extends PolyglotStringTable {
 		notifyLanguageListChanged();
 	}
 
-	/* (non-Javadoc)
-	 * @see fs.xml.PolyglotStringTable#putString(java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see fs.xml.PolyglotStringTable#putString(java.lang.String,
+	 * java.lang.String, java.lang.String, java.lang.String)
 	 */
 	@Override
 	public void putString(String stringID, String languageID, String groupID,
@@ -144,8 +160,11 @@ public class PolyglotTableModel extends PolyglotStringTable {
 		notifyStringTableChanged();
 	}
 
-	/* (non-Javadoc)
-	 * @see fs.xml.PolyglotStringTable#putString(java.lang.String, java.lang.String, java.lang.String)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see fs.xml.PolyglotStringTable#putString(java.lang.String,
+	 * java.lang.String, java.lang.String)
 	 */
 	@Override
 	public void putString(String stringID, String languageID, String value) {
@@ -153,7 +172,9 @@ public class PolyglotTableModel extends PolyglotStringTable {
 		notifyStringTableChanged();
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see fs.xml.PolyglotStringTable#removeID(java.lang.String)
 	 */
 	@Override
@@ -162,7 +183,9 @@ public class PolyglotTableModel extends PolyglotStringTable {
 		notifyStringTableChanged();
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see fs.xml.PolyglotStringTable#removeLanguage(java.lang.String)
 	 */
 	@Override
@@ -171,8 +194,11 @@ public class PolyglotTableModel extends PolyglotStringTable {
 		notifyStringTableChanged();
 	}
 
-	/* (non-Javadoc)
-	 * @see fs.xml.PolyglotStringTable#setGroupID(java.lang.String, java.lang.String)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see fs.xml.PolyglotStringTable#setGroupID(java.lang.String,
+	 * java.lang.String)
 	 */
 	@Override
 	public void setGroupID(String stringID, String groupID) {
@@ -180,8 +206,11 @@ public class PolyglotTableModel extends PolyglotStringTable {
 		notifyStringTableChanged();
 	}
 
-	/* (non-Javadoc)
-	 * @see fs.xml.PolyglotStringTable#setLanguageDescription(java.lang.String, java.lang.String)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see fs.xml.PolyglotStringTable#setLanguageDescription(java.lang.String,
+	 * java.lang.String)
 	 */
 	@Override
 	public void setLanguageDescription(String languageID, String description) {
@@ -189,7 +218,9 @@ public class PolyglotTableModel extends PolyglotStringTable {
 		notifyLanguageListChanged();
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see fs.xml.PolyglotStringTable#setTableDescription(java.lang.String)
 	 */
 	@Override
@@ -198,7 +229,9 @@ public class PolyglotTableModel extends PolyglotStringTable {
 		notifyDescChanged();
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see fs.xml.PolyglotStringTable#setTableID(java.lang.String)
 	 */
 	@Override
@@ -206,5 +239,5 @@ public class PolyglotTableModel extends PolyglotStringTable {
 		super.setTableID(tableID);
 		notifyIDChanged();
 	}
-	
+
 }

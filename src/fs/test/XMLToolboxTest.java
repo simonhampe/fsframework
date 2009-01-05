@@ -8,13 +8,14 @@ import org.dom4j.tree.*;
 
 /**
  * Tests features of XMLToolbox
+ * 
  * @author Simon Hampe
- *
+ * 
  */
 public class XMLToolboxTest {
 
 	public static void main(String[] args) {
-		
+
 	}
-	
+
 }
