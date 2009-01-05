@@ -4,16 +4,24 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Dialog.ModalityType;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ActionEvent;
+import java.io.IOException;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.DropMode;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
 import javax.swing.ToolTipManager;
+import javax.swing.TransferHandler;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreeSelectionModel;
@@ -98,10 +106,7 @@ public class GroupTreeView extends JPanel implements ResourceDependent {
 		private static final long serialVersionUID = -763939291634307386L;
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			GroupEditor editor = new GroupEditor((((Group)grouptree.getSelectionPath().getLastPathComponent()).path),e.getSource() == deleteButton ? null : "",reference, loader, languageID);
-			editor.setModalityType(ModalityType.APPLICATION_MODAL);
-			editor.addDataRetrievalListener(editorListener);
-			editor.setVisible(true);
+			openEditor((((Group)grouptree.getSelectionPath().getLastPathComponent()).path),e.getSource() == deleteButton ? null : "");
 		}
 	};
 	
@@ -114,6 +119,79 @@ public class GroupTreeView extends JPanel implements ResourceDependent {
 		}
 	};
 
+	// DRAG'N'DROP SUPPORT ********************************************
+	// ****************************************************************
+	
+	//Allows to drag a node onto any DIFFERENT node and opens up a group editor accordingly
+	private TransferHandler dndHandler = new TransferHandler() {
+		/**
+		 * compiler-generated version id
+		 */
+		private static final long serialVersionUID = 3443048457094840001L;
+
+		/**
+		 * Import is possible, if the new path is not equal to the old path
+		 */
+		@Override
+		public boolean canImport(TransferSupport support) {
+			JTree.DropLocation dl = (JTree.DropLocation)support.getDropLocation();
+			if(dl == null || dl.getPath() == null) return false;
+			Group g = (Group)dl.getPath().getLastPathComponent();
+			try {
+				String old = (String) support.getTransferable().getTransferData(DataFlavor.stringFlavor);
+				return old == null? g.path != null : !old.equals(g.path);	
+			} catch (UnsupportedFlavorException e) {
+				return false;
+			} catch (IOException e) {
+				return false;
+			}
+		}
+
+		/**
+		 * Returns MOVE
+		 */
+		@Override
+		public int getSourceActions(JComponent c) {
+			return TransferHandler.MOVE;
+		}
+
+		/**
+		 * Returns the path of the components text 
+		 */
+		@Override
+		protected Transferable createTransferable(JComponent c) {
+			return new StringSelection(((Group)grouptree.getSelectionPath().getLastPathComponent()).path);
+		}
+
+		/**
+		 * Does nothing
+		 */
+		@Override
+		protected void exportDone(JComponent source, Transferable data,
+				int action) {
+			super.exportDone(source, data, action);
+		}
+
+		/**
+		 * Opens up an editor with original path the dragged group and new path the drop node 
+		 */
+		@Override
+		public boolean importData(TransferSupport support) {
+			JTree.DropLocation dl = (JTree.DropLocation)support.getDropLocation();
+			Group g = (Group)dl.getPath().getLastPathComponent();
+			try {
+				String old = (String) support.getTransferable().getTransferData(DataFlavor.stringFlavor);
+				openEditor(old, g.path);
+				return true;
+			} catch (UnsupportedFlavorException e) {
+				return true;
+			} catch (IOException e) {
+				return true;
+			}
+		}
+		
+	};
+	
 	// CONSTRUCTOR ****************************************************
 	// ****************************************************************
 
@@ -157,7 +235,11 @@ public class GroupTreeView extends JPanel implements ResourceDependent {
 				TreeSelectionModel.SINGLE_TREE_SELECTION);
 		ToolTipManager.sharedInstance().registerComponent(grouptree);
 		JScrollPane scrollPane = new JScrollPane(grouptree);
-
+		//Drag'n'Drop
+		grouptree.setDragEnabled(true);
+		grouptree.setDropMode(DropMode.ON);
+		grouptree.setTransferHandler(dndHandler);
+		
 		// Buttons
 		deleteButton.setIcon(deleteIcon);
 		deleteButton.setToolTipText(loader.getString(sgroup + ".delete",
@@ -192,6 +274,19 @@ public class GroupTreeView extends JPanel implements ResourceDependent {
 		deleteButton.addActionListener(editListener);
 	}
 
+	// EDITOR METHODS *************************************************
+	// ****************************************************************
+	
+	/**
+	 * Opens up an editor filled with the specified data and already registered to the internal listener
+	 */
+	protected void openEditor(String oldValue, String newValue) {
+		GroupEditor editor = new GroupEditor(oldValue,newValue,reference, loader, languageID);
+		editor.setModalityType(ModalityType.APPLICATION_MODAL);
+		editor.addDataRetrievalListener(editorListener);
+		editor.setVisible(true);
+	}
+	
 	// RESOURCE DEPENDENT METHODS *************************************
 	// ****************************************************************
 
