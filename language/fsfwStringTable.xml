@@ -148,6 +148,8 @@
 		<variant lang="en">Change group name</variant></polyglotstring>
 	<polyglotstring id="fs.polyglot.GroupTreeView.delete" group="fs.polyglot.GroupTreeView">
 		<variant lang="en">Delete this group (all strings in this group are moved to the root group)</variant></polyglotstring>
+	<polyglotstring id="fs.polyglot.GroupTreeView.toggletip" group="fs.polyglot.GroupTreeView">
+		<variant lang="en">Toggles whether the complete group path or only the last part is displayed</variant></polyglotstring>
 	<polyglotstring id="fs.polyglot.GroupEditor.originalpath"
 		group="fs.polyglot.GroupEditor">
 		<variant lang="en">Original group:</variant>

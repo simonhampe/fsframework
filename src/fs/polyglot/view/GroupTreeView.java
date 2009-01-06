@@ -1,5 +1,6 @@
 package fs.polyglot.view;
 
+import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
@@ -9,10 +10,12 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOException;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.BorderFactory;
 import javax.swing.DropMode;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -60,6 +63,7 @@ public class GroupTreeView extends JPanel implements ResourceDependent {
 	//Components
 	private JButton editButton = new JButton();
 	private JButton deleteButton = new JButton();
+	private JButton toggleViewButton = new JButton();
 	private JTree grouptree = new JTree();
 
 	private GroupTreeModel treemodel = null;
@@ -69,6 +73,8 @@ public class GroupTreeView extends JPanel implements ResourceDependent {
 
 	private ImageIcon deleteIcon;
 	private ImageIcon editIcon;
+	private ImageIcon toggleOnIcon;
+	private ImageIcon toggleOffIcon;
 
 	// Resource reference an language id for tooltips
 	private ResourceReference reference;
@@ -116,6 +122,15 @@ public class GroupTreeView extends JPanel implements ResourceDependent {
 		public void dataReady(Object source, Object data) {
 			GroupEditor editor = (GroupEditor) source;
 			editFactory.performUndoableGroupEdit(editor.getOriginalPath(),editor.getNewPath(), editor.getRenameIDs(), editor.getAffectSubGroups());
+		}
+	};
+	
+	//Toggles the cutGroupPath property
+	private ActionListener toggleListener = new ActionListener() {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			setCutGroupPath(!doesCutGroupPath());
+			toggleViewButton.setIcon(doesCutGroupPath()? toggleOnIcon : toggleOffIcon);
 		}
 	};
 
@@ -240,7 +255,7 @@ public class GroupTreeView extends JPanel implements ResourceDependent {
 		grouptree.setDropMode(DropMode.ON);
 		grouptree.setTransferHandler(dndHandler);
 		
-		// Buttons
+		// Main Buttons
 		deleteButton.setIcon(deleteIcon);
 		deleteButton.setToolTipText(loader.getString(sgroup + ".delete",
 				this.languageID));
@@ -250,9 +265,18 @@ public class GroupTreeView extends JPanel implements ResourceDependent {
 
 		JPanel buttonbar = new JPanel();
 		buttonbar.setLayout(new GridLayout(1, 3));
-		buttonbar.add(editButton);
+		buttonbar.add(editButton);	
 		buttonbar.add(deleteButton);
 
+		//View Control
+		toggleViewButton.setIcon(toggleOnIcon);
+		toggleViewButton.addActionListener(toggleListener);
+		toggleViewButton.setToolTipText(loader.getString(sgroup + ".toggletip", this.languageID));
+		JPanel togglePanel = new JPanel();
+		togglePanel.setBorder(BorderFactory.createEtchedBorder());
+		togglePanel.setLayout(new BorderLayout());
+		togglePanel.add(toggleViewButton, BorderLayout.WEST);
+		
 		// Layout
 		GridBagLayout gbl = new GridBagLayout();
 		setLayout(gbl);
@@ -260,11 +284,14 @@ public class GroupTreeView extends JPanel implements ResourceDependent {
 		GridBagConstraints treec = GUIToolbox.buildConstraints(0, 1, 1, 1);
 		treec.weighty = 100;
 		GridBagConstraints barc = GUIToolbox.buildConstraints(0, 0, 1, 1);
+		GridBagConstraints togglec = GUIToolbox.buildConstraints(0, 2, 1, 1);
 		gbl.setConstraints(scrollPane, treec);
 		gbl.setConstraints(buttonbar, barc);
+		gbl.setConstraints(togglePanel, togglec);
 
 		add(scrollPane);
 		add(buttonbar);
+		add(togglePanel);
 
 		// Event handling
 		grouptree.getSelectionModel().addTreeSelectionListener(
@@ -287,6 +314,25 @@ public class GroupTreeView extends JPanel implements ResourceDependent {
 		editor.setVisible(true);
 	}
 	
+	// VIEW CONTROL ********************************************************
+	// *********************************************************************
+	
+	/**
+	 * Returns whether group paths are trimmed to the last path component
+	 */
+	public boolean doesCutGroupPath() {
+		return treerenderer.doesCutGroupPath();
+	}
+
+	/**
+	 * Specifies whether group paths should be trimmed to the last path component and 
+	 * causes a repaint
+	 */
+	public void setCutGroupPath(boolean cutGroupPath) {
+		treerenderer.setCutGroupPath(cutGroupPath);
+		repaint();
+	}
+
 	// RESOURCE DEPENDENT METHODS *************************************
 	// ****************************************************************
 
@@ -300,6 +346,8 @@ public class GroupTreeView extends JPanel implements ResourceDependent {
 				"graphics/GroupTreeView/delete.png"));
 		editIcon = new ImageIcon(reference.getFullResourcePath(this,
 				"graphics/GroupTreeView/edit.png"));
+		toggleOnIcon = new ImageIcon(reference.getFullResourcePath(this, "graphics/GroupTreeView/toggleCut.png"));
+		toggleOffIcon = new ImageIcon(reference.getFullResourcePath(this, "graphics/GroupTreeView/toggleNoCut.png"));
 	}
 
 	/**
@@ -311,6 +359,8 @@ public class GroupTreeView extends JPanel implements ResourceDependent {
 				.getExpectedResourceStructure();
 		tree.addPath("graphics/GroupTreeView/new.png");
 		tree.addPath("graphics/GroupTreeView/edit.png");
+		tree.addPath("graphics/GroupTreeView/toggleCut.png");
+		tree.addPath("graphics/GroupTreeView/toggleNoCut.png");
 		return tree;
 	}
 

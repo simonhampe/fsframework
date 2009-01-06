@@ -160,4 +160,19 @@ public class GroupTreeCellRenderer implements TreeCellRenderer,
 		return tree;
 	}
 
+	/**
+	 * Indicates whether group and string paths are trimmed to the last path component
+	 */
+	public boolean doesCutGroupPath() {
+		return cutGroupPath;
+	}
+
+	/**
+	 * Sets whether group and string paths should be trimmed to the last path component
+	 * @param cutGroupPath
+	 */
+	public void setCutGroupPath(boolean cutGroupPath) {
+		this.cutGroupPath = cutGroupPath;
+	}
+
 }
