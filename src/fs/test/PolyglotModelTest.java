@@ -12,6 +12,8 @@ import javax.swing.JTree;
 import javax.swing.ToolTipManager;
 import javax.swing.undo.UndoManager;
 
+import org.apache.log4j.BasicConfigurator;
+
 import fs.polyglot.model.Group;
 import fs.polyglot.model.GroupTreeModel;
 import fs.polyglot.model.LanguageListModel;
@@ -34,6 +36,7 @@ public class PolyglotModelTest {
 
 	public static void main(String[] args) {
 		try {
+			BasicConfigurator.configure();
 			JFrame main = new JFrame("polyglot model test");
 			main.setBounds(100, 100, 300, 300);
 			main.setLayout(new FlowLayout());
@@ -83,7 +86,6 @@ public class PolyglotModelTest {
 			main.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 			main.pack();
 			main.setVisible(true);
-
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

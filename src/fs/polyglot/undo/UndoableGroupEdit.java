@@ -125,14 +125,14 @@ public class UndoableGroupEdit extends AbstractUndoableEdit {
 	 */
 	@Override
 	public String getPresentationName() {
-		return getLanguageEditPresentationName(oldValue, newValue);
+		return getGroupEditPresentationName(oldValue, newValue);
 	}
 
 	/**
 	 * Convenience method returning the representation name of a language change
 	 * from oldval to newval (in the language of this edit)
 	 */
-	public String getLanguageEditPresentationName(String oldValue, String newValue) {
+	public String getGroupEditPresentationName(String oldValue, String newValue) {
 		return loader.getString("fs.polyglot.undo.groupgeneral",languageID,oldValue, newValue);
 	}
 
@@ -141,7 +141,7 @@ public class UndoableGroupEdit extends AbstractUndoableEdit {
 	 */
 	@Override
 	public String getRedoPresentationName() {
-		return getLanguageEditPresentationName(oldValue, newValue);
+		return getGroupEditPresentationName(oldValue, newValue);
 	}
 
 	/**
@@ -149,7 +149,7 @@ public class UndoableGroupEdit extends AbstractUndoableEdit {
 	 */
 	@Override
 	public String getUndoPresentationName() {
-		return getLanguageEditPresentationName(newValue, oldValue);
+		return getGroupEditPresentationName(newValue, oldValue);
 	}
 
 	/**

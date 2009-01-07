@@ -18,6 +18,7 @@ import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.border.BevelBorder;
+import javax.swing.undo.CannotRedoException;
 
 import org.dom4j.Document;
 
@@ -25,6 +26,8 @@ import fs.event.DataRetrievalListener;
 import fs.gui.FrameworkDialog;
 import fs.gui.GUIToolbox;
 import fs.gui.SwitchIconLabel;
+import fs.polyglot.undo.UndoableEditFactory;
+import fs.polyglot.undo.UndoableGroupEdit;
 import fs.validate.LabelIndicValidator;
 import fs.validate.SingleButtonValidator;
 import fs.validate.ValidationValidator;
@@ -300,6 +303,25 @@ public class GroupEditor extends FrameworkDialog implements ResourceDependent {
 		return tree;
 	}
 
+	/** 
+	 * Performs the group edit associated to the data in this editor. This method should only be called by a dataRetrievalListener, when
+	 * dataReady is called, since this ensures validity of the operation
+	 */
+	public UndoableGroupEdit performUndoableGroupEdit(UndoableEditFactory f) throws CannotRedoException {
+		if(f == null) throw new CannotRedoException();
+		//If both paths are equal throw exception
+		if(getNewPath() == null ? getOriginalPath() == null : getNewPath().equals(getOriginalPath())) throw new CannotRedoException();
+		return f.performUndoableGroupEdit(getOriginalPath(), getNewPath(), getRenameIDs(), getAffectSubGroups());
+	}
 	
+	/**
+	 * Returns the group edit associated to the data in this editor. Does not guarantee validity.
+	 * @param f
+	 * @return
+	 */
+	public UndoableGroupEdit getUndoableGroupEdit(UndoableEditFactory f) {
+		if(f == null) return null;
+		else return f.createUndoableGroupEdit(getOriginalPath(), getNewPath(), getRenameIDs(), getAffectSubGroups());
+	}
 	
 }

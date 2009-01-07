@@ -28,7 +28,9 @@ import javax.swing.TransferHandler;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreeSelectionModel;
+import javax.swing.undo.CannotRedoException;
 
+import org.apache.log4j.Logger;
 import org.dom4j.Document;
 
 import fs.event.DataRetrievalListener;
@@ -88,6 +90,9 @@ public class GroupTreeView extends JPanel implements ResourceDependent {
 	// Undo factory
 	UndoableEditFactory editFactory = null;
 
+	//Log
+	private org.apache.log4j.Logger logger = Logger.getLogger(this.getClass().getCanonicalName());
+	
 	// LISTENERS ******************************************************
 	// ****************************************************************
 
@@ -120,8 +125,12 @@ public class GroupTreeView extends JPanel implements ResourceDependent {
 	private DataRetrievalListener editorListener = new DataRetrievalListener() {
 		@Override
 		public void dataReady(Object source, Object data) {
-			GroupEditor editor = (GroupEditor) source;
-			editFactory.performUndoableGroupEdit(editor.getOriginalPath(),editor.getNewPath(), editor.getRenameIDs(), editor.getAffectSubGroups());
+			try {
+				((GroupEditor) source).performUndoableGroupEdit(editFactory);
+			}
+			catch(CannotRedoException ce) {
+				logger.error(loader.getString("fs.global.cantperform", languageID, ((GroupEditor)source).getUndoableGroupEdit(editFactory).getRedoPresentationName()));
+			}
 		}
 	};
 	
