@@ -1,10 +1,13 @@
 package fs.test;
 
 import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JList;
@@ -14,6 +17,7 @@ import javax.swing.undo.UndoManager;
 
 import org.apache.log4j.BasicConfigurator;
 
+import fs.gui.GUIToolbox;
 import fs.polyglot.model.Group;
 import fs.polyglot.model.GroupTreeModel;
 import fs.polyglot.model.LanguageListModel;
@@ -23,6 +27,7 @@ import fs.polyglot.view.GroupTreeCellRenderer;
 import fs.polyglot.view.GroupTreeView;
 import fs.polyglot.view.LanguageListCellRenderer;
 import fs.polyglot.view.LanguageListView;
+import fs.polyglot.view.StringTreeView;
 import fs.xml.PolyglotStringTable;
 import fs.xml.XMLToolbox;
 
@@ -38,7 +43,7 @@ public class PolyglotModelTest {
 		try {
 			BasicConfigurator.configure();
 			JFrame main = new JFrame("polyglot model test");
-			main.setBounds(100, 100, 300, 300);
+			main.setSize(main.getMaximumSize());
 			main.setLayout(new FlowLayout());
 
 			String filename = "language/fsfwStringTable.xml";
@@ -52,19 +57,7 @@ public class PolyglotModelTest {
 					table);
 			GroupTreeView tview = new GroupTreeView(null, null, null, table);
 
-			 JTree tree = new JTree();
-			 tree.setModel(new GroupTreeModel(table, true, true,true));
-			 GroupTreeCellRenderer render =new	 GroupTreeCellRenderer(null,null,null,true, "bla");
-			 render.setNullString(table.getTableID());
-			 tree.setCellRenderer(render);
-			// tree.repaint();
-			// ToolTipManager.sharedInstance().registerComponent(tree);
-			//			
-			// JTree gtree = new JTree();
-			// gtree.setModel(new GroupTreeModel(table,false,false));
-			// gtree.setCellRenderer(new
-			// GroupTreeCellRenderer(null,null,null,false));
-			// ToolTipManager.sharedInstance().registerComponent(gtree);
+			StringTreeView sview = new StringTreeView(null,null,null,table);
 
 			JButton undo = new JButton("undo");
 			undo.addActionListener(new ActionListener() {
@@ -77,14 +70,23 @@ public class PolyglotModelTest {
 
 			});
 
-			 main.getContentPane().add(tree);
-			// main.getContentPane().add(gtree);
-			// main.getContentPane().add(stree);
+			sview.setBorder(BorderFactory.createEtchedBorder());
+			GridBagLayout gbl = new GridBagLayout();
+			main.getContentPane().setLayout(gbl);
+			GridBagConstraints cs = GUIToolbox.buildConstraints(0, 0, 1, 2);
+			cs.weightx = 100;cs.weighty = 100; cs.fill = GridBagConstraints.BOTH;
+			GridBagConstraints cv = GUIToolbox.buildConstraints(1, 0, 1, 1);
+			GridBagConstraints ct = GUIToolbox.buildConstraints(1, 1, 1, 1);
+			gbl.setConstraints(sview, cs);
+			gbl.setConstraints(tview, ct);
+			gbl.setConstraints(view, cv);
+			
+			main.getContentPane().add(sview);
 			main.getContentPane().add(view);
 			main.getContentPane().add(tview);
-			main.getContentPane().add(undo);
+			//main.getContentPane().add(undo);
 			main.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-			main.pack();
+			//main.pack();
 			main.setVisible(true);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

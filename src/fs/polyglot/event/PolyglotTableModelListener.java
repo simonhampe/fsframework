@@ -27,9 +27,11 @@ public interface PolyglotTableModelListener {
 	public void languageListChanged(PolyglotTableModel source);
 
 	/**
-	 * This method is called when any changes were committed to the actual
-	 * string table
+	 * This method is called when any heavy structural changes were committed to the actual
+	 * string table that cannot be reflected by one of the other methods
 	 */
 	public void stringTableChanged(PolyglotTableModel source);
 
+	public void //TODO: Has to be finer grained, since otherwise jtrees will be collapsing all the time
+	
 }

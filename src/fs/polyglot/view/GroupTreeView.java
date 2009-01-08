@@ -292,7 +292,7 @@ public class GroupTreeView extends JPanel implements ResourceDependent {
 		setLayout(gbl);
 
 		GridBagConstraints treec = GUIToolbox.buildConstraints(0, 1, 1, 1);
-		treec.weighty = 100;
+		treec.weighty = 100; treec.weightx = 100;
 		GridBagConstraints barc = GUIToolbox.buildConstraints(0, 0, 1, 1);
 		GridBagConstraints togglec = GUIToolbox.buildConstraints(0, 2, 1, 1);
 		gbl.setConstraints(scrollPane, treec);

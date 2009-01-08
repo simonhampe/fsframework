@@ -130,6 +130,56 @@ public class GroupTreeModel implements TreeModel, PolyglotTableModelListener {
 	// ******************************************************
 
 	/**
+	 * Returns, whether polyglot strings are included
+	 */
+	public boolean doesIncludeStrings() {
+		return includeStrings;
+	}
+
+
+	/**
+	 * Sets whether polyglot strings should be included and notifies all listeners
+	 */
+	public void setIncludeStrings(boolean includeStrings) {
+		this.includeStrings = includeStrings;
+		fireTreeStructureChanged();
+	}
+
+
+	/**
+	 * Returns, whether variants are included (regardless of whether strings are included, this only the abstract value set by
+	 * the user)
+	 */
+	public boolean doesIncludeVariants() {
+		return includeVariants;
+	}
+
+	/**
+	 * Sets whether variants should be included and notifies all listener
+	 */
+	public void setIncludeVariants(boolean includeVariants) {
+		this.includeVariants = includeVariants;
+		fireTreeStructureChanged();
+	}
+
+	/**
+	 * Returns, whether only incomplete groups are included
+	 */
+	public boolean doesShowOnlyIncomplete() {
+		return showOnlyIncomplete;
+	}
+
+	/**
+	 * Sets whether only incomplete groups are included and notifies all listeners
+	 */
+	public void setShowOnlyIncomplete(boolean showOnlyIncomplete) {
+		this.showOnlyIncomplete = showOnlyIncomplete;
+		fireTreeStructureChanged();
+	}
+
+
+
+	/**
 	 * If this Object is a tree object and has a valid path for this tree, this
 	 * returns a list of all visible children. If not, this returns the empty
 	 * list

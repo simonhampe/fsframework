@@ -33,6 +33,7 @@ import fs.polyglot.model.LanguageListModel;
 import fs.polyglot.model.PolyglotTableModel;
 import fs.polyglot.undo.TableUndoManager;
 import fs.polyglot.undo.UndoableEditFactory;
+import fs.polyglot.undo.UndoableLanguageEdit;
 import fs.xml.FsfwDefaultReference;
 import fs.xml.PolyglotStringLoader;
 import fs.xml.PolyglotStringTable;
@@ -153,8 +154,16 @@ public class LanguageListView extends JPanel implements ResourceDependent {
 	private ActionListener deleteListener = new ActionListener() {
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			editFactory.performUndoableLanguageEdit((Language) languageList
-					.getSelectedValue(), null);
+			UndoableLanguageEdit edit = editFactory.createUndoableLanguageEdit((Language) languageList.getSelectedValue(), null);
+			try {
+				logger.info(loader.getString("fs.global.perform", languageID, edit.getRedoPresentationName()));
+				editFactory.performUndoableLanguageEdit((Language) languageList
+						.getSelectedValue(), null);
+			}
+			catch(CannotRedoException ce) {
+				logger.error(loader.getString("fs.global.cantperform",languageID,edit.getRedoPresentationName()));
+			}
+			
 		}
 	};
 
@@ -271,7 +280,7 @@ public class LanguageListView extends JPanel implements ResourceDependent {
 		setLayout(gbl);
 
 		GridBagConstraints listc = GUIToolbox.buildConstraints(0, 1, 1, 1);
-		listc.weighty = 100;
+		listc.weighty = 100; listc.weightx = 100;
 		GridBagConstraints barc = GUIToolbox.buildConstraints(0, 0, 1, 1);
 		gbl.setConstraints(listPane, listc);
 		gbl.setConstraints(buttonbar, barc);
