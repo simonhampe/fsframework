@@ -126,6 +126,7 @@ public class GroupTreeView extends JPanel implements ResourceDependent {
 		@Override
 		public void dataReady(Object source, Object data) {
 			try {
+				logger.info(loader.getString("fs.global.perform", languageID, ((GroupEditor)source).getUndoableGroupEdit(editFactory).getRedoPresentationName()));
 				((GroupEditor) source).performUndoableGroupEdit(editFactory);
 			}
 			catch(CannotRedoException ce) {

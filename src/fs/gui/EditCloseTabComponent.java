@@ -28,12 +28,12 @@ import fs.xml.*;
  * completely selected and has requested keyboard focus. When the user presses
  * ENTER, the text field changes back into the label, which contains the new
  * text. When the user presses ESCAPE, it changes back to the label with the
- * original text. Focus loss or abitraty mouse clicks do not cause the label to
+ * original text. Focus loss or arbitrary mouse clicks do not cause the label to
  * reappear. Any of these have to implemented manually. <br>
  * <br>
  * The component can notify potential listeners about changes by firing
  * PropertyChangeEvents for the following events:<br>
- * - Mode has changed (Propery name: 'mode', value: 'edit' or 'display')<br>
+ * - Mode has changed (Property name: 'mode', value: 'edit' or 'display')<br>
  * - Text editing has been terminated, by confirmation or abortion (Property
  * name: 'text', value: original and new text. If both values are identical,
  * null and new text are sent)

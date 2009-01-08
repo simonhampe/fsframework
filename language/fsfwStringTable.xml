@@ -191,5 +191,7 @@
 		<variant lang="en">Change group</variant></polyglotstring>
 	<polyglotstring id="fs.global.cantperform" group="fs.global">
 		<variant lang="en">Can't perform operation: %s</variant></polyglotstring>
+	<polyglotstring id="fs.global.perform" group="fs.global">
+		<variant lang="en">Performing operation: %s ...</variant></polyglotstring>
 
 </fsfw:polyglotstringtable>

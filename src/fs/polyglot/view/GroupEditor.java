@@ -317,7 +317,6 @@ public class GroupEditor extends FrameworkDialog implements ResourceDependent {
 	/**
 	 * Returns the group edit associated to the data in this editor. Does not guarantee validity.
 	 * @param f
-	 * @return
 	 */
 	public UndoableGroupEdit getUndoableGroupEdit(UndoableEditFactory f) {
 		if(f == null) return null;
