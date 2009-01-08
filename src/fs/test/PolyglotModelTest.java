@@ -53,7 +53,7 @@ public class PolyglotModelTest {
 			GroupTreeView tview = new GroupTreeView(null, null, null, table);
 
 			 JTree tree = new JTree();
-			 tree.setModel(new GroupTreeModel(table, true, true));
+			 tree.setModel(new GroupTreeModel(table, true, true,true));
 			 GroupTreeCellRenderer render =new	 GroupTreeCellRenderer(null,null,null,true, "bla");
 			 render.setNullString(table.getTableID());
 			 tree.setCellRenderer(render);

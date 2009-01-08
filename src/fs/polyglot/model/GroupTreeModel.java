@@ -41,6 +41,10 @@ public class GroupTreeModel implements TreeModel, PolyglotTableModelListener {
 	 */
 	private boolean includeVariants = false;
 	/**
+	 * Should only incomplete groups be displayed?
+	 */
+	private boolean showOnlyIncomplete = false;
+	/**
 	 * A set of TreeModelListeners
 	 */
 	private HashSet<TreeModelListener> listeners = new HashSet<TreeModelListener>();
@@ -112,10 +116,11 @@ public class GroupTreeModel implements TreeModel, PolyglotTableModelListener {
 	 * and even variants.
 	 */
 	public GroupTreeModel(PolyglotTableModel table, boolean includeStrings,
-			boolean includeVariants) {
+			boolean includeVariants, boolean showOnlyIncomplete) {
 		this.table = table;
 		this.includeStrings = includeStrings;
 		this.includeVariants = includeVariants;
+		this.showOnlyIncomplete = showOnlyIncomplete;
 		if(table != null) {
 			table.addChangeListener(this);
 		}
@@ -148,7 +153,9 @@ public class GroupTreeModel implements TreeModel, PolyglotTableModelListener {
 							.extractGroup(obj.path, gid);
 					// This creates no doublets, since the treeObjectComparator
 					// recognizes identical paths:
-					children.add(new Group(cid, table.isCompleteGroup(cid)));
+					boolean isComplete = table.isCompleteGroup(cid);
+					if(!showOnlyIncomplete || !isComplete) 
+						children.add(new Group(cid, isComplete));
 				}
 			}
 			if (includeStrings) {
