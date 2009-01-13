@@ -97,19 +97,22 @@ public class StringTreeView extends JPanel implements ResourceDependent {
 	private TreeSelectionListener selectionListener = new TreeSelectionListener() {
 		@Override
 		public void valueChanged(TreeSelectionEvent e) {
-			TreePath selected = (TreePath) stringtree.getSelectionPath();
-			if(selected == null) {
-				delete.setEnabled(false);
-				editsingle.setEnabled(false);
+			TreePath[] selected = stringtree.getSelectionPaths();
+			if(selected == null || selected.length > 1) {
+				if(selected == null) {
+					delete.setEnabled(false);
+					editsingle.setEnabled(false);
+				}
 				add.setIcon(addStringIcon);
+				add.setToolTipText(loader.getString(sgroup + ".addstring", languageID));
 			}
 			else {
 				delete.setEnabled(true);
 				editsingle.setEnabled(true);
-				switch(((TreeObject)selected.getLastPathComponent()).getType()) {
-				case GROUP: add.setIcon(addStringIcon); break;
+				switch(((TreeObject)selected[0].getLastPathComponent()).getType()) {
+				case GROUP: add.setIcon(addStringIcon); add.setToolTipText(loader.getString(sgroup + ".addstring",languageID));break;
 				case POLYGLOTSTRING:  
-				case VARIANT: add.setIcon(addVariantIcon); break; 
+				case VARIANT: add.setIcon(addVariantIcon); add.setToolTipText(loader.getString(sgroup + ".addvariant",languageID));break; 
 				}
 			}
 		}
@@ -154,6 +157,8 @@ public class StringTreeView extends JPanel implements ResourceDependent {
 		}
 	};
 	
+	
+	
 	// CONSTRUCTOR *****************************************************************************
 	// *****************************************************************************************
 	
@@ -173,18 +178,25 @@ public class StringTreeView extends JPanel implements ResourceDependent {
 		stringtree.setCellRenderer(treerenderer);
 		ToolTipManager.sharedInstance().registerComponent(stringtree);
 		stringtree.getSelectionModel().setSelectionMode(
-				TreeSelectionModel.SINGLE_TREE_SELECTION);
+				TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
 		stringtree.getSelectionModel().addTreeSelectionListener(selectionListener);
 		selectionListener.valueChanged(null);
 		
-		//Init Buttons icons (those which do not depend on selection) and tooltips
+		//Init Buttons  (those which do not depend on selection) 
 		delete.setIcon(deleteIcon);
+		delete.setToolTipText(loader.getString(sgroup + ".delete", languageID));
 		editsingle.setIcon(editSingleIcon);
+		editsingle.setToolTipText(loader.getString(sgroup + ".editsingle", languageID));
 		editmultiple.setIcon(editMultipleIcon);
+		editmultiple.setToolTipText(loader.getString(sgroup + ".editmultiple", languageID));
 		viewString.setIcon(viewStringIcon);
+		viewString.setToolTipText(loader.getString(sgroup + ".togglestring", languageID));
 		viewVariant.setIcon(viewVariantIcon);
+		viewVariant.setToolTipText(loader.getString(sgroup + ".togglevariant", languageID));
 		toggleCut.setIcon(toggleCutIcon);
+		toggleCut.setToolTipText(loader.getString(sgroup + ".togglecut", languageID));
 		showOnlyIncomplete.setIcon(showNotOnlyIncompleteIcon);
+		showOnlyIncomplete.setToolTipText(loader.getString(sgroup + ".toggleincomplete", languageID));
 		
 		//Create Panels to contain everything
 		

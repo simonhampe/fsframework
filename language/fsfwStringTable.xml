@@ -193,5 +193,37 @@
 		<variant lang="en">Can't perform operation: %s</variant></polyglotstring>
 	<polyglotstring id="fs.global.perform" group="fs.global">
 		<variant lang="en">Performing operation: %s ...</variant></polyglotstring>
+	<polyglotstring id="fs.polyglot.StringTreeView.addstring" group="fs.polyglot.StringTreeView">
+		<variant lang="en">Add string ID</variant></polyglotstring>
+	<polyglotstring id="fs.polyglot.StringTreeView.addvariant"
+		group="fs.polyglot.StringTreeView">
+		<variant lang="en">Add variant</variant>
+	</polyglotstring>
+	<polyglotstring id="fs.polyglot.StringTreeView.delete" group="fs.polyglot.StringTreeView">
+		<variant lang="en">Delete selected item</variant></polyglotstring>
+	<polyglotstring id="fs.polyglot.StringTreeView.editsingle"
+		group="fs.polyglot.StringTreeView">
+		<variant lang="en">Edit single item</variant>
+	</polyglotstring>
+	<polyglotstring id="fs.polyglot.StringTreeView.editmultiple"
+		group="fs.polyglot.StringTreeView">
+		<variant lang="en">Advanced edit</variant>
+	</polyglotstring>
+	<polyglotstring id="fs.polyglot.StringTreeView.togglestring"
+		group="fs.polyglot.StringTreeView">
+		<variant lang="en">Toggle whether string IDs are displayed</variant>
+	</polyglotstring>
+	<polyglotstring id="fs.polyglot.StringTreeView.togglevariant"
+		group="fs.polyglot.StringTreeView">
+		<variant lang="en">Toggle whether variants are displayed</variant>
+	</polyglotstring>
+	<polyglotstring id="fs.polyglot.StringTreeView.togglecut"
+		group="fs.polyglot.StringTreeView">
+		<variant lang="en">Toggle whether complete group paths and string IDs or only the last part are displayed</variant>
+	</polyglotstring>
+	<polyglotstring id="fs.polyglot.StringTreeView.toggleincomplete"
+		group="fs.polyglot.StringTreeView">
+		<variant lang="en">Toggle whether only incomplete groups are displayed</variant>
+	</polyglotstring>
 
 </fsfw:polyglotstringtable>

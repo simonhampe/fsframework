@@ -32,6 +32,6 @@ public interface PolyglotTableModelListener {
 	 */
 	public void stringTableChanged(PolyglotTableModel source);
 
-	public void //TODO: Has to be finer grained, since otherwise jtrees will be collapsing all the time
+	//TODO: Has to be finer grained, since otherwise jtrees will be collapsing all the time
 	
 }
