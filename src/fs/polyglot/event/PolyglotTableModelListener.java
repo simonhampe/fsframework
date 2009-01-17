@@ -51,7 +51,5 @@ public interface PolyglotTableModelListener {
 	 * string table that cannot be reflected by one of the other methods
 	 */
 	public void stringTableChanged(PolyglotTableModel source);
-
-	//TODO: Has to be finer grained, since otherwise jtrees will be collapsing all the time
 	
 }

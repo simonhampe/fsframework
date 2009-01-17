@@ -122,7 +122,7 @@ public class GroupTreeModel implements TreeModel, PolyglotTableModelListener {
 		this.includeVariants = includeVariants;
 		this.showOnlyIncomplete = showOnlyIncomplete;
 		if(table != null) {
-			table.addChangeListener(this);
+			table.addListener(this);
 		}
 	}
 
@@ -328,15 +328,6 @@ public class GroupTreeModel implements TreeModel, PolyglotTableModelListener {
 		fireTreeStructureChanged();
 	}
 
-	/**
-	 * Notifies all TreeModelListeners of a structure change from the root node
-	 * down
-	 */
-	protected void fireTreeStructureChanged() {
-		Object[] o = { getRoot() };
-		for (TreeModelListener l : listeners)
-			l.treeStructureChanged(new TreeModelEvent(this, o));
-	}
 
 	// TABLEMODELLISTENER INTERFACE****************************
 	// ********************************************************
@@ -372,6 +363,42 @@ public class GroupTreeModel implements TreeModel, PolyglotTableModelListener {
 	@Override
 	public void tableIDChanged(PolyglotTableModel source) {
 		// Ignored
+	}
+
+	@Override
+	public void groupChanged(PolyglotTableModel source, Group group) {
+	}
+
+	@Override
+	public void groupInserted(PolyglotTableModel source, Group group) {
+	}
+
+	@Override
+	public void groupRemoved(PolyglotTableModel source, Group group) {
+	}
+
+	@Override
+	public void stringChanged(PolyglotTableModel source, PolyglotString string) {
+	}
+
+	@Override
+	public void stringInserted(PolyglotTableModel source, PolyglotString string) {
+	}
+
+	@Override
+	public void stringRemoved(PolyglotTableModel source, PolyglotString string) {
+	}
+
+	@Override
+	public void variantChanged(PolyglotTableModel source, Variant variant) {
+	}
+
+	@Override
+	public void variantInserted(PolyglotTableModel source, Variant variant) {
+	}
+
+	@Override
+	public void variantRemoved(PolyglotTableModel source, Variant variant) {
 	}
 
 }

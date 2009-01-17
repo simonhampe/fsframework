@@ -51,7 +51,7 @@ public class LanguageListModel extends AbstractListModel implements
 		this.table = table;
 		if (table != null) {
 			syncToTable();
-			table.addChangeListener(this);
+			table.addListener(this);
 		}
 	}
 
@@ -75,7 +75,7 @@ public class LanguageListModel extends AbstractListModel implements
 		// Attach to new one
 		this.table = table;
 		if (this.table != null)
-			this.table.addChangeListener(this);
+			this.table.addListener(this);
 	}
 
 	/**
@@ -156,6 +156,51 @@ public class LanguageListModel extends AbstractListModel implements
 	@Override
 	public void tableIDChanged(PolyglotTableModel source) {
 		// Ignored
+	}
+
+	@Override
+	public void groupChanged(PolyglotTableModel source, Group group) {
+		//Ignored
+	}
+
+	@Override
+	public void groupInserted(PolyglotTableModel source, Group group) {
+		//Ignored
+	}
+
+	@Override
+	public void groupRemoved(PolyglotTableModel source, Group group) {
+		//Ignored
+	}
+
+	@Override
+	public void stringChanged(PolyglotTableModel source, PolyglotString string) {
+		syncToTable();
+	}
+
+	@Override
+	public void stringInserted(PolyglotTableModel source, PolyglotString string) {
+		syncToTable();
+	}
+
+	@Override
+	public void stringRemoved(PolyglotTableModel source, PolyglotString string) {
+		syncToTable();
+	}
+
+	@Override
+	public void variantChanged(PolyglotTableModel source, Variant variant) {
+		syncToTable();
+	}
+
+	@Override
+	public void variantInserted(PolyglotTableModel source, Variant variant) {
+		syncToTable();
+	}
+
+	@Override
+	public void variantRemoved(PolyglotTableModel source, Variant variant) {
+		syncToTable();
 	}
 
 }
