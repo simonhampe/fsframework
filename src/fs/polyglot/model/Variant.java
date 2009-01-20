@@ -5,7 +5,8 @@ package fs.polyglot.model;
  * properties its path, its string UID, a Language object and the actual string.
  * As subtype of PolyglotString, it is always considered complete, since there
  * are no subnodes.
- * 
+ * Two variants are considered equal, if they have the same path, stringID and languageID. The value is irrelevant, since only the abstract position 
+ * in the string tree is considered.
  * @author Simon Hampe
  * 
  */
@@ -38,4 +39,17 @@ public class Variant extends PolyglotString {
 		return super.toString() + ": " + language.id;
 	}
 
+	@Override
+	public boolean equals(Object obj) {
+		if(!(obj.getClass() == this.getClass())) return false;
+		return super.equals(obj) && this.language.id.equals(((Variant)obj).language.id);
+	}
+
+	@Override
+	public int hashCode() {
+		return super.hashCode() ^ language.id.hashCode();
+	}
+
+	
+	
 }

@@ -4,7 +4,8 @@ package fs.polyglot.model;
  * This class implements a tree object which represents a polyglot string. In
  * addtion to its path, which is the path of its group, it has a string id. It
  * also has an attribute indicating whether it is a complete string, i.e. there
- * is a variant for each listed language.
+ * is a variant for each listed language.<br>
+ * Two objects of this class (or subclass) are considered equal, if they have the same path and stringID 
  * 
  * @author Simon Hampe
  * 
@@ -34,5 +35,18 @@ public class PolyglotString extends TreeObject {
 	public String toString() {
 		return path + ": " + stringID;
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if(!(obj.getClass() == this.getClass())) return false;
+		else return super.equals(obj) && stringID.equals(((PolyglotString)obj).stringID);
+	}
+
+	@Override
+	public int hashCode() {
+		return super.hashCode() ^ stringID.hashCode();
+	}
+	
+	
 
 }

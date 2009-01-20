@@ -2,6 +2,7 @@ package fs.polyglot.model;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.TreeSet;
 
@@ -49,6 +50,10 @@ public class GroupTreeModel implements TreeModel, PolyglotTableModelListener {
 	 */
 	private HashSet<TreeModelListener> listeners = new HashSet<TreeModelListener>();
 
+	//The actual data
+	private Group root = null;
+	private HashMap<TreeObject, ArrayList<TreeObject>> children = new HashMap<TreeObject, ArrayList<TreeObject>>();
+	
 	/**
 	 * Compares two TreeObjects primarily by alphabetical order of their paths.
 	 * Afterwards they are potentially compared by string id and language id.
@@ -125,6 +130,30 @@ public class GroupTreeModel implements TreeModel, PolyglotTableModelListener {
 			table.addListener(this);
 		}
 	}
+	
+	// SYNC METHOS ******************************************
+	// ******************************************************
+	
+	/**
+	 * This causes all data to be reloaded from the associated table. The difference to the status before is computed and 
+	 * appropriate listener calls are made
+	 */
+	public void syncData() {
+		HashMap<TreeObject,ArrayList<TreeObject>> newchildren = new HashMap<TreeObject, ArrayList<TreeObject>>();
+		//Generate root
+		root = new Group(null,table.isCompleteGroup(null));
+		addChildrenRecursively(root, newchildren);
+	}
+	
+	/**
+	 * Adds all children of o to the associated list newchildren.get(o) and calls itself for all children of 
+	 * o.
+	 */
+	protected void addChildrenRecursively(TreeObject o, HashMap<TreeObject, ArrayList<TreeObject>> newchildren) {
+		//TODO: continue
+	}
+	
+	
 
 	// HELPER METHODS ***************************************
 	// ******************************************************
@@ -188,10 +217,7 @@ public class GroupTreeModel implements TreeModel, PolyglotTableModelListener {
 	 * returns a list of all visible children. If not, this returns the empty
 	 * list
 	 */
-	public ArrayList<TreeObject> getChildren(Object ob) {
-		if (!isOfThisTree(ob))
-			return new ArrayList<TreeObject>();
-		TreeObject obj = (TreeObject) ob;
+	public ArrayList<TreeObject> getChildren(TreeObject obj) {
 		// Now the list of children depends on the type of this object
 		// No children for variants
 		if (obj.getType() == TreeObject.NodeType.VARIANT)
@@ -236,30 +262,30 @@ public class GroupTreeModel implements TreeModel, PolyglotTableModelListener {
 		return new ArrayList<TreeObject>(children);
 	}
 
-	/**
-	 * Returns true if there is a group in the associated table which has this
-	 * path or is a subgroup of this path (i.e. path must be a substring of a
-	 * group id). As null is considered the root node, it is always a valid path
-	 */
-	public boolean isValidTreePath(String path) {
-		if (table == null)
-			return false;
-		if (path == null)
-			return true;
-		for (String gid : table.getGroupList()) {
-			if (gid.startsWith(path))
-				return true;
-		}
-		return false;
-	}
-
-	/**
-	 * Returns true, if this object is an object of this tree model, i.e. it is
-	 * of type TreeObject and has a valid tree path.
-	 */
-	public boolean isOfThisTree(Object o) {
-		return (o != null && o instanceof TreeObject && isValidTreePath(((TreeObject) o).path));
-	}
+//	/**
+//	 * Returns true if there is a group in the associated table which has this
+//	 * path or is a subgroup of this path (i.e. path must be a substring of a
+//	 * group id). As null is considered the root node, it is always a valid path
+//	 */
+//	public boolean isValidTreePath(String path) {
+//		if (table == null)
+//			return false;
+//		if (path == null)
+//			return true;
+//		for (String gid : table.getGroupList()) {
+//			if (gid.startsWith(path))
+//				return true;
+//		}
+//		return false;
+//	}
+//
+//	/**
+//	 * Returns true, if this object is an object of this tree model, i.e. it is
+//	 * of type TreeObject and has a valid tree path.
+//	 */
+//	public boolean isOfThisTree(Object o) {
+//		return (o != null && o instanceof TreeObject && isValidTreePath(((TreeObject) o).path));
+//	}
 
 	// TREE MODEL INTERFACE **********************************
 	// *******************************************************
@@ -277,8 +303,8 @@ public class GroupTreeModel implements TreeModel, PolyglotTableModelListener {
 	@Override
 	public Object getChild(Object parent, int index) {
 		try {
-			return getChildren(parent).get(index);
-		} catch (ArrayIndexOutOfBoundsException e) {
+			return children.get(parent).get(index);
+		} catch (Exception e) {
 			return null;
 		}
 	}
@@ -289,7 +315,12 @@ public class GroupTreeModel implements TreeModel, PolyglotTableModelListener {
 	 */
 	@Override
 	public int getChildCount(Object parent) {
-		return isOfThisTree(parent) ? getChildren(parent).size() : -1;
+		try {
+			return children.get(parent).size();
+		}
+		catch(Exception e) {
+			return -1;
+		}
 	}
 
 	/**
@@ -298,7 +329,12 @@ public class GroupTreeModel implements TreeModel, PolyglotTableModelListener {
 	 */
 	@Override
 	public int getIndexOfChild(Object parent, Object child) {
-		return getChildren(parent).indexOf(child);
+		try {
+			return children.get(parent).indexOf(child);
+		}
+		catch(Exception e) {
+			return -1;
+		}
 	}
 
 	/**
@@ -306,7 +342,7 @@ public class GroupTreeModel implements TreeModel, PolyglotTableModelListener {
 	 */
 	@Override
 	public Object getRoot() {
-		return new Group(null, table.isCompleteGroup(null));
+		return root;
 	}
 
 	/**
@@ -314,7 +350,12 @@ public class GroupTreeModel implements TreeModel, PolyglotTableModelListener {
 	 */
 	@Override
 	public boolean isLeaf(Object node) {
-		return isOfThisTree(node) ? getChildren(node).size() == 0 : false;
+		try {
+			return children.get(node).size() == 0;
+		} 
+		catch(Exception e) {
+			return false;
+		}
 	}
 
 	@Override
@@ -323,13 +364,11 @@ public class GroupTreeModel implements TreeModel, PolyglotTableModelListener {
 	}
 
 	/**
-	 * Actually, a node value shouldn't be changed but via the associated table
-	 * model, but in any case this only notifies all potential
-	 * TreeModelListeners of a structure change
+	 * Ignored, since node values are only changed via the associated table model
 	 */
 	@Override
 	public void valueForPathChanged(TreePath path, Object newValue) {
-		fireTreeStructureChanged();
+		//Ignored
 	}
 
 

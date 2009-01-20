@@ -25,5 +25,7 @@ public class Group extends TreeObject {
 	public NodeType getType() {
 		return type;
 	}
+	
+	
 
 }
