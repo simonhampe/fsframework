@@ -141,8 +141,12 @@ public class GroupTreeModel implements TreeModel, PolyglotTableModelListener {
 	 * Sets whether polyglot strings should be included and notifies all listeners
 	 */
 	public void setIncludeStrings(boolean includeStrings) {
+		if(includeStrings == this.includeStrings) return;
 		this.includeStrings = includeStrings;
-		fireTreeStructureChanged();
+		//Notify
+		if(!includeStrings) {
+			for
+		}
 	}
 
 
@@ -332,6 +336,19 @@ public class GroupTreeModel implements TreeModel, PolyglotTableModelListener {
 	// TABLEMODELLISTENER INTERFACE****************************
 	// ********************************************************
 
+	public void fireTreeNodesChanged(TreeModelEvent e) {
+		for(TreeModelListener l : listeners) l.treeNodesChanged(e);
+	}
+	public void fireTreeNodesInserted(TreeModelEvent e) {
+		for(TreeModelListener l : listeners) l.treeNodesInserted(e);
+	}
+	public void fireTreeNodesRemoved(TreeModelEvent e) {
+		for(TreeModelListener l : listeners) l.treeNodesRemoved(e);
+	}
+	public void fireTreeStructureChanged(TreeModelEvent e) {
+		for(TreeModelListener l : listeners) l.treeStructureChanged(e);
+	}
+	
 	/**
 	 * Notifies, if variants are included
 	 */

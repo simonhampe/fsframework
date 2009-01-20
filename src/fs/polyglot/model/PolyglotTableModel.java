@@ -141,8 +141,9 @@ public class PolyglotTableModel extends PolyglotStringTable {
 	 */
 	@Override
 	public void addStringID(String stringID) {
+		boolean existedBefore = containsStringID(stringID);
 		super.addStringID(stringID);
-		wrapperListener.stringInserted(this, new PolyglotString(getGroupID(stringID),stringID, false));
+		if(!existedBefore) wrapperListener.stringInserted(this, new PolyglotString(getGroupID(stringID),stringID, false));
 	}
 
 	/*
@@ -181,10 +182,15 @@ public class PolyglotTableModel extends PolyglotStringTable {
 	@Override
 	public void putString(String stringID, String languageID, String groupID,
 			String value) {
-		boolean existedBefore = getUnformattedString(stringID, languageID) != null;
+		boolean variantExistedBefore = getUnformattedString(stringID, languageID) != null;
+		boolean stringExistedBefore = containsStringID(stringID);
 		super.putString(stringID, languageID, groupID, value);
-		if(existedBefore) wrapperListener.stringChanged(this, new PolyglotString(groupID,stringID,false));
-		else wrapperListener.stringInserted(this, new PolyglotString(groupID, stringID,false));
+		Variant v = new Variant(groupID,stringID,new Language(languageID,getLanguageDescription(languageID),false,0),value);
+		PolyglotString s = new PolyglotString(groupID,stringID,false);
+		if(!stringExistedBefore) wrapperListener.stringInserted(this, s);
+		else wrapperListener.stringChanged(this, s);
+		if(!variantExistedBefore) wrapperListener.variantInserted(this,v); 
+		else wrapperListener.variantChanged(this, v);
 	}
 
 	/*
@@ -195,10 +201,15 @@ public class PolyglotTableModel extends PolyglotStringTable {
 	 */
 	@Override
 	public void putString(String stringID, String languageID, String value) {
-		boolean existedBefore = getUnformattedString(stringID, languageID) != null;
+		boolean variantExistedBefore = getUnformattedString(stringID, languageID) != null;
+		boolean stringExistedBefore = containsStringID(stringID);
 		super.putString(stringID, languageID, value);
-		if(existedBefore) wrapperListener.stringChanged(this, new PolyglotString(getGroupID(stringID),stringID, false));
-		else wrapperListener.stringInserted(this, new PolyglotString(null, stringID,false));
+		Variant v = new Variant(null,stringID,new Language(languageID,getLanguageDescription(languageID),false,0),value);
+		PolyglotString s = new PolyglotString(null,stringID,false);
+		if(!stringExistedBefore) wrapperListener.stringInserted(this, s);
+		else wrapperListener.stringChanged(this, s);
+		if(!variantExistedBefore) wrapperListener.variantInserted(this,v); 
+		else wrapperListener.variantChanged(this, v);
 	}
 
 	/*
@@ -232,10 +243,15 @@ public class PolyglotTableModel extends PolyglotStringTable {
 	 */
 	@Override
 	public void setGroupID(String stringID, String groupID) {
+		if(!containsStringID(stringID)) return;
 		String oldGroupID = getGroupID(stringID);
 		super.setGroupID(stringID, groupID);
 		wrapperListener.stringRemoved(this, new PolyglotString(oldGroupID,stringID,false));
 		wrapperListener.stringInserted(this, new PolyglotString(groupID, stringID,false));
+		//Notify of inserted variants
+		for(String l : getSupportedLanguages(stringID)) {
+			wrapperListener.variantInserted(this, new Variant(groupID,stringID,new Language(l,getLanguageDescription(l),false,0),getUnformattedString(stringID, l)));
+		}
 	}
 
 	/*
