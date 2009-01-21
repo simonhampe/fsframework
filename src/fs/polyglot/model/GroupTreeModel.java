@@ -1,6 +1,7 @@
 package fs.polyglot.model;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -53,7 +54,6 @@ public class GroupTreeModel implements TreeModel, PolyglotTableModelListener {
 	//The actual data
 	private Group root = null; //The root node
 	private HashMap<TreeObject, ArrayList<TreeObject>> children = new HashMap<TreeObject, ArrayList<TreeObject>>(); //The tree data
-	private HashMap<TreeObject, TreeObject> parents = new HashMap<TreeObject, TreeObject>(); //Parent map, created for performance reasons
 	
 	/**
 	 * Compares two TreeObjects primarily by alphabetical order of their paths.
@@ -147,6 +147,12 @@ public class GroupTreeModel implements TreeModel, PolyglotTableModelListener {
 		//Generate tree
 		addChildrenRecursively(root, newchildren);
 		
+		//If this is the first time that this method is called, just call for a structure change
+		if(children.size() == 0) {
+			children = newchildren;
+			fireTreeStructureChanged(new TreeModelEvent(this,new TreePath(root)));
+		}
+		
 		//Compute difference and notify listeners
 		
 		ArrayList<TreeObject> removed = 	new ArrayList<TreeObject>();
@@ -187,14 +193,46 @@ public class GroupTreeModel implements TreeModel, PolyglotTableModelListener {
 			}
 		}
 		
-		//Copy data
+		//Calculate parent data and TreeModelEvents(if necessary)
+		HashMap<TreeObject, TreeObject> oldparents = new HashMap<TreeObject, TreeObject>();
+		HashMap<TreeObject, TreeObject> newparents = new HashMap<TreeObject, TreeObject>();
+		HashSet<TreeModelEvent> removeevents = new HashSet<TreeModelEvent>();
+		HashSet<TreeModelEvent> addevents = new HashSet<TreeModelEvent>();
+		if(removed.size() > 0) {
+			//Create parent list
+			for(TreeObject p : children.keySet()) for(TreeObject c : children.get(p)) oldparents.put(c,p);
+			//Create events
+			for(TreeObject o : removed) {
+				int[] index = new int[1];
+				index[0] = children.get(oldparents.get(o)).indexOf(o);
+				Object[] node = new Object[1];
+				node[0] = o;
+				removeevents.add(new TreeModelEvent(this, getNodePath(o, oldparents),index,node));
+			}
+		}
+			
+		if(added.size() > 0 || changed.size() > 0) {
+			//Create parent list
+			for(TreeObject p: newchildren.keySet()) for(TreeObject c : newchildren.get(p)) newparents.put(c,p);
+			//Create events
+			for(TreeObject o : added) {
+				int[] index = new int[1];
+				index[0] = children.get(newparents.get(o)).indexOf(o);
+				Object[] node = new Object[1];
+				node[0] = o;
+				addevents.add(new TreeModelEvent(this, getNodePath(o, newparents),index,node));
+			}
+		}
+		
+		//Copy data needed by Listeners
 		children = newchildren;
 		
 		//Notify
 		
-		for(TreeObject o : removed) fireTreeNodesRemoved(new TreeModelEvent(this, getNodePath(o)));
-		for(TreeObject o : added) fireTreeNodesInserted(new TreeModelEvent(this, getNodePath(o)));
-		for(TreeObject o : changed) fireTreeNodesChanged(new TreeModelEvent(this, getNodePath(o)));		
+		for(TreeModelEvent e : removeevents) fireTreeNodesRemoved(e);
+		for(TreeModelEvent e : addevents) fireTreeNodesInserted(e);
+		for(TreeObject o : changed) fireTreeNodesChanged(new TreeModelEvent(this, getNodePath(o,newparents)));
+		
 	}
 	
 	/**
@@ -270,7 +308,7 @@ public class GroupTreeModel implements TreeModel, PolyglotTableModelListener {
 	 * returns a list of all visible children. If not, this returns the empty
 	 * list
 	 */
-	public ArrayList<TreeObject> getChildren(TreeObject obj) {
+	protected ArrayList<TreeObject> getChildren(TreeObject obj) {
 		// Now the list of children depends on the type of this object
 		// No children for variants
 		if (obj.getType() == TreeObject.NodeType.VARIANT)
@@ -317,18 +355,20 @@ public class GroupTreeModel implements TreeModel, PolyglotTableModelListener {
 	
 	/**
 	 * Returns the tree path to the parent of the specified node (or null, if the node is
-	 * not part of this tree or root)
+	 * not part of this tree or has no parent) according to the given parent map
+	 * @param node The node for which the path should be obtained
+	 * @param parents A map which maps children to a parent
 	 */
-	public TreePath getNodePath(TreeObject node) {
+	protected TreePath getNodePath(TreeObject node, HashMap<TreeObject, TreeObject> parents) {
 		ArrayList<TreeObject> path = new ArrayList<TreeObject>();
 		
-		if(node.equals(root)  || !parents.keySet().contains(node)) return null;
+		if(!parents.keySet().contains(node)) return null;
 		
 		TreeObject p = parents.get(node);
 		do {
 			path.add(0, p);
 			p = parents.get(p);
-		} while( !root.equals(p));
+		} while( p != null);
 		return new TreePath(path.toArray());
 	}
 
