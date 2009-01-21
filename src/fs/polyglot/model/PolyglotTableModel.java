@@ -26,32 +26,6 @@ public class PolyglotTableModel extends PolyglotStringTable {
 	 * A list of registered listeners
 	 */
 	private HashSet<PolyglotTableModelListener> listeners = new HashSet<PolyglotTableModelListener>();
-	
-	/**
-	 * This listener notifies all registered listeners
-	 */
-	private PolyglotTableModelListener wrapperListener = new PolyglotTableModelListener() {
-		
-		@Override
-		public void languageListChanged(PolyglotTableModel source) {
-			for(PolyglotTableModelListener l : listeners) l.languageListChanged(source);
-		}
-
-		@Override
-		public void stringTableChanged(PolyglotTableModel source) {
-			for(PolyglotTableModelListener l : listeners) l.stringTableChanged(source);
-		}
-
-		@Override
-		public void tableDescriptionChanged(PolyglotTableModel source) {
-			for(PolyglotTableModelListener l : listeners) l.tableDescriptionChanged(source);
-		}
-
-		@Override
-		public void tableIDChanged(PolyglotTableModel source) {
-			for(PolyglotTableModelListener l : listeners) l.tableIDChanged(source);
-		}		
-	};
 
 	// CONSTRUCTORS *******************************************
 	// ********************************************************
@@ -93,7 +67,7 @@ public class PolyglotTableModel extends PolyglotStringTable {
 	@Override
 	public void addStringID(String stringID) {
 		super.addStringID(stringID);
-		wrapperListener.stringTableChanged(this);
+		fireStringTableChanged(this);
 	}
 
 	/*
@@ -105,10 +79,10 @@ public class PolyglotTableModel extends PolyglotStringTable {
 	public void configure(Node n) throws XMLWriteConfigurationException {
 		super.configure(n);
 		// All properties may have been changed,
-		wrapperListener.tableDescriptionChanged(this);
-		wrapperListener.tableIDChanged(this);
-		wrapperListener.languageListChanged(this);
-		wrapperListener.stringTableChanged(this);
+		fireTableDescriptionChanged(this);
+		fireTableIDChanged(this);
+		fireLanguageListChanged(this);
+		fireStringTableChanged(this);
 	}
 
 	/*
@@ -120,7 +94,7 @@ public class PolyglotTableModel extends PolyglotStringTable {
 	@Override
 	public void putLanguage(String languageID, String description) {
 		super.putLanguage(languageID, description);
-		wrapperListener.languageListChanged(this);
+		fireLanguageListChanged(this);
 	}
 
 	/*
@@ -133,7 +107,7 @@ public class PolyglotTableModel extends PolyglotStringTable {
 	public void putString(String stringID, String languageID, String groupID,
 			String value) {
 		super.putString(stringID, languageID, groupID, value);
-		wrapperListener.stringTableChanged(this);
+		fireStringTableChanged(this);
 	}
 
 	/*
@@ -145,7 +119,7 @@ public class PolyglotTableModel extends PolyglotStringTable {
 	@Override
 	public void putString(String stringID, String languageID, String value) {
 		super.putString(stringID, languageID, value);
-		wrapperListener.stringTableChanged(this);
+		fireStringTableChanged(this);
 	}
 
 	/*
@@ -156,7 +130,7 @@ public class PolyglotTableModel extends PolyglotStringTable {
 	@Override
 	public void removeID(String stringID) {
 		super.removeID(stringID);
-		wrapperListener.stringTableChanged(this);
+		fireStringTableChanged(this);
 	}
 
 	/*
@@ -167,7 +141,7 @@ public class PolyglotTableModel extends PolyglotStringTable {
 	@Override
 	public void removeLanguage(String languageID) {
 		super.removeLanguage(languageID);
-		wrapperListener.languageListChanged(this);
+		fireLanguageListChanged(this);
 	}
 
 	/*
@@ -179,7 +153,7 @@ public class PolyglotTableModel extends PolyglotStringTable {
 	@Override
 	public void setGroupID(String stringID, String groupID) {
 		super.setGroupID(stringID, groupID);
-		wrapperListener.stringTableChanged(this);
+		fireStringTableChanged(this);
 	}
 
 	/*
@@ -191,7 +165,7 @@ public class PolyglotTableModel extends PolyglotStringTable {
 	@Override
 	public void setLanguageDescription(String languageID, String description) {
 		super.setLanguageDescription(languageID, description);
-		wrapperListener.languageListChanged(this);
+		fireLanguageListChanged(this);
 	}
 
 	/*
@@ -202,7 +176,7 @@ public class PolyglotTableModel extends PolyglotStringTable {
 	@Override
 	public void setTableDescription(String desc) {
 		super.setTableDescription(desc);
-		wrapperListener.tableDescriptionChanged(this);
+		fireTableDescriptionChanged(this);
 	}
 
 	/*
@@ -213,7 +187,7 @@ public class PolyglotTableModel extends PolyglotStringTable {
 	@Override
 	public void setTableID(String tableID) {
 		super.setTableID(tableID);
-		wrapperListener.tableIDChanged(this);
+		fireTableIDChanged(this);
 	}
 
 	/*
@@ -224,9 +198,30 @@ public class PolyglotTableModel extends PolyglotStringTable {
 	@Override
 	public void renameString(String oldID, String newID) {
 		super.renameString(oldID, newID);
-		wrapperListener.stringTableChanged(this);
+		fireStringTableChanged(this);
 	}
 	
-	
+	// LISTENER METHODS ******************************************
+	// ***********************************************************
 
+	public void fireLanguageListChanged(PolyglotTableModel source) {
+		if(listeners != null)
+		for(PolyglotTableModelListener l : listeners) l.languageListChanged(source);
+	}
+
+	public void fireStringTableChanged(PolyglotTableModel source) {
+		if(listeners != null)
+		for(PolyglotTableModelListener l : listeners) l.stringTableChanged(source);
+	}
+
+	public void fireTableDescriptionChanged(PolyglotTableModel source) {
+		if(listeners != null)
+		for(PolyglotTableModelListener l : listeners) l.tableDescriptionChanged(source);
+	}
+
+	public void fireTableIDChanged(PolyglotTableModel source) {
+		if(listeners != null)
+		for(PolyglotTableModelListener l : listeners) l.tableIDChanged(source);
+	}		
+	
 }

@@ -187,9 +187,14 @@ public class GroupTreeModel implements TreeModel, PolyglotTableModelListener {
 			}
 		}
 		
+		//Copy data
+		children = newchildren;
+		
+		//Notify
+		
 		for(TreeObject o : removed) fireTreeNodesRemoved(new TreeModelEvent(this, getNodePath(o)));
 		for(TreeObject o : added) fireTreeNodesInserted(new TreeModelEvent(this, getNodePath(o)));
-		for(TreeObject o : changed) fireTreeNodesChanged(new TreeModelEvent(this, getNodePath(o)));
+		for(TreeObject o : changed) fireTreeNodesChanged(new TreeModelEvent(this, getNodePath(o)));		
 	}
 	
 	/**
