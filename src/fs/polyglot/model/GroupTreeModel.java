@@ -129,6 +129,7 @@ public class GroupTreeModel implements TreeModel, PolyglotTableModelListener {
 		this.showOnlyIncomplete = showOnlyIncomplete;
 		if(table != null) {
 			table.addListener(this);
+			syncData();
 		}
 	}
 	
@@ -148,10 +149,47 @@ public class GroupTreeModel implements TreeModel, PolyglotTableModelListener {
 		
 		//Compute difference and notify listeners
 		
+		ArrayList<TreeObject> removed = 	new ArrayList<TreeObject>();
+		ArrayList<TreeObject> added = 		new ArrayList<TreeObject>();
+		ArrayList<TreeObject> intersect = 	new ArrayList<TreeObject>(children.keySet());
+		ArrayList<TreeObject> changed = 	new ArrayList<TreeObject>();
 		//Compute removed nodes
 		for(TreeObject node : children.keySet()) {
-			if(!newchildren.containsKey(node)) fireTreeNodesRemoved(e)
+			if(!newchildren.containsKey(node)) removed.add(node);
 		}
+		//Compute added nodes
+		for(TreeObject node : newchildren.keySet()) {
+			if(!children.containsKey(node)) added.add(node);
+		}
+		//Make intersect the intersection of children and newchildren
+		intersect.removeAll(removed);
+		//Compute changed nodes
+		for(TreeObject newer : newchildren.keySet()) {
+			for(TreeObject older : intersect) {
+				if(newer.equals(older)) {
+					switch(newer.getType()) {
+					case VARIANT: 
+						if(!((Variant)newer).value.equals(((Variant)older).value)) {
+								changed.add(older);
+								break;
+						} 
+						//We don't break, if the value is equal since we still have to check isComplete
+					case POLYGLOTSTRING: 
+						if(((PolyglotString)newer).isComplete != ((PolyglotString)older).isComplete) changed.add(older);
+						break;
+					case GROUP: 
+						if(((Group)newer).isComplete != ((Group)older).isComplete) changed.add(older);
+						break;
+					default: //Will be considered changed 
+						changed.add(older);
+					}
+				}
+			}
+		}
+		
+		for(TreeObject o : removed) fireTreeNodesRemoved(new TreeModelEvent(this, getNodePath(o)));
+		for(TreeObject o : added) fireTreeNodesInserted(new TreeModelEvent(this, getNodePath(o)));
+		for(TreeObject o : changed) fireTreeNodesChanged(new TreeModelEvent(this, getNodePath(o)));
 	}
 	
 	/**
@@ -178,15 +216,12 @@ public class GroupTreeModel implements TreeModel, PolyglotTableModelListener {
 
 
 	/**
-	 * Sets whether polyglot strings should be included and notifies all listeners
+	 * Sets whether polyglot strings should be included and potentially resyncs
 	 */
 	public void setIncludeStrings(boolean includeStrings) {
 		if(includeStrings == this.includeStrings) return;
 		this.includeStrings = includeStrings;
-		//Notify
-		if(!includeStrings) {
-			for
-		}
+		syncData();
 	}
 
 
@@ -199,11 +234,12 @@ public class GroupTreeModel implements TreeModel, PolyglotTableModelListener {
 	}
 
 	/**
-	 * Sets whether variants should be included and notifies all listener
+	 * Sets whether variants should be included and potentially resyncs
 	 */
 	public void setIncludeVariants(boolean includeVariants) {
+		if(includeVariants == this.includeVariants) return;
 		this.includeVariants = includeVariants;
-		fireTreeStructureChanged();
+		syncData();
 	}
 
 	/**
@@ -217,8 +253,9 @@ public class GroupTreeModel implements TreeModel, PolyglotTableModelListener {
 	 * Sets whether only incomplete groups are included and notifies all listeners
 	 */
 	public void setShowOnlyIncomplete(boolean showOnlyIncomplete) {
+		if(this.showOnlyIncomplete == showOnlyIncomplete) return;
 		this.showOnlyIncomplete = showOnlyIncomplete;
-		fireTreeStructureChanged();
+		syncData();
 	}
 
 
@@ -274,16 +311,20 @@ public class GroupTreeModel implements TreeModel, PolyglotTableModelListener {
 	}
 	
 	/**
-	 * Returns the tree path to the specified node (or null, if the node is
-	 * not part of this tree)
+	 * Returns the tree path to the parent of the specified node (or null, if the node is
+	 * not part of this tree or root)
 	 */
 	public TreePath getNodePath(TreeObject node) {
 		ArrayList<TreeObject> path = new ArrayList<TreeObject>();
 		
-		if(node.equals(root)) return new TreePath(root);
-		if(!parents.keySet().contains(node)) return null;
+		if(node.equals(root)  || !parents.keySet().contains(node)) return null;
 		
 		TreeObject p = parents.get(node);
+		do {
+			path.add(0, p);
+			p = parents.get(p);
+		} while( !root.equals(p));
+		return new TreePath(path.toArray());
 	}
 
 //	/**
@@ -418,7 +459,7 @@ public class GroupTreeModel implements TreeModel, PolyglotTableModelListener {
 	@Override
 	public void languageListChanged(PolyglotTableModel source) {
 		if (includeVariants)
-			fireTreeStructureChanged();
+			syncData();
 	}
 
 	/**
@@ -426,7 +467,7 @@ public class GroupTreeModel implements TreeModel, PolyglotTableModelListener {
 	 */
 	@Override
 	public void stringTableChanged(PolyglotTableModel source) {
-		fireTreeStructureChanged();
+		syncData();
 	}
 
 	/**
@@ -443,42 +484,6 @@ public class GroupTreeModel implements TreeModel, PolyglotTableModelListener {
 	@Override
 	public void tableIDChanged(PolyglotTableModel source) {
 		// Ignored
-	}
-
-	@Override
-	public void groupChanged(PolyglotTableModel source, Group group) {
-	}
-
-	@Override
-	public void groupInserted(PolyglotTableModel source, Group group) {
-	}
-
-	@Override
-	public void groupRemoved(PolyglotTableModel source, Group group) {
-	}
-
-	@Override
-	public void stringChanged(PolyglotTableModel source, PolyglotString string) {
-	}
-
-	@Override
-	public void stringInserted(PolyglotTableModel source, PolyglotString string) {
-	}
-
-	@Override
-	public void stringRemoved(PolyglotTableModel source, PolyglotString string) {
-	}
-
-	@Override
-	public void variantChanged(PolyglotTableModel source, Variant variant) {
-	}
-
-	@Override
-	public void variantInserted(PolyglotTableModel source, Variant variant) {
-	}
-
-	@Override
-	public void variantRemoved(PolyglotTableModel source, Variant variant) {
 	}
 
 }

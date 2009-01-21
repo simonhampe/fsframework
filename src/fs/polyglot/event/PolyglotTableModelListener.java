@@ -1,13 +1,10 @@
 package fs.polyglot.event;
 
-import fs.polyglot.model.Group;
-import fs.polyglot.model.PolyglotString;
 import fs.polyglot.model.PolyglotTableModel;
-import fs.polyglot.model.Variant;
 
 /**
- * Listens to all possible changes in a PolyglotTableModel. Most of the listener methods correspond to the methods of 
- * TreeModelListener.
+ * Listens to all possible changes in a PolyglotTableModel. This is very coarse-grained, since it would be a serious performance impact to calculate 
+ * the exact changes
  */
 public interface PolyglotTableModelListener {
 
@@ -20,25 +17,6 @@ public interface PolyglotTableModelListener {
 	 * This method is called when the table description has been changed
 	 */
 	public void tableDescriptionChanged(PolyglotTableModel source);
-
-	
-	public void groupChanged(PolyglotTableModel source, Group group);
-	
-	public void groupInserted(PolyglotTableModel source, Group group);
-	
-	public void groupRemoved(PolyglotTableModel source, Group group);
-	
-	public void stringChanged(PolyglotTableModel source, PolyglotString string);
-	
-	public void stringInserted(PolyglotTableModel source, PolyglotString string);
-	
-	public void stringRemoved(PolyglotTableModel source, PolyglotString string);
-	
-	public void variantChanged(PolyglotTableModel source, Variant variant);
-	
-	public void variantInserted(PolyglotTableModel source, Variant variant);
-	
-	public void variantRemoved(PolyglotTableModel source, Variant variant);
 	
 	/**
 	 * This method is called, when any changes were committed to the language
