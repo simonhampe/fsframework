@@ -51,8 +51,9 @@ public class GroupTreeModel implements TreeModel, PolyglotTableModelListener {
 	private HashSet<TreeModelListener> listeners = new HashSet<TreeModelListener>();
 
 	//The actual data
-	private Group root = null;
-	private HashMap<TreeObject, ArrayList<TreeObject>> children = new HashMap<TreeObject, ArrayList<TreeObject>>();
+	private Group root = null; //The root node
+	private HashMap<TreeObject, ArrayList<TreeObject>> children = new HashMap<TreeObject, ArrayList<TreeObject>>(); //The tree data
+	private HashMap<TreeObject, TreeObject> parents = new HashMap<TreeObject, TreeObject>(); //Parent map, created for performance reasons
 	
 	/**
 	 * Compares two TreeObjects primarily by alphabetical order of their paths.
@@ -142,7 +143,15 @@ public class GroupTreeModel implements TreeModel, PolyglotTableModelListener {
 		HashMap<TreeObject,ArrayList<TreeObject>> newchildren = new HashMap<TreeObject, ArrayList<TreeObject>>();
 		//Generate root
 		root = new Group(null,table.isCompleteGroup(null));
+		//Generate tree
 		addChildrenRecursively(root, newchildren);
+		
+		//Compute difference and notify listeners
+		
+		//Compute removed nodes
+		for(TreeObject node : children.keySet()) {
+			if(!newchildren.containsKey(node)) fireTreeNodesRemoved(e)
+		}
 	}
 	
 	/**
@@ -150,7 +159,9 @@ public class GroupTreeModel implements TreeModel, PolyglotTableModelListener {
 	 * o.
 	 */
 	protected void addChildrenRecursively(TreeObject o, HashMap<TreeObject, ArrayList<TreeObject>> newchildren) {
-		//TODO: continue
+		ArrayList<TreeObject> clist = getChildren(o);
+		newchildren.put(o, clist);
+		for(TreeObject c : clist) addChildrenRecursively(c, newchildren);
 	}
 	
 	
@@ -260,6 +271,19 @@ public class GroupTreeModel implements TreeModel, PolyglotTableModelListener {
 		}
 
 		return new ArrayList<TreeObject>(children);
+	}
+	
+	/**
+	 * Returns the tree path to the specified node (or null, if the node is
+	 * not part of this tree)
+	 */
+	public TreePath getNodePath(TreeObject node) {
+		ArrayList<TreeObject> path = new ArrayList<TreeObject>();
+		
+		if(node.equals(root)) return new TreePath(root);
+		if(!parents.keySet().contains(node)) return null;
+		
+		TreeObject p = parents.get(node);
 	}
 
 //	/**
