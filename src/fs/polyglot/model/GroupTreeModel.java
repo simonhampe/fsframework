@@ -217,7 +217,11 @@ public class GroupTreeModel implements TreeModel, PolyglotTableModelListener {
 			//Create events
 			for(TreeObject o : added) {
 				int[] index = new int[1];
-				index[0] = children.get(newparents.get(o)).indexOf(o);
+				try {
+				index[0] = newchildren.get(newparents.get(o)).indexOf(o);
+				} catch(NullPointerException ne) {
+					System.out.println("");
+				}
 				Object[] node = new Object[1];
 				node[0] = o;
 				addevents.add(new TreeModelEvent(this, getNodePath(o, newparents),index,node));
