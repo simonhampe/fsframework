@@ -201,8 +201,8 @@ public class GroupTreeModel implements TreeModel, PolyglotTableModelListener {
 		if(removed.size() > 0) {
 			//Create parent list
 			for(TreeObject p : children.keySet()) for(TreeObject c : children.get(p)) oldparents.put(c,p);
-			//Create events
-			for(TreeObject o : removed) {
+			//Create events, removed nodes are summarized by parent nodes
+			for(TreeObject o : children.keySet()) {
 				int[] index = new int[1];
 				index[0] = children.get(oldparents.get(o)).indexOf(o);
 				Object[] node = new Object[1];
