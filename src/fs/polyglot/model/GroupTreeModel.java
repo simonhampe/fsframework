@@ -1,7 +1,6 @@
 package fs.polyglot.model;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -11,8 +10,6 @@ import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
-
-import sun.reflect.generics.tree.Tree;
 
 import fs.polyglot.event.PolyglotTableModelListener;
 import fs.xml.PolyglotStringTable;
@@ -157,7 +154,7 @@ public class GroupTreeModel implements TreeModel, PolyglotTableModelListener {
 		
 		//Create parent map 
 		HashMap<TreeObject,TreeObject> newparents = new HashMap<TreeObject, TreeObject>();
-		for(TreeObject p : newchildren.keySet()) for(TreeObject c : children.get(p)) newparents.put(c,p);
+		for(TreeObject p : newchildren.keySet()) for(TreeObject c : newchildren.get(p)) newparents.put(c,p);
 		
 		
 		//Compute difference and notify listeners
@@ -229,99 +226,25 @@ public class GroupTreeModel implements TreeModel, PolyglotTableModelListener {
 					cIndex[i] = chaIndex.get(i); cObject[i] = changed.get(i);
 				}
 				TreePath newpath = getNodePath(p, newparents);
-				inserts.add(new TreeModelEvent(this,getNodePath(p, newparents),iIndex, iObject));
-				removals.add(new TreeModelEvent(this,newpath,rIndex,rObject));
-				changes.add(new TreeModelEvent(this,newpath,cIndex,cObject));
+				if(inserted.size() > 0) inserts.add(new TreeModelEvent(this,getNodePath(p, newparents),iIndex, iObject));
+				if(removed.size() > 0) removals.add(new TreeModelEvent(this,newpath,rIndex,rObject));
+				if(changed.size() > 0) changes.add(new TreeModelEvent(this,newpath,cIndex,cObject));
 			}
 		}
 		
+		//Copy data
+		children = newchildren;
+		
 		//Now fire events
-		for(TreeModelEvent e : removals) fireTreeNodesRemoved(e);
-		for(TreeModelEvent e : inserts) fireTreeNodesInserted(e);
-		for(TreeModelEvent e : changes) fireTreeNodesChanged(e);
-		
-//		ArrayList<TreeObject> removed = 	new ArrayList<TreeObject>();
-//		ArrayList<TreeObject> added = 		new ArrayList<TreeObject>();
-//		ArrayList<TreeObject> intersect = 	new ArrayList<TreeObject>(children.keySet());
-//		ArrayList<TreeObject> changed = 	new ArrayList<TreeObject>();
-//		//Compute removed nodes
-//		for(TreeObject node : children.keySet()) {
-//			if(!newchildren.containsKey(node)) removed.add(node);
-//		}
-//		//Compute added nodes
-//		for(TreeObject node : newchildren.keySet()) {
-//			if(!children.containsKey(node)) added.add(node);
-//		}
-//		//Make intersect the intersection of children and newchildren
-//		intersect.removeAll(removed);
-//		//Compute changed nodes
-//		for(TreeObject newer : newchildren.keySet()) {
-//			for(TreeObject older : intersect) {
-//				if(newer.equals(older)) {
-//					switch(newer.getType()) {
-//					case VARIANT: 
-//						if(!((Variant)newer).value.equals(((Variant)older).value)) {
-//								changed.add(older);
-//								break;
-//						} 
-//						//We don't break, if the value is equal since we still have to check isComplete
-//					case POLYGLOTSTRING: 
-//						if(((PolyglotString)newer).isComplete != ((PolyglotString)older).isComplete) changed.add(older);
-//						break;
-//					case GROUP: 
-//						if(((Group)newer).isComplete != ((Group)older).isComplete) changed.add(older);
-//						break;
-//					default: //Will be considered changed 
-//						changed.add(older);
-//					}
-//				}
-//			}
-//		}
-//		
-//		//Calculate parent data and TreeModelEvents(if necessary)
-//		HashMap<TreeObject, TreeObject> oldparents = new HashMap<TreeObject, TreeObject>();
-//		HashMap<TreeObject, TreeObject> newparents = new HashMap<TreeObject, TreeObject>();
-//		HashSet<TreeModelEvent> removeevents = new HashSet<TreeModelEvent>();
-//		HashSet<TreeModelEvent> addevents = new HashSet<TreeModelEvent>();
-//		if(removed.size() > 0) {
-//			//Create parent list
-//			for(TreeObject p : children.keySet()) for(TreeObject c : children.get(p)) oldparents.put(c,p);
-//			//Create events, removed nodes are summarized by parent nodes
-//			for(TreeObject o : children.keySet()) {
-//				int[] index = new int[1];
-//				index[0] = children.get(oldparents.get(o)).indexOf(o);
-//				Object[] node = new Object[1];
-//				node[0] = o;
-//				removeevents.add(new TreeModelEvent(this, getNodePath(o, oldparents),index,node));
-//			}
-//		}
-//			
-//		if(added.size() > 0 || changed.size() > 0) {
-//			//Create parent list
-//			for(TreeObject p: newchildren.keySet()) for(TreeObject c : newchildren.get(p)) newparents.put(c,p);
-//			//Create events
-//			for(TreeObject o : added) {
-//				int[] index = new int[1];
-//				try {
-//				index[0] = newchildren.get(newparents.get(o)).indexOf(o);
-//				} catch(NullPointerException ne) {
-//					System.out.println("");
-//				}
-//				Object[] node = new Object[1];
-//				node[0] = o;
-//				addevents.add(new TreeModelEvent(this, getNodePath(o, newparents),index,node));
-//			}
-//		}
-//		
-//		//Copy data needed by Listeners
-//		children = newchildren;
-//		
-//		//Notify
-//		
-//		for(TreeModelEvent e : removeevents) fireTreeNodesRemoved(e);
-//		for(TreeModelEvent e : addevents) fireTreeNodesInserted(e);
-//		for(TreeObject o : changed) fireTreeNodesChanged(new TreeModelEvent(this, getNodePath(o,newparents)));
-		
+		for(TreeModelEvent e : removals) {
+			fireTreeNodesRemoved(e);
+		}
+		for(TreeModelEvent e : inserts) {
+			fireTreeNodesInserted(e);
+		}
+		for(TreeModelEvent e : changes) {
+			fireTreeNodesChanged(e);
+		}
 	}
 	
 	/**
