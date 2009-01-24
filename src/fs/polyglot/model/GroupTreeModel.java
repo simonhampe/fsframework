@@ -156,9 +156,7 @@ public class GroupTreeModel implements TreeModel, PolyglotTableModelListener {
 		}
 		
 		//Create parent map 
-		HashMap<TreeObject,TreeObject> oldparents  = new HashMap<TreeObject, TreeObject>();
 		HashMap<TreeObject,TreeObject> newparents = new HashMap<TreeObject, TreeObject>();
-		for(TreeObject p : children.keySet()) for(TreeObject c : children.get(p)) oldparents.put(c, p);
 		for(TreeObject p : newchildren.keySet()) for(TreeObject c : children.get(p)) newparents.put(c,p);
 		
 		
@@ -169,7 +167,7 @@ public class GroupTreeModel implements TreeModel, PolyglotTableModelListener {
 		HashSet<TreeModelEvent> changes = new HashSet<TreeModelEvent>();
 		
 		//We compute for each element in newchildren which of its children has been removed, added or changed
-		//This works, since every 'old' child is always a child (or descendant) of a still existing node.
+		//This works, since every 'old' child is always a child (or descendant) of a still existing node (since root always exists).
 		for(TreeObject p : newchildren.keySet()) {
 			//We only have to compute this, if the node p still exists, since otherwise a corresponding removal event has already
 			//been generated
@@ -220,11 +218,27 @@ public class GroupTreeModel implements TreeModel, PolyglotTableModelListener {
 				for(int i = 0; i < iIndex.length; i++) {
 					iIndex[i] = insIndex.get(i); iObject[i] = inserted.get(i);
 				}
-				//TODO: Does not work. Have to include p in node path. 
+				int[] rIndex = new int[remIndex.size()];
+				Object[] rObject = new Object[removed.size()];
+				for(int i = 0; i < rIndex.length; i++) {
+					rIndex[i] = remIndex.get(i); rObject[i] = removed.get(i);
+				}
+				int[] cIndex = new int[chaIndex.size()];
+				Object[] cObject = new Object[changed.size()];
+				for(int i = 0; i < cIndex.length; i++) {
+					cIndex[i] = chaIndex.get(i); cObject[i] = changed.get(i);
+				}
+				TreePath newpath = getNodePath(p, newparents);
 				inserts.add(new TreeModelEvent(this,getNodePath(p, newparents),iIndex, iObject));
-				
+				removals.add(new TreeModelEvent(this,newpath,rIndex,rObject));
+				changes.add(new TreeModelEvent(this,newpath,cIndex,cObject));
 			}
 		}
+		
+		//Now fire events
+		for(TreeModelEvent e : removals) fireTreeNodesRemoved(e);
+		for(TreeModelEvent e : inserts) fireTreeNodesInserted(e);
+		for(TreeModelEvent e : changes) fireTreeNodesChanged(e);
 		
 //		ArrayList<TreeObject> removed = 	new ArrayList<TreeObject>();
 //		ArrayList<TreeObject> added = 		new ArrayList<TreeObject>();
@@ -429,17 +443,19 @@ public class GroupTreeModel implements TreeModel, PolyglotTableModelListener {
 	}
 	
 	/**
-	 * Returns the tree path to the parent of the specified node (or null, if the node is
-	 * not part of this tree or has no parent) according to the given parent map
+	 * Returns the tree path to the specified node (or null, if the node is
+	 * not part of this tree) according to the given parent map
 	 * @param node The node for which the path should be obtained
 	 * @param parents A map which maps children to a parent
 	 */
 	protected TreePath getNodePath(TreeObject node, HashMap<TreeObject, TreeObject> parents) {
 		ArrayList<TreeObject> path = new ArrayList<TreeObject>();
 		
+		if(node == null) return null;
+		if(root.equals(node)) return new TreePath(root);
 		if(!parents.keySet().contains(node)) return null;
-		
-		TreeObject p = parents.get(node);
+				
+		TreeObject p = node;
 		do {
 			path.add(0, p);
 			p = parents.get(p);
