@@ -72,7 +72,7 @@ public class UndoableGroupEdit extends AbstractUndoableEdit {
 			//If subgroups are not affected or the string's group IS the oldvalue, the new group is just newValue
 			if(!affectSubGroups || (oldValue == null? gid == null : oldValue.equals(gid))) groupsForRedo.add(newValue);
 			//If newValue == null, replace oldValue + ".", otherwise oldValue
-			else groupsForRedo.add((gid != null ? gid : "").replaceFirst((oldValue == null ? "" : oldValue) + (newValue == null? "." : ""),newValue == null? "" : newValue));
+			else groupsForRedo.add((gid != null ? gid : "").replaceFirst((oldValue == null ? "" : oldValue) + (newValue == null? "." : ""),newValue == null? "" : newValue + (oldValue == null? "." : "") ));
 		}
 	}
 
