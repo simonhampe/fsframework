@@ -39,11 +39,25 @@ public class StringEditorConfigurator extends FrameworkDialog {
 	
 	private JButton okButton = new JButton();
 	private JButton cancelButton = new JButton();
+	private JCheckBox incomplete = 	new JCheckBox();
+	private JCheckBox selected = 	new JCheckBox();
+	private JCheckBox onlylanguages = 	new JCheckBox();
+	private JCheckBox excludelanguages = new JCheckBox();
+	private JList listOnly = new JList();
+	private JList listExclude = new JList();
 	
 	private Action disposalListener = new AbstractAction() {
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			if(e.getSource() == )
+			if(e.getSource() == okButton) {
+				//Copy configuration data
+				StringEditorConfiguration config = new StringEditorConfiguration();
+				config.editOnlyIncomplete = incomplete.isSelected();
+				config.editOnlySelected = selected.isSelected();
+				
+				
+				fireDataReady(config);
+			}
 		}
 	};
 	
@@ -61,18 +75,18 @@ public class StringEditorConfigurator extends FrameworkDialog {
 		
 		// Init GUI
 		
-		JCheckBox incomplete = 	new JCheckBox(loader.getString(sgroup + ".incomplete", languageID));
-		JCheckBox selected = 	new JCheckBox(loader.getString(sgroup + ".selected", languageID));
-		JCheckBox onlylanguages = 	new JCheckBox(loader.getString(sgroup + ".onlytheselanguages", languageID));
-		JCheckBox excludelanguages = new JCheckBox(loader.getString(sgroup + ".excludelanguages",languageID));
+		incomplete = 	new JCheckBox(loader.getString(sgroup + ".incomplete", languageID));
+		selected = 	new JCheckBox(loader.getString(sgroup + ".selected", languageID));
+		onlylanguages = 	new JCheckBox(loader.getString(sgroup + ".onlytheselanguages", languageID));
+		excludelanguages = new JCheckBox(loader.getString(sgroup + ".excludelanguages",languageID));
 		Vector<Language> languages = new Vector<Language>();
 		for(String id : table.getUsedLanguages()) {
 			String desc = table.getLanguageDescription(id);
 			languages.add(new Language(id,desc,desc == null, table.getSupport(id)));
 		}
-		JList listOnly = new JList(languages);
+		listOnly = new JList(languages);
 		listOnly.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
-		JList listExclude = new JList(languages);
+		listExclude = new JList(languages);
 		listExclude.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
 		okButton = new JButton(loader.getString("fs.global.ok", languageID));
 		cancelButton = new JButton(loader.getString("fs.global.cancel", languageID));
