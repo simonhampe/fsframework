@@ -9,8 +9,10 @@ import java.util.Arrays;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JToggleButton;
 import javax.swing.JTree;
 import javax.swing.ToolTipManager;
 import javax.swing.event.TreeSelectionEvent;
@@ -47,6 +49,11 @@ public class StringTreeView extends JPanel implements ResourceDependent {
 	private JButton delete = new JButton();
 	private JButton editsingle = new JButton();
 	private JButton editmultiple = new JButton();
+	private JToggleButton editSelected = new JToggleButton();
+	private JToggleButton editIncomplete = new JToggleButton();
+	private JToggleButton onlyLanguages = new JToggleButton();
+	private JToggleButton excludeLanguages = new JToggleButton();
+	private JList languageList = new JList();
 	private JButton viewString = new JButton();
 	private JButton viewVariant = new JButton();
 	private JButton toggleCut = new JButton();

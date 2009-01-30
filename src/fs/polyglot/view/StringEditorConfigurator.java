@@ -4,20 +4,21 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
+import java.util.HashSet;
 import java.util.Vector;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
-import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
-import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 import javax.swing.border.EtchedBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import fs.event.DataRetrievalListener;
 import fs.gui.FrameworkDialog;
@@ -35,6 +36,11 @@ import fs.xml.ResourceReference;
  */
 public class StringEditorConfigurator extends FrameworkDialog {
 
+	/**
+	 * compiler-generated version id
+	 */
+	private static final long serialVersionUID = 2195434728552582293L;
+
 	private final static String sgroup = "fs.polyglot.StringEditorConfigurator";
 	
 	private JButton okButton = new JButton();
@@ -46,7 +52,12 @@ public class StringEditorConfigurator extends FrameworkDialog {
 	private JList listOnly = new JList();
 	private JList listExclude = new JList();
 	
+	//Listens for OK and Cancel
 	private Action disposalListener = new AbstractAction() {
+		/**
+		 * compiler-generated version id
+		 */
+		private static final long serialVersionUID = 3732305715709762289L;
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			if(e.getSource() == okButton) {
@@ -54,12 +65,47 @@ public class StringEditorConfigurator extends FrameworkDialog {
 				StringEditorConfiguration config = new StringEditorConfiguration();
 				config.editOnlyIncomplete = incomplete.isSelected();
 				config.editOnlySelected = selected.isSelected();
-				
-				
+				//Read out selected ids
+				HashSet<String> onlySelected = new HashSet<String>();
+				for(Object o : listOnly.getSelectedValues()) onlySelected.add(((Language)o).id);
+				HashSet<String> excludeSelected = new HashSet<String>();
+				for(Object o : listExclude.getSelectedValues()) excludeSelected.add(((Language)o).id);
+				config.excludeTheseLanguages = excludelanguages.isSelected() ? excludeSelected: null;
+				config.onlyTheseLanguages = excludelanguages.isSelected() ? null : 
+											onlylanguages.isSelected() ? onlySelected : null;
 				fireDataReady(config);
+			}
+			dispose();
+		}
+	};
+	
+	//Listens for checkbox changes of exclude and only - languages
+	private ChangeListener selectListener = new ChangeListener() {
+		@Override
+		public void stateChanged(ChangeEvent e) {
+			if(e.getSource() == onlylanguages ) {
+				if(onlylanguages.isSelected()) {
+					excludelanguages.setSelected(false);
+					listOnly.setEnabled(true);
+				}
+				else {
+					listOnly.setEnabled(false);
+				}
+			}
+			if(e.getSource() == excludelanguages ) {
+				if(excludelanguages.isSelected()) {
+					onlylanguages.setSelected(false);
+					listExclude.setEnabled(true);
+				}
+				else {
+					listExclude.setEnabled(false);
+				}
 			}
 		}
 	};
+	
+	// CONSTRUCTOR *********************************************
+	// *********************************************************
 	
 	/**
 	 * Creates a StringEditorConfigurator dialog.
@@ -86,8 +132,10 @@ public class StringEditorConfigurator extends FrameworkDialog {
 		}
 		listOnly = new JList(languages);
 		listOnly.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
+		listOnly.setEnabled(false);
 		listExclude = new JList(languages);
 		listExclude.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
+		listExclude.setEnabled(false);
 		okButton = new JButton(loader.getString("fs.global.ok", languageID));
 		cancelButton = new JButton(loader.getString("fs.global.cancel", languageID));
 		
@@ -126,6 +174,9 @@ public class StringEditorConfigurator extends FrameworkDialog {
 		getRootPane().getActionMap().put("dispose", disposalListener);
 		okButton.addActionListener(disposalListener);
 		cancelButton.addActionListener(disposalListener);
+		
+		excludelanguages.addChangeListener(selectListener);
+		onlylanguages.addChangeListener(selectListener);
 		
 	}
 

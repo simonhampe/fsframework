@@ -19,8 +19,8 @@ import fs.xml.*;
  * - An iconified JButton (The appearance can be changed), that takes the form
  * of a close button. Automatic removal of the associated tab can be
  * (de)activated. <br>
- * Both components can be accessed and messed around with freely (i.e.: they are
- * public), all internal methods are written in a robust way, so no exceptions
+ * Both components can be accessed and messed around with freely (i.e.: they can be obtained
+ * via public methods), all internal methods are written in a robust way, so no exceptions
  * will be caused by possible changes (e.g. one component is set to null).
  * However, unexpected behavior is of course possible. Without any external
  * changes, the standard behavior is the following: The label changes into a
