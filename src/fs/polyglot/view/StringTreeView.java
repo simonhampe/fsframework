@@ -69,6 +69,10 @@ public class StringTreeView extends JPanel implements ResourceDependent {
 	private ImageIcon deleteIcon;
 	private ImageIcon editSingleIcon;
 	private ImageIcon editMultipleIcon;
+	private ImageIcon editSelectedIcon;
+	private ImageIcon editIncompleteIcon;
+	private ImageIcon onlyLanguagesIcon;
+	private ImageIcon excludeLanguagesIcon;
 	private ImageIcon viewStringIcon;
 	private ImageIcon viewNoStringIcon;
 	private ImageIcon viewVariantIcon;
@@ -259,6 +263,10 @@ public class StringTreeView extends JPanel implements ResourceDependent {
 		deleteIcon = new ImageIcon(reference.getFullResourcePath(this, path + "delete.png"));
 		editSingleIcon = new ImageIcon(reference.getFullResourcePath(this, path + "edit.png"));
 		editMultipleIcon = new ImageIcon(reference.getFullResourcePath(this, path + "editmultiple.png"));
+		editIncompleteIcon = new ImageIcon(reference.getFullResourcePath(this, path + "editincomplete.png"));
+		editSelectedIcon = new ImageIcon(reference.getFullResourcePath(this, path + "editselected.png"));
+		onlyLanguagesIcon = new ImageIcon(reference.getFullResourcePath(this, path + "editonly.png"));
+		excludeLanguagesIcon = new ImageIcon(reference.getFullResourcePath(this, path + "editnot.png"));
 		viewStringIcon = new ImageIcon(reference.getFullResourcePath(this, path + "string.png"));
 		viewNoStringIcon = new ImageIcon(reference.getFullResourcePath(this, path + "nostring.png"));
 		viewVariantIcon = new ImageIcon(reference.getFullResourcePath(this, path + "variant.png"));
@@ -274,7 +282,7 @@ public class StringTreeView extends JPanel implements ResourceDependent {
 	public Document getExpectedResourceStructure() {
 		XMLDirectoryTree tree = new XMLDirectoryTree();
 		
-		for(String s : Arrays.asList("delete","edit","editmultiple","newstring","newvariant","nostring","novariant","nowarn","string","variant", "toggleCut", "toggleNoCut", "variant","warn")) {
+		for(String s : Arrays.asList("delete","edit","editmultiple","editselected", "editincomplete", "editonly", "editnot","newstring","newvariant","nostring","novariant","nowarn","string","variant", "toggleCut", "toggleNoCut", "variant","warn")) {
 			tree.addPath("graphics/StringTreeView/" + s + ".png");
 		}
 		
