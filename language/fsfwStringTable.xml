@@ -225,6 +225,19 @@
 		group="fs.polyglot.StringTreeView">
 		<variant lang="en">Toggle whether only incomplete groups are displayed</variant>
 	</polyglotstring>
+	<polyglotstring id="fs.polyglot.StringTreeView.editincomplete"
+		group="fs.polyglot.StringTreeView">
+		<variant lang="en">Edit only incomplete strings</variant>
+	</polyglotstring>
+	<polyglotstring id="fs.polyglot.StringTreeView.editselected"
+		group="fs.polyglot.StringTreeView">
+		<variant lang="en">Edit only selected strings and groups</variant>
+	</polyglotstring>
+	<polyglotstring id="fs.polyglot.StringTreeView.editonly" group="fs.polyglot.StringTreeView">
+		<variant lang="en">Edit only variants for the selected languages</variant></polyglotstring>
+	<polyglotstring id="fs.polyglot.StringTreeView.editnot" group="fs.polyglot.StringTreeView">
+		<variant lang="en">Exclude variants for the selected languages</variant>
+	</polyglotstring>
 	<polyglotstring id="fs.polyglot.StringEditorConfigurator.title"
 		group="fs.polyglot.StringEditorConfigurator">
 		<variant lang="en">String editor options</variant>

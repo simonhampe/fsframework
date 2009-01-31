@@ -321,7 +321,7 @@ public class LanguageListView extends JPanel implements ResourceDependent {
 		// Set Bounds
 		int index = languageList.getSelectedIndex();
 		int y = 0;
-		if (index != -1)
+		if (index != -1 && index < languageList.getModel().getSize()) //If a language has just been deleted, it might be, that index is still set to this row
 			y = languageList.getCellBounds(index, index).y;
 		int realx = languageList.getLocationOnScreen().x;
 		int realy = languageList.getLocationOnScreen().y;

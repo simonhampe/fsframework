@@ -1,12 +1,16 @@
 package fs.polyglot.view;
 
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Arrays;
 
+import javax.swing.AbstractButton;
+import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JList;
@@ -15,8 +19,11 @@ import javax.swing.JScrollPane;
 import javax.swing.JToggleButton;
 import javax.swing.JTree;
 import javax.swing.ToolTipManager;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.text.ChangedCharSetException;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
@@ -25,6 +32,7 @@ import org.dom4j.Document;
 
 import fs.gui.GUIToolbox;
 import fs.polyglot.model.GroupTreeModel;
+import fs.polyglot.model.LanguageListModel;
 import fs.polyglot.model.PolyglotTableModel;
 import fs.polyglot.model.TreeObject;
 import fs.polyglot.undo.UndoableEditFactory;
@@ -164,6 +172,15 @@ public class StringTreeView extends JPanel implements ResourceDependent {
 		}
 	};
 	
+	//Listens for the two exclusive edit restriction toggle buttonss
+	private ChangeListener toggleListener = new ChangeListener() {
+		@Override
+		public void stateChanged(ChangeEvent e) {
+			if(e.getSource() == onlyLanguages && onlyLanguages.isSelected()) excludeLanguages.setSelected(false);
+			if(e.getSource() == excludeLanguages && excludeLanguages.isSelected()) onlyLanguages.setSelected(false);
+		}
+	};
+	
 	
 	
 	// CONSTRUCTOR *****************************************************************************
@@ -188,6 +205,7 @@ public class StringTreeView extends JPanel implements ResourceDependent {
 				TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
 		stringtree.getSelectionModel().addTreeSelectionListener(selectionListener);
 		selectionListener.valueChanged(null);
+		languageList.setModel(new LanguageListModel(table));
 		
 		//Init Buttons  (those which do not depend on selection) 
 		delete.setIcon(deleteIcon);
@@ -196,6 +214,14 @@ public class StringTreeView extends JPanel implements ResourceDependent {
 		editsingle.setToolTipText(loader.getString(sgroup + ".editsingle", languageID));
 		editmultiple.setIcon(editMultipleIcon);
 		editmultiple.setToolTipText(loader.getString(sgroup + ".editmultiple", languageID));
+		editIncomplete.setIcon(editIncompleteIcon);
+		editIncomplete.setToolTipText(loader.getString(sgroup + ".editincomplete", languageID));
+		editSelected.setIcon(editSelectedIcon);
+		editSelected.setToolTipText(loader.getString(sgroup + ".editselected", languageID));
+		onlyLanguages.setIcon(onlyLanguagesIcon);
+		onlyLanguages.setToolTipText(loader.getString(sgroup + ".editonly", languageID ));
+		excludeLanguages.setIcon(excludeLanguagesIcon);
+		excludeLanguages.setToolTipText(loader.getString(sgroup + ".editnot",languageID));
 		viewString.setIcon(viewStringIcon);
 		viewString.setToolTipText(loader.getString(sgroup + ".togglestring", languageID));
 		viewVariant.setIcon(viewVariantIcon);
@@ -209,22 +235,43 @@ public class StringTreeView extends JPanel implements ResourceDependent {
 		
 		JPanel operationbar = new JPanel();
 		JPanel viewbar = new JPanel();
+		JPanel advedit = new JPanel();
+		advedit.setBorder(BorderFactory.createEtchedBorder());
 		JScrollPane scrollpane = new JScrollPane(stringtree);
+		//I have to mess around with the size to make it pretty
+		JScrollPane listpane = new JScrollPane(languageList) {
+			/**
+			 * compiler-generated version id
+			 */
+			private static final long serialVersionUID = -5008388045112489067L;
+
+			@Override
+			public Dimension getPreferredSize() {
+				Dimension d = super.getPreferredSize();
+				return new Dimension(d.width + 50, editmultiple.getPreferredSize().height);
+			}
+		};
 		operationbar.setLayout(new FlowLayout(FlowLayout.LEFT));
 		viewbar.setLayout(new FlowLayout(FlowLayout.LEFT));
 		
-		//Add everything
 		
-		operationbar.add(add);
-		operationbar.add(delete);
-		operationbar.add(editsingle);
-		operationbar.add(editmultiple);
-		viewbar.add(viewString);
-		viewbar.add(viewVariant);
-		viewbar.add(toggleCut);
-		viewbar.add(showOnlyIncomplete);
 		
 		//Layout
+		
+		GridBagLayout ael = new GridBagLayout(); // Layout for the advanced edit panel
+		advedit.setLayout(ael);
+		GridBagConstraints cEdit = GUIToolbox.buildConstraints(0, 0, 1, 2); cEdit.insets = new Insets(5,5,5,5);
+		GridBagConstraints cInc = GUIToolbox.buildConstraints(1, 0, 1, 1); cInc.insets = new Insets(5,0,0,0);
+		GridBagConstraints cSel = GUIToolbox.buildConstraints(1, 1, 1, 1); cSel.insets = new Insets(0,0,5,0);
+		GridBagConstraints cOnl = GUIToolbox.buildConstraints(2, 0, 1, 1); cOnl.insets = new Insets(5,0,0,0);
+		GridBagConstraints cExc = GUIToolbox.buildConstraints(2, 1, 1, 1); cExc.insets = new Insets(0,0,5,0);
+		GridBagConstraints cLis = GUIToolbox.buildConstraints(3, 0, 1, 2); cLis.insets = new Insets(5,5,5,5);
+		ael.setConstraints(editmultiple, cEdit); ael.setConstraints(editIncomplete, cInc);
+		ael.setConstraints(editSelected, cSel); ael.setConstraints(onlyLanguages, cOnl);
+		ael.setConstraints(excludeLanguages, cExc); ael.setConstraints(listpane, cLis);
+		advedit.add(editmultiple); advedit.add(editIncomplete); advedit.add(editSelected);
+		advedit.add(onlyLanguages); advedit.add(excludeLanguages);advedit.add(listpane);
+		
 		
 		GridBagLayout gbl = new GridBagLayout();
 		setLayout(gbl);
@@ -234,6 +281,17 @@ public class StringTreeView extends JPanel implements ResourceDependent {
 		gbl.setConstraints(operationbar, cOps);
 		gbl.setConstraints(viewbar, cView);
 		gbl.setConstraints(scrollpane, cScroll);
+		
+		//Add everything
+		operationbar.add(add);
+		operationbar.add(delete);
+		operationbar.add(editsingle);
+		operationbar.add(advedit);
+		viewbar.add(viewString);
+		viewbar.add(viewVariant);
+		viewbar.add(toggleCut);
+		viewbar.add(showOnlyIncomplete);
+		
 		add(operationbar);
 		add(scrollpane); 
 		add(viewbar);
@@ -244,6 +302,8 @@ public class StringTreeView extends JPanel implements ResourceDependent {
 		viewVariant.addActionListener(viewVariantListener);
 		toggleCut.addActionListener(toggleCutListener);
 		showOnlyIncomplete.addActionListener(showOnlyIncompleteListener);
+		onlyLanguages.addChangeListener(toggleListener);
+		excludeLanguages.addChangeListener(toggleListener);
 		
 	}
 	
