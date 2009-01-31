@@ -259,5 +259,20 @@
 		id="fs.polyglot.StringEditorConfigurator.excludelanguages" group="fs.polyglot.StringEditorConfigurator">
 		<variant lang="en">Do NOT display variants for the following languages:</variant>
 	</polyglotstring>
+	<polyglotstring id="fs.polyglot.StringEditor.stringid" group="fs.polyglot.StringEditor">
+		<variant lang="en">String ID:</variant></polyglotstring>
+	<polyglotstring id="fs.polyglot.StringEditor.groupid" group="fs.polyglot.StringEditor">
+		<variant lang="en">Group:</variant>
+	</polyglotstring>
+	<polyglotstring id="fs.polyglot.StringEditor.generateid" group="fs.polyglot.StringEditor">
+		<variant lang="en">Generate actual string ID from 'String ID' and 'Group':</variant></polyglotstring>
+	<polyglotstring id="fs.polyglot.StringEditor.variants" group="fs.polyglot.StringEditor">
+		<variant lang="en">Variants:</variant></polyglotstring>
+	<polyglotstring id="fs.polyglot.StringEditor.quicknav" group="fs.polyglot.StringEditor">
+		<variant lang="en">Enable Quick Navigation (changes tab sequence to speed up edit process)</variant></polyglotstring>
+	<polyglotstring id="fs.polyglot.StringEditor.config" group="fs.polyglot.StringEditor">
+		<variant lang="en">Configure...</variant></polyglotstring>
+	<polyglotstring id="fs.polyglot.StringEditor.jumpto" group="fs.polyglot.StringEditor">
+		<variant lang="en">Jump to: </variant></polyglotstring>
 
 </fsfw:polyglotstringtable>
