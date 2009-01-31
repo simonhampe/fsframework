@@ -274,5 +274,7 @@
 		<variant lang="en">Configure...</variant></polyglotstring>
 	<polyglotstring id="fs.polyglot.StringEditor.jumpto" group="fs.polyglot.StringEditor">
 		<variant lang="en">Jump to: </variant></polyglotstring>
+	<polyglotstring id="fs.polyglot.StringEditor.groupwarn" group="fs.polyglot.StringEditor">
+		<variant lang="en">The empty group name is discouraged</variant></polyglotstring>
 
 </fsfw:polyglotstringtable>

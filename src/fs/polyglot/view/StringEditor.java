@@ -6,6 +6,7 @@ import java.awt.GridBagLayout;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -14,18 +15,29 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+import javax.swing.text.JTextComponent;
+
+import org.dom4j.Document;
 
 import fs.gui.FrameworkDialog;
+import fs.gui.SwitchIconLabel;
 import fs.polyglot.model.PolyglotTableModel;
+import fs.polyglot.validate.NonEmptyWarner;
+import fs.test.XMLDirectoryTest;
+import fs.validate.LabelIndicValidator;
+import fs.validate.ValidationResult.Result;
+import fs.xml.FsfwDefaultReference;
 import fs.xml.PolyglotStringLoader;
+import fs.xml.ResourceDependent;
 import fs.xml.ResourceReference;
+import fs.xml.XMLDirectoryTree;
 
 /**
  * This class represents the most important tool for editing strings in a PolyglotStringTable. 
  * @author Simon Hampe
  *
  */
-public class StringEditor extends FrameworkDialog {
+public class StringEditor extends FrameworkDialog implements ResourceDependent{
 
 	//Components
 	private JTextField textID;
@@ -41,12 +53,18 @@ public class StringEditor extends FrameworkDialog {
 	private JButton ok;
 	private JButton cancel;
 	
+	private ImageIcon warnIcon;
+	
 	//Data
 	private PolyglotTableModel table;
 	private ListSelectionModel selection;
 	private StringEditorConfiguration configuration;
 	private static String sgroup = "fs.polyglot.StringEditor";
 	private String currentEdit = null;
+	
+	//Validation
+	private NonEmptyWarner groupWarner;
+	private LabelIndicValidator<JTextField> stringValidator;
 	
 	/**
 	 * This creates a string editor. If singleStringID is not null, this creates an editor for a single string, with navigational controls
@@ -62,8 +80,8 @@ public class StringEditor extends FrameworkDialog {
 		super(r, l, lid);
 		
 		//Init additional components
-		JLabel labelID = new JLabel(loader.getString(sgroup + ".stringid", languageID));
-		JLabel labelGroup = new JLabel(loader.getString(sgroup + ".groupid", languageID));
+		SwitchIconLabel labelID = new SwitchIconLabel(loader.getString(sgroup + ".stringid", languageID));
+		SwitchIconLabel labelGroup = new SwitchIconLabel(loader.getString(sgroup + ".groupid", languageID));
 		JLabel labelTable = new JLabel(loader.getString(sgroup + ".variants", languageID));
 		JLabel labelJump = new JLabel(loader.getString(sgroup + ".jumpto", languageID));
 		JScrollPane tablePane = new JScrollPane(tableVariants);
@@ -112,6 +130,21 @@ public class StringEditor extends FrameworkDialog {
 		add(lineBox);
 		pack();
 		
+		//Init Validation
+		
+		groupWarner = new NonEmptyWarner(null, warnIcon, null) {
+			@Override
+			public Result validate(JTextComponent component) {
+				Result r = super.validate(component);
+				if(r == Result.WARNING) {
+					setToolTipText(component, loader.getString(sgroup + ".groupwarn", languageID));
+				}
+				else setToolTipText(component, null);
+				return r;
+			}
+		};
+		groupWarner.addComponent(textGroup, labelGroup);
+		
 		
 	}
 
@@ -122,6 +155,27 @@ public class StringEditor extends FrameworkDialog {
 	public void updateData() {
 		
 	}
+
+	// RESOURCEDEPENDENT METHODS ********************************************************
+	// **********************************************************************************
+	
+	/**
+	 * Assigns a resource reference (default, if r == null)
+	 */
+	@Override
+	public void assignReference(ResourceReference r) {
+		resource = (r != null) ? r : FsfwDefaultReference.getDefaultReference();
+		warnIcon = new ImageIcon(resource.getFullResourcePath(this, "graphics/StringEditor/warn.png"));
+	}
+
+	@Override
+	public Document getExpectedResourceStructure() {
+		XMLDirectoryTree tree = new XMLDirectoryTree();
+		tree.addPath("graphics/StringEditor/warn.png");
+		return tree;
+	}
+	
+	
 	
 	
 }
