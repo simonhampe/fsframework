@@ -136,6 +136,8 @@ public class UndoableLanguageEdit extends AbstractUndoableEdit {
 	public boolean canRedo() {
 		if ((oldValue == null && newValue == null) || table == null)
 			return true;
+		bla
+		//TODO: This doesn't work. If a language is deleted and EDITED afterwards this always returns false
 		// Language addition
 		if (oldValue == null)
 			return !table.containsLanguage(newValue.id);
