@@ -10,25 +10,16 @@ import java.io.File;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JList;
-import javax.swing.JTree;
-import javax.swing.ToolTipManager;
 import javax.swing.undo.UndoManager;
 
 import org.apache.log4j.BasicConfigurator;
 
 import fs.gui.GUIToolbox;
-import fs.polyglot.model.Group;
-import fs.polyglot.model.GroupTreeModel;
-import fs.polyglot.model.LanguageListModel;
 import fs.polyglot.model.PolyglotTableModel;
 import fs.polyglot.undo.TableUndoManager;
-import fs.polyglot.view.GroupTreeCellRenderer;
 import fs.polyglot.view.GroupTreeView;
-import fs.polyglot.view.LanguageListCellRenderer;
 import fs.polyglot.view.LanguageListView;
 import fs.polyglot.view.StringTreeView;
-import fs.xml.PolyglotStringTable;
 import fs.xml.XMLToolbox;
 
 /**

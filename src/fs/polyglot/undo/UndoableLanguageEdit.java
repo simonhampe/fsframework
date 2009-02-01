@@ -40,7 +40,8 @@ public class UndoableLanguageEdit extends AbstractUndoableEdit {
 	 *            The old value of the language. null indicates that a new
 	 *            language was added. If old and new value are both null, this
 	 *            edit is considered without effect and it will not post itself
-	 *            automatically
+	 *            automatically. If old value is a language with isOnlyUsed set to true, it will be
+	 *            regarded as if being null, since does not show up in the language list.
 	 * @param newValue
 	 *            The new value of the language. null indicates that a language
 	 *            was removed. If old and new value are both null, this edit is
@@ -68,7 +69,7 @@ public class UndoableLanguageEdit extends AbstractUndoableEdit {
 		if (table == null)
 			throw new NullPointerException(
 					"Can't create undoable edit for null table");
-		this.oldValue = oldValue;
+		this.oldValue = (oldValue != null && oldValue.isOnlyUsed ) ?  null : oldValue;
 		this.newValue = newValue;
 		this.table = table;
 
@@ -136,8 +137,6 @@ public class UndoableLanguageEdit extends AbstractUndoableEdit {
 	public boolean canRedo() {
 		if ((oldValue == null && newValue == null) || table == null)
 			return true;
-		bla
-		//TODO: This doesn't work. If a language is deleted and EDITED afterwards this always returns false
 		// Language addition
 		if (oldValue == null)
 			return !table.containsLanguage(newValue.id);

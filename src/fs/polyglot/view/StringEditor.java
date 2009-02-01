@@ -1,5 +1,6 @@
 package fs.polyglot.view;
 
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 
@@ -25,6 +26,8 @@ import fs.polyglot.model.PolyglotTableModel;
 import fs.polyglot.validate.NonEmptyWarner;
 import fs.test.XMLDirectoryTest;
 import fs.validate.LabelIndicValidator;
+import fs.validate.SingleButtonValidator;
+import fs.validate.ValidationValidator;
 import fs.validate.ValidationResult.Result;
 import fs.xml.FsfwDefaultReference;
 import fs.xml.PolyglotStringLoader;
@@ -65,6 +68,7 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 	//Validation
 	private NonEmptyWarner groupWarner;
 	private LabelIndicValidator<JTextField> stringValidator;
+	private ValidationValidator summary = new SingleButtonValidator(ok);
 	
 	/**
 	 * This creates a string editor. If singleStringID is not null, this creates an editor for a single string, with navigational controls
@@ -79,13 +83,6 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 	public StringEditor(ResourceReference r, PolyglotStringLoader l, String lid, PolyglotTableModel associatedTable, ListSelectionModel selectedStrings, String singleStringID, StringEditorConfiguration configuration) {
 		super(r, l, lid);
 		
-		//Init additional components
-		SwitchIconLabel labelID = new SwitchIconLabel(loader.getString(sgroup + ".stringid", languageID));
-		SwitchIconLabel labelGroup = new SwitchIconLabel(loader.getString(sgroup + ".groupid", languageID));
-		JLabel labelTable = new JLabel(loader.getString(sgroup + ".variants", languageID));
-		JLabel labelJump = new JLabel(loader.getString(sgroup + ".jumpto", languageID));
-		JScrollPane tablePane = new JScrollPane(tableVariants);
-		
 		//Init all member components
 		textID = new JTextField();
 		textGroup = new JTextField();
@@ -93,7 +90,7 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 		checkQuickNav = new JCheckBox(loader.getString(sgroup + ".quicknav", languageID),singleStringID == null); checkQuickNav.setEnabled(singleStringID == null);
 		generatedID = new JLabel("");
 			generatedID.setBorder(BorderFactory.createEtchedBorder());
-		tableVariants = new JTable();
+		tableVariants = new JTable(5,5);
 		jumpto = new JComboBox();
 		previous = new JButton("<-");
 		next = new JButton("->");
@@ -101,8 +98,32 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 		ok = new JButton(loader.getString("fs.global.ok", languageID));
 		cancel = new JButton(loader.getString("fs.global.cancel", languageID));
 		
+		//Init additional components
+		SwitchIconLabel labelID = new SwitchIconLabel(loader.getString(sgroup + ".stringid", languageID));
+		labelID.setIconReference(warnIcon);
+		SwitchIconLabel labelGroup = new SwitchIconLabel(loader.getString(sgroup + ".groupid", languageID));
+		labelGroup.setIconReference(warnIcon);
+		JLabel labelTable = new JLabel(loader.getString(sgroup + ".variants", languageID));
+		JLabel labelJump = new JLabel(loader.getString(sgroup + ".jumpto", languageID));
+		JScrollPane tablePane = new JScrollPane(tableVariants) {
+			/**
+			 * compiler-generated version id
+			 */
+			private static final long serialVersionUID = 3430793500371203460L;
+
+			public Dimension getPreferredSize() {
+				Dimension d = super.getPreferredSize();
+				return new Dimension(d.width, tableVariants.getPreferredSize().height*2);
+			}
+		};
+		
+		
 		//Layout
 		Box lineBox = new Box(BoxLayout.Y_AXIS); //The box for all lines
+		Box hfill = new Box(BoxLayout.X_AXIS);
+		hfill.add(Box.createRigidArea(new Dimension(5,5)));
+		Box hfill2 = new Box(BoxLayout.X_AXIS);
+		hfill2.add(Box.createRigidArea(new Dimension(5,5)));
 		Box line1 = new Box(BoxLayout.X_AXIS);
 		line1.setAlignmentX(LEFT_ALIGNMENT);
 			line1.add(labelID); line1.add(textID); line1.add(labelGroup); line1.add(textGroup);
@@ -126,7 +147,11 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 		line7.setAlignmentX(LEFT_ALIGNMENT);
 			line7.add(labelJump); line7.add(jumpto);line7.add(Box.createHorizontalGlue());
 			
-		lineBox.add(line1);lineBox.add(line2);lineBox.add(line3); lineBox.add(line4); lineBox.add(line5); lineBox.add(line6);lineBox.add(line7);
+		lineBox.add(hfill);	
+		lineBox.add(line1);lineBox.add(line2);lineBox.add(line3); 
+		lineBox.add(line4); lineBox.add(line5); lineBox.add(line6);
+		lineBox.add(hfill2);
+		lineBox.add(line7);
 		add(lineBox);
 		pack();
 		
@@ -144,6 +169,7 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 			}
 		};
 		groupWarner.addComponent(textGroup, labelGroup);
+		groupWarner.validate();
 		
 		
 	}
@@ -164,7 +190,7 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 	 */
 	@Override
 	public void assignReference(ResourceReference r) {
-		resource = (r != null) ? r : FsfwDefaultReference.getDefaultReference();
+		super.assignReference(r);
 		warnIcon = new ImageIcon(resource.getFullResourcePath(this, "graphics/StringEditor/warn.png"));
 	}
 

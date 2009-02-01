@@ -8,11 +8,15 @@ import java.util.HashSet;
 
 import javax.swing.JDialog;
 
+import org.dom4j.Document;
+
 import fs.event.DataRetrievalListener;
 import fs.xml.FsfwDefaultReference;
 import fs.xml.PolyglotStringLoader;
 import fs.xml.PolyglotStringTable;
+import fs.xml.ResourceDependent;
 import fs.xml.ResourceReference;
+import fs.xml.XMLDirectoryTree;
 
 /**
  * Most dialogs in fsframework make as well of the ResourceReference mechanism
@@ -20,7 +24,7 @@ import fs.xml.ResourceReference;
  * with a ResourceReference, a StringLoader and a language ID, which, if null,
  * are initialized to default values. This class takes care of that. All
  * constructors of JDialog have been copied and behave just as the original
- * constructors. <br>
+ * constructors. An overwriting class that needs resources should overwrite the resource dependent methods.<br>
  * This dialog also implements a listener mechanism to inform eventual listeners
  * that a certain set of data is ready for retrieval (usually, when OK has been
  * clicked)
@@ -28,7 +32,7 @@ import fs.xml.ResourceReference;
  * @author Simon Hampe
  * 
  */
-public class FrameworkDialog extends JDialog {
+public class FrameworkDialog extends JDialog implements ResourceDependent {
 
 	/**
 	 * compiler-generated version id
@@ -83,7 +87,7 @@ public class FrameworkDialog extends JDialog {
 	 */
 	protected void setFrameworkValues(ResourceReference r,
 			PolyglotStringLoader l, String lid) {
-		resource = r != null ? r : FsfwDefaultReference.getDefaultReference();
+		assignReference(r);
 		loader = l != null ? l : PolyglotStringLoader.getDefaultLoader();
 		languageID = lid != null ? lid : PolyglotStringTable
 				.getGlobalLanguageID();
@@ -189,6 +193,16 @@ public class FrameworkDialog extends JDialog {
 			PolyglotStringLoader l, String lid) {
 		super(owner);
 		setFrameworkValues(r, l, lid);
+	}
+
+	@Override
+	public void assignReference(ResourceReference r) {
+		resource = r != null ? r : FsfwDefaultReference.getDefaultReference();
+	}
+
+	@Override
+	public Document getExpectedResourceStructure() {
+		return new XMLDirectoryTree();
 	}
 
 }

@@ -137,7 +137,7 @@ public abstract class AbstractComponentValidator<T> implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @seejavax.swing.event.DocumentListener#changedUpdate(javax.swing.event.
+	 * @see javax.swing.event.DocumentListener#changedUpdate(javax.swing.event.
 	 * DocumentEvent)
 	 */
 	@Override
@@ -148,7 +148,7 @@ public abstract class AbstractComponentValidator<T> implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @seejavax.swing.event.DocumentListener#insertUpdate(javax.swing.event.
+	 * @see javax.swing.event.DocumentListener#insertUpdate(javax.swing.event.
 	 * DocumentEvent)
 	 */
 	@Override
@@ -159,7 +159,7 @@ public abstract class AbstractComponentValidator<T> implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @seejavax.swing.event.DocumentListener#removeUpdate(javax.swing.event.
+	 * @see javax.swing.event.DocumentListener#removeUpdate(javax.swing.event.
 	 * DocumentEvent)
 	 */
 	@Override
