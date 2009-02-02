@@ -276,5 +276,19 @@
 		<variant lang="en">Jump to: </variant></polyglotstring>
 	<polyglotstring id="fs.polyglot.StringEditor.groupwarn" group="fs.polyglot.StringEditor">
 		<variant lang="en">The empty group name is discouraged</variant></polyglotstring>
+	<polyglotstring id="fs.polyglot.StringEditor.stringerror"
+		group="fs.polyglot.StringEditor">
+		<variant lang="en">The empty ID is not allowed</variant>
+	</polyglotstring>
+	<polyglotstring id="fs.polyglot.StringEditor.stringwarn" group="fs.polyglot.StringEditor">
+		<variant lang="en">This ID already exists. It will be overwritten.</variant></polyglotstring>
+	<polyglotstring id="fs.polyglot.StringEditor.switchvalid"
+		group="fs.polyglot.StringEditor">
+		<variant lang="en">Performs the current changes and jumps to the %s element.</variant>
+	</polyglotstring>
+	<polyglotstring id="fs.polyglot.StringEditor.switchcancel"
+		group="fs.polyglot.StringEditor">
+		<variant lang="en">Cancels the current edit and jumps to the %s element.</variant>
+	</polyglotstring>
 
 </fsfw:polyglotstringtable>

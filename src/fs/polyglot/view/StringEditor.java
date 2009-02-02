@@ -3,6 +3,9 @@ package fs.polyglot.view;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.TreeSet;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -12,10 +15,13 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.text.JTextComponent;
 
 import org.dom4j.Document;
@@ -27,6 +33,7 @@ import fs.polyglot.validate.NonEmptyWarner;
 import fs.test.XMLDirectoryTest;
 import fs.validate.LabelIndicValidator;
 import fs.validate.SingleButtonValidator;
+import fs.validate.ValidationResult;
 import fs.validate.ValidationValidator;
 import fs.validate.ValidationResult.Result;
 import fs.xml.FsfwDefaultReference;
@@ -60,15 +67,37 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 	
 	//Data
 	private PolyglotTableModel table;
-	private ListSelectionModel selection;
+	private JList listOfSelected;
+	private HashSet<String> selected = new HashSet<String>();
 	private StringEditorConfiguration configuration;
 	private static String sgroup = "fs.polyglot.StringEditor";
-	private String currentEdit = null;
+	private ArrayList<String> edits = new ArrayList<String>();
+	private int currentEdit;
 	
 	//Validation
 	private NonEmptyWarner groupWarner;
 	private LabelIndicValidator<JTextField> stringValidator;
-	private ValidationValidator summary = new SingleButtonValidator(ok);
+	private ValidationValidator summary;
+	
+	// EVENT HANDLING ********************************************
+	// ***********************************************************
+	
+	//Reloads the string list when selection is changed (and needed)
+	private ListSelectionListener selectionListener = new ListSelectionListener() {
+		@Override
+		public void valueChanged(ListSelectionEvent e) {
+			if(configuration.editOnlySelected) {
+				Object[] strings = listOfSelected.getSelectedValues();
+				selected.clear();
+				for(Object o : strings) {
+					selected.add(o.toString());
+				}
+			}
+		}
+	};
+	
+	// CONSTRUCTOR ***********************************************
+	// ***********************************************************
 	
 	/**
 	 * This creates a string editor. If singleStringID is not null, this creates an editor for a single string, with navigational controls
@@ -78,10 +107,21 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 	 * @param selectedStrings A list model from which to retrieve a list of selected strings. If only a single string is to be edited, this parameter is ignored
 	 * @param singleStringID Should be null, if the strings to be edited should be retrieved from the configuration data. Otherwise this stringID is edited and its data
 	 * retrieved from the table model
-	 * @param configuration The Configuration data. This specifies, which strings are to be edited. Usually this data is created by a StringEditorConfigurator.
+	 * @param configuration The Configuration data. This specifies, which strings are to be edited. Usually this data is created by a StringEditorConfigurator. If null, default values are used
 	 */
-	public StringEditor(ResourceReference r, PolyglotStringLoader l, String lid, PolyglotTableModel associatedTable, ListSelectionModel selectedStrings, String singleStringID, StringEditorConfiguration configuration) {
+	public StringEditor(ResourceReference r, PolyglotStringLoader l, String lid, PolyglotTableModel associatedTable, JList selectedStrings, String singleStringID, StringEditorConfiguration configuration) {
 		super(r, l, lid);
+		
+		//Copy data
+		if(associatedTable== null) throw new NullPointerException("Can't create editor for null table");
+		table = associatedTable;
+		listOfSelected = selectedStrings;
+		this.configuration = configuration != null ? configuration : new StringEditorConfiguration(); 
+		listOfSelected.getSelectionModel().addListSelectionListener(selectionListener);
+		
+		//Load data
+		
+		//TODO: load data
 		
 		//Init all member components
 		textID = new JTextField();
@@ -168,8 +208,63 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 				return r;
 			}
 		};
+		stringValidator = new LabelIndicValidator<JTextField>(null, warnIcon, warnIcon) {
+			@Override
+			protected void registerToComponent(JTextField component) {
+				if(component != null) {
+					component.getDocument().addDocumentListener(this);
+					checkGenerateID.addChangeListener(this);
+				}
+			}
+			@Override
+			protected void unregisterFromComponent(JTextField component) {
+				if(component != null) {
+					component.getDocument().removeDocumentListener(this);
+					checkGenerateID.removeChangeListener(this);
+				}
+			}
+			@Override
+			public Result validate(JTextField component) {
+				if(component == null) return Result.CORRECT;
+				//The empty ID is not allowed
+				if(component.getText().trim().equals("")) {
+					setToolTipText(component, loader.getString(sgroup + ".stringerror", languageID));
+					return Result.INCORRECT;
+				}
+				//If it exists already, issue a warning
+				String finalid = getFinalID();
+				if(!finalid.equals(edits.get(currentEdit)) && table.containsStringID(finalid)) {
+					setToolTipText(component, loader.getString(sgroup + ".stringwarn", languageID));
+					return Result.WARNING;
+				}
+				setToolTipText(component, null);
+				return Result.CORRECT;
+			}
+		};
+		//Dis/En-ables Ok-Button and changes tooltips
+		summary = new ValidationValidator() {
+			@Override
+			public void validationPerformed(ValidationResult result) {
+				boolean enable = true;
+				switch(result.getOverallResult()) {
+				case INCORRECT: enable = false; break;
+				case CORRECT:
+				case WARNING: enable = true;break;
+				}
+				ok.setEnabled(enable);
+				String nexttooltip = loader.getString(sgroup + (enable? ".switchvalid" : ".switchcancel"), languageID, "next");
+				String prevtooltip = loader.getString(sgroup + (enable? ".switchvalid" : ".switchcancel"), languageID, "previous");
+				String jumptooltip = loader.getString(sgroup + (enable? ".switchvalid" : ".switchcancel"), languageID, "selected");
+				next.setToolTipText(nexttooltip);
+				previous.setToolTipText(prevtooltip);
+				jumpto.setToolTipText(jumptooltip);
+			}
+		};
 		groupWarner.addComponent(textGroup, labelGroup);
-		groupWarner.validate();
+		stringValidator.addComponent(textID, labelID);
+		summary.addValidator(groupWarner);
+		summary.addValidator(stringValidator);
+		summary.validate();
 		
 		
 	}
@@ -179,7 +274,45 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 	 * possible, the current selection is left unchanged and the last edit is performed before the update, if possible.
 	 */
 	public void updateData() {
+		String currentEditID = edits.get(currentEdit);
+		TreeSet<String> sortedIDs = new TreeSet<String>(table.getIDList());
+		//Load strings and remove unused strings
+		for(String id : sortedIDs) {
+			//only incomplete?
+			if(configuration.editOnlyIncomplete && table.isCompleteString(id)) sortedIDs.remove(id);
+			//only selected?
+			if(configuration.editOnlySelected && !selected.contains(id)) sortedIDs.remove(id);
+		}
+		//We don't have to change anything, if the current edit is still contained
+		edits = new ArrayList<String>(sortedIDs);
+		if(edits.contains(currentEditID)) currentEdit = edits.indexOf(currentEditID);
+		else {
+			currentEdit = 0;
+			insertData();
+		}
+	}
+	
+	/**
+	 * Inserts the data of the current edit in the dialog components
+	 */
+	protected void insertData() {
+		//Clear everything
+		textID.setText(""); textGroup.setText("");
+		//TODO: clear table and combo box
+		//If there are no strings, there is nothing to insert
+		if(edits.size() > 0) {
+			//TODO: Do something
+		}
 		
+	}
+	
+	/**
+	 * Returns the final string id depending on the state of the checkbox 'Generate ID...'. i.e. either the value of String ID or
+	 * Group + '.' + StringID
+	 * @return
+	 */
+	public String getFinalID() {
+		return checkGenerateID.isSelected() ? textGroup.getText() + "." + textID.getText() : textID.getText();
 	}
 
 	// RESOURCEDEPENDENT METHODS ********************************************************
