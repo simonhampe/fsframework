@@ -126,6 +126,8 @@ public abstract class AbstractComponentValidator<T> implements
 	 * Notifies all registered listeners of the specified validation event
 	 */
 	protected void fireStateChanged(ChangeEvent e) {
+		//First validate for yourself
+		validate();
 		for (ChangeListener l : listener) {
 			l.stateChanged(e);
 		}
