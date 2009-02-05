@@ -51,6 +51,14 @@ public abstract class ValidationValidator implements ChangeListener {
 	 */
 	@Override
 	public void stateChanged(ChangeEvent e) {
+		validate();
+	}
+
+	/**
+	 * Calculates the overall validation status and calls calculateResult;
+	 * @return The overall validation result.
+	 */
+	public ValidationResult validate() {
 		// Validate all cv's
 		ValidationResult.Result result = ValidationResult.Result.CORRECT;
 		HashMap<Object, ValidationResult.Result> idvResults = new HashMap<Object, ValidationResult.Result>();
@@ -59,17 +67,18 @@ public abstract class ValidationValidator implements ChangeListener {
 			result = ValidationResult.min(result, vresult.getOverallResult());
 			idvResults.putAll(vresult.getResults());
 		}
-		// Call validationPerformed
-		validationPerformed(new ValidationResult(result, idvResults));
+		ValidationResult r = new ValidationResult(result, idvResults); 
+		validationPerformed(r);
+		return r;
 	}
-
-	/**
-	 * Calls stateChanged with a null event, i.e. causes a complete validation
-	 * run.
-	 */
-	public void validate() {
-		stateChanged(null);
-	}
+	
+//	/**
+//	 * Calls stateChanged with a null event, i.e. causes a complete validation
+//	 * run.
+//	 */
+//	public void validate() {
+//		stateChanged(null);
+//	}
 
 	/**
 	 * This method is called after a change in a component has been noted and a

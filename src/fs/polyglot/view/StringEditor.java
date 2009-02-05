@@ -54,6 +54,7 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 	private JTextField textGroup;
 	private JCheckBox checkGenerateID;
 	private JCheckBox checkQuickNav;
+	private JCheckBox checkGroup;
 	private JLabel generatedID;
 	private JTable tableVariants;
 	private JComboBox jumpto;
@@ -67,7 +68,7 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 	
 	//Data
 	private PolyglotTableModel table;
-	private JList listOfSelected;
+	private JList listOfSelected = null;
 	private HashSet<String> selected = new HashSet<String>();
 	private StringEditorConfiguration configuration;
 	private static String sgroup = "fs.polyglot.StringEditor";
@@ -75,7 +76,7 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 	private int currentEdit;
 	
 	//Validation
-	private NonEmptyWarner groupWarner;
+	private LabelIndicValidator<JTextField> groupWarner;
 	private LabelIndicValidator<JTextField> stringValidator;
 	private ValidationValidator summary;
 	
@@ -117,17 +118,14 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 		table = associatedTable;
 		listOfSelected = selectedStrings;
 		this.configuration = configuration != null ? configuration : new StringEditorConfiguration(); 
-		listOfSelected.getSelectionModel().addListSelectionListener(selectionListener);
-		
-		//Load data
-		
-		//TODO: load data
+		if(listOfSelected != null) listOfSelected.getSelectionModel().addListSelectionListener(selectionListener);
 		
 		//Init all member components
 		textID = new JTextField();
 		textGroup = new JTextField();
 		checkGenerateID = new JCheckBox(loader.getString(sgroup + ".generateid", languageID), true);
 		checkQuickNav = new JCheckBox(loader.getString(sgroup + ".quicknav", languageID),singleStringID == null); checkQuickNav.setEnabled(singleStringID == null);
+		checkGroup = new JCheckBox();
 		generatedID = new JLabel("");
 			generatedID.setBorder(BorderFactory.createEtchedBorder());
 		tableVariants = new JTable(5,5);
@@ -138,6 +136,9 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 		ok = new JButton(loader.getString("fs.global.ok", languageID));
 		cancel = new JButton(loader.getString("fs.global.cancel", languageID));
 		
+		//Load data
+		updateData();
+				
 		//Init additional components
 		SwitchIconLabel labelID = new SwitchIconLabel(loader.getString(sgroup + ".stringid", languageID));
 		labelID.setIconReference(warnIcon);
@@ -166,7 +167,7 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 		hfill2.add(Box.createRigidArea(new Dimension(5,5)));
 		Box line1 = new Box(BoxLayout.X_AXIS);
 		line1.setAlignmentX(LEFT_ALIGNMENT);
-			line1.add(labelID); line1.add(textID); line1.add(labelGroup); line1.add(textGroup);
+			line1.add(labelID); line1.add(textID); line1.add(labelGroup); line1.add(textGroup);line1.add(checkGroup);
 		Box line2 = new Box(BoxLayout.X_AXIS);
 		line2.setAlignmentX(LEFT_ALIGNMENT);
 			line2.add(checkGenerateID);line2.add(generatedID);
@@ -197,15 +198,25 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 		
 		//Init Validation
 		
-		groupWarner = new NonEmptyWarner(null, warnIcon, null) {
+		groupWarner = new LabelIndicValidator<JTextField>(null, warnIcon, null) {
 			@Override
-			public Result validate(JTextComponent component) {
-				Result r = super.validate(component);
+			public Result validate(JTextField component) {
 				if(r == Result.WARNING) {
 					setToolTipText(component, loader.getString(sgroup + ".groupwarn", languageID));
 				}
 				else setToolTipText(component, null);
 				return r;
+			}
+			@Override
+			protected void registerToComponent(JTextField component) {
+				textGroup.getDocument().addDocumentListener(this);
+				checkGroup.addChangeListener(this);
+				
+			}
+			@Override
+			protected void unregisterFromComponent(JTextField component) {
+				textGroup.getDocument().removeDocumentListener(this);
+				checkGroup.removeChangeListener(this);
 			}
 		};
 		stringValidator = new LabelIndicValidator<JTextField>(null, warnIcon, warnIcon) {
@@ -274,7 +285,7 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 	 * possible, the current selection is left unchanged and the last edit is performed before the update, if possible.
 	 */
 	public void updateData() {
-		String currentEditID = edits.get(currentEdit);
+		String currentEditID = (edits == null || edits.size() == 0) ? null : edits.get(currentEdit);
 		TreeSet<String> sortedIDs = new TreeSet<String>(table.getIDList());
 		//Load strings and remove unused strings
 		for(String id : sortedIDs) {
@@ -303,6 +314,20 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 		if(edits.size() > 0) {
 			//TODO: Do something
 		}
+		
+	}
+	
+	/**
+	 * If the entries are valid, effects all changes
+	 */
+	protected void applyData() {
+		//If the entries are not valid, return
+		if(summary.validate().getOverallResult() == Result.INCORRECT) return;
+		//Change string ID, if necessary
+		if(!textID.getText().equals(edits.get(currentEdit))) {
+			table.renameString(edits.get(currentEdit), textID.getText());
+		}
+		//
 		
 	}
 	
