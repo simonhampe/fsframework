@@ -4,6 +4,7 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.TreeSet;
 
@@ -20,6 +21,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.text.JTextComponent;
@@ -71,9 +74,11 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 	private JList listOfSelected = null;
 	private HashSet<String> selected = new HashSet<String>();
 	private StringEditorConfiguration configuration;
-	private static String sgroup = "fs.polyglot.StringEditor";
 	private ArrayList<String> edits = new ArrayList<String>();
 	private int currentEdit;
+	private String singleEditString = null;
+	
+	private static String sgroup = "fs.polyglot.StringEditor";
 	
 	//Validation
 	private LabelIndicValidator<JTextField> groupWarner;
@@ -94,6 +99,13 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 					selected.add(o.toString());
 				}
 			}
+		}
+	};
+	//Changes the enables-status of textGroup according to the check box
+	private ChangeListener checkGroupListener = new ChangeListener() {
+		@Override
+		public void stateChanged(ChangeEvent e) {
+			textGroup.setEnabled(checkGroup.isSelected());
 		}
 	};
 	
@@ -117,6 +129,7 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 		if(associatedTable== null) throw new NullPointerException("Can't create editor for null table");
 		table = associatedTable;
 		listOfSelected = selectedStrings;
+		singleEditString = singleStringID;
 		this.configuration = configuration != null ? configuration : new StringEditorConfiguration(); 
 		if(listOfSelected != null) listOfSelected.getSelectionModel().addListSelectionListener(selectionListener);
 		
@@ -126,6 +139,8 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 		checkGenerateID = new JCheckBox(loader.getString(sgroup + ".generateid", languageID), true);
 		checkQuickNav = new JCheckBox(loader.getString(sgroup + ".quicknav", languageID),singleStringID == null); checkQuickNav.setEnabled(singleStringID == null);
 		checkGroup = new JCheckBox();
+			checkGroup.setSelected(table.getGroupID(singleStringID) != null);
+			checkGroup.addChangeListener(checkGroupListener);
 		generatedID = new JLabel("");
 			generatedID.setBorder(BorderFactory.createEtchedBorder());
 		tableVariants = new JTable(5,5);
@@ -201,11 +216,14 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 		groupWarner = new LabelIndicValidator<JTextField>(null, warnIcon, null) {
 			@Override
 			public Result validate(JTextField component) {
-				if(r == Result.WARNING) {
+				if(textGroup.getText().trim().equals("") && checkGroup.isSelected()) {
 					setToolTipText(component, loader.getString(sgroup + ".groupwarn", languageID));
+					return Result.WARNING;
 				}
-				else setToolTipText(component, null);
-				return r;
+				else {
+					setToolTipText(component, null);
+					return Result.CORRECT;
+				}
 			}
 			@Override
 			protected void registerToComponent(JTextField component) {
@@ -285,6 +303,13 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 	 * possible, the current selection is left unchanged and the last edit is performed before the update, if possible.
 	 */
 	public void updateData() {
+		//If we only edit a single string, we don't change anything
+		if(singleEditString != null) {
+			edits = new ArrayList<String>(Arrays.asList(singleEditString));
+			currentEdit = 0;
+			return;
+		}
+		//Otherwise calculate edit list
 		String currentEditID = (edits == null || edits.size() == 0) ? null : edits.get(currentEdit);
 		TreeSet<String> sortedIDs = new TreeSet<String>(table.getIDList());
 		//Load strings and remove unused strings
@@ -324,10 +349,15 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 		//If the entries are not valid, return
 		if(summary.validate().getOverallResult() == Result.INCORRECT) return;
 		//Change string ID, if necessary
+		String newID = textID.getText();
 		if(!textID.getText().equals(edits.get(currentEdit))) {
 			table.renameString(edits.get(currentEdit), textID.getText());
 		}
-		//
+		//Set Group
+		table.setGroupID(newID, checkGroup.isSelected() ? textGroup.getText() : null);
+		//Set Variants (we wan't to reduce operations to a mininum)
+		//TODO: Finish
+		
 		
 	}
 	

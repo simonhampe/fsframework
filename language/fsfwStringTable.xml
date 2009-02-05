@@ -290,5 +290,13 @@
 		group="fs.polyglot.StringEditor">
 		<variant lang="en">Cancels the current edit and jumps to the %s element.</variant>
 	</polyglotstring>
+	<polyglotstring id="fs.polyglot.VariantTableModel.language"
+		group="fs.polyglot.VariantTableModel">
+		<variant lang="en">Language</variant>
+	</polyglotstring>
+	<polyglotstring id="fs.polyglot.VariantTableModel.variant"
+		group="fs.polyglot.VariantTableModel">
+		<variant lang="en">Variant</variant>
+	</polyglotstring>
 
 </fsfw:polyglotstringtable>
