@@ -1,5 +1,6 @@
 package fs.polyglot.model;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.TreeSet;
@@ -19,7 +20,7 @@ import fs.xml.PolyglotStringTable;
 public class VariantTableModel implements TableModel {
 
 	//A list of languages
-	private TreeSet<String> languages = new TreeSet<String>();
+	private ArrayList<String> languages = new ArrayList<String>();
 	//A map mapping language ids to variants
 	private HashMap<String, String> variants = new HashMap<String, String>();	
 	
@@ -35,7 +36,7 @@ public class VariantTableModel implements TableModel {
 		this.loader = loader != null ? loader : PolyglotStringLoader.getDefaultLoader();
 		this.languageID = languageID != null ? languageID : PolyglotStringTable.getGlobalLanguageID();
 		if(!(table == null || stringID == null)) {
-			languages = new TreeSet<String>(table.getSupportedLanguages(stringID));
+			languages = new ArrayList<String>(new TreeSet<String>(table.getSupportedLanguages(stringID)));
 			for(String l : languages) {
 				variants.put(l, table.getUnformattedString(stringID, l));
 			}
@@ -63,15 +64,15 @@ public class VariantTableModel implements TableModel {
 	}
 
 	/**
-	 * There are always two columns
+	 * There are always three columns
 	 */
 	@Override
 	public int getColumnCount() {
-		return 2;
+		return 3;
 	}
 
 	/**
-	 * The first column is named 'Language', the second 'Variant'
+	 * The first column is named 'Language', the second 'Variant', the third has no name
 	 */
 	@Override
 	public String getColumnName(int arg0) {
@@ -87,30 +88,42 @@ public class VariantTableModel implements TableModel {
 	}
 
 	/**
-	 * Except for the last row returns the language ID in the first column, the variant in the second row. The last row is empty
+	 * Except for the last row, returns the language ID in the first column, the variant in the second row and nothing in the third column. 
+	 * The last row is empty
 	 */
 	@Override
 	public Object getValueAt(int arg0, int arg1) {
-		if(arg0 == languages.size())
-			//TODO: Argharghargh this doesn't work...
+		if(arg0 == languages.size()) {
+			return "";
+		}
+		else switch(arg1) {
+		case 0: return languages.get(arg0);
+		case 1: return variants.get(languages.get(arg0));
+		case 2: return "";
+		default: return "";
+		}
 	}
 
+	/**
+	 * Returns true for all language/variant cells which are not in the last row and only for the language cell in the last row
+	 */
 	@Override
 	public boolean isCellEditable(int arg0, int arg1) {
-		// TODO Auto-generated method stub
-		return false;
+		return (arg0 < languages.size() || arg1 == 0) && arg1 <= 1;
 	}
 
 	@Override
 	public void removeTableModelListener(TableModelListener arg0) {
-		// TODO Auto-generated method stub
+		listeners.remove(arg0);
 
 	}
 
+	/**
+	 * Will set the value in any language/variant cell, but won't change any third row cells. 
+	 */
 	@Override
 	public void setValueAt(Object arg0, int arg1, int arg2) {
-		// TODO Auto-generated method stub
-
+		
 	}
 
 }
