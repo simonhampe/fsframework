@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.TreeSet;
 
+import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
 
@@ -119,11 +120,41 @@ public class VariantTableModel implements TableModel {
 	}
 
 	/**
-	 * Will set the value in any language/variant cell, but won't change any third row cells. 
+	 * If the cell adressed is a cell in the first or second column, the following happens:<br>
+	 * - If an existing language or variant is changed, this change will be adopted and all listeners notified
+	 * - If a language is added in the last row, it is added with an empty variant and all listeners are notified
+	 * @throws ArrayIndexOutOfBoundsException - If a third column cell is edited or the indices are out of bounds.
 	 */
 	@Override
-	public void setValueAt(Object arg0, int arg1, int arg2) {
-		
+	public void setValueAt(Object value, int row, int col) {
+		if(col >= 2 || col < 0 || row < 0 || row > languages.size()) 
+			throw new ArrayIndexOutOfBoundsException("Can't edit cell at (" + row + ", " + col + "). Is not editable or does not exist.");
+		//Language added
+		if(row == languages.size() && col == 0) {
+			languages.add(value.toString());
+			variants.put(value.toString(), "");
+			fireTableChanged(new TableModelEvent(this, row,row+1,TableModelEvent.ALL_COLUMNS,TableModelEvent.INSERT));
+		}
+		//Change
+		else {
+			if(col == 0) {
+				String oldval = languages.get(row);
+				languages.set(row, value.toString());
+				variants.put(value.toString(), variants.get(oldval));
+				variants.remove(oldval);
+			}
+			else {
+				variants.put(languages.get(row), value.toString());
+			}
+			fireTableChanged(new TableModelEvent(this, row,row,col));
+		}
+	}
+	
+	/**
+	 * Notifies all listeners
+	 */
+	protected void fireTableChanged(TableModelEvent e) {
+		for(TableModelListener l : listeners) l.tableChanged(e);
 	}
 
 }
