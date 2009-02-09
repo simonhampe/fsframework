@@ -1,13 +1,19 @@
 package fs.polyglot.view;
 
+import java.awt.Component;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.EventObject;
 import java.util.HashSet;
 
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
+import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.event.CellEditorListener;
+import javax.swing.event.ChangeEvent;
+import javax.swing.table.TableCellEditor;
 import javax.swing.text.JTextComponent;
 
 import org.dom4j.Document;
@@ -24,12 +30,11 @@ import fs.xml.ResourceReference;
 import fs.xml.XMLDirectoryTree;
 
 /**
- * Implements the component which is used for editing cells in a variant table. It is created configured via the corresponding 
- * VariantTableCellEditor
+ * Implements the component which is used for editing cells in a variant table. 
  * @author hampe
  *
  */
-public class VariantTableEditor extends JPanel implements ResourceDependent {
+public class VariantTableEditor extends JPanel implements TableCellEditor, ResourceDependent {
 
 	/**
 	 * compiler-generated version id 
@@ -53,7 +58,8 @@ public class VariantTableEditor extends JPanel implements ResourceDependent {
 	private HashSet<String> tabooList;
 	
 	//Listeners
-	private HashSet<DataRetrievalListener> listeners = new HashSet<DataRetrievalListener>();
+	//private HashSet<DataRetrievalListener> listeners = new HashSet<DataRetrievalListener>();
+	private HashSet<CellEditorListener> editorlisteners = new HashSet<CellEditorListener>();
 	
 	private TabooValidator languageValidator;
 	
@@ -62,12 +68,12 @@ public class VariantTableEditor extends JPanel implements ResourceDependent {
 		public void keyPressed(KeyEvent e) {
 			super.keyPressed(e);
 			//If ENTER is pressed and the content is valid, notify of an edit stop
-			if(e.getKeyCode() == KeyEvent.VK_ENTER && languageValidator.validate().getOverallResult() == Result.CORRECT) {
-				fireDataReady(entryField, entryField.getText());
+			if(e.getKeyCode() == KeyEvent.VK_ENTER) {
+				stopCellEditing();
 			}
 			//Id ESCAPE is pressed, 
 			if(e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-				fireDataReady(entryField, null);
+				cancelCellEditing();
 			}
 		}	
 	};
@@ -76,9 +82,7 @@ public class VariantTableEditor extends JPanel implements ResourceDependent {
 	// ******************************************************************
 	
 	/**
-	 * Constructs an editor, that is a panel containing a SwitchIconLabel and a text field. The cell editor is notified of edit stop / cancel
-	 * via a dataReady call. Edit calls are allowed /disallowed according to the validation status. An edit cancel is represented by a null data object,
-	 * an edit stop by the string which is the content.
+	 * Constructs an editor, that is a panel containing a SwitchIconLabel and a text field.  Edit stops are allowed /disallowed according to the validation status. 
 	 * @param taboos If this is null, every possible content is valid content. Otherwise the content may not be empty and not be contained in this list
 	 */
 	public VariantTableEditor(HashSet<String> taboos, ResourceReference r, PolyglotStringLoader l, String lang) {
@@ -90,21 +94,19 @@ public class VariantTableEditor extends JPanel implements ResourceDependent {
 		
 		//Init components
 		add(label); add(entryField);
-		languageValidator = (taboos == null)? new TabooValidator(null,null,null,new HashSet<String>(),true) : 
-							new TabooValidator(null,warn,warn,tabooList,false) {
+		languageValidator = new TabooValidator(null,warn,warn,tabooList,false) {
 			@Override
 			public Result validate(JTextComponent component) {
 				Result r = super.validate(component);
 				//Set Tooltips
 				switch(r) {
-				case INCORRECT: if(entryField.getText().trim().equals("")) setToolTipText(component,loader.getString(sgroup + ".nonempty", languageID));
+				case INCORRECT: if(component.getText().trim().equals("")) setToolTipText(component,loader.getString(sgroup + ".nonempty", languageID));
 								else setToolTipText(component, loader.getString(loader + ".existant", languageID)); break;
 				default: setToolTipText(component, null);
 				}
 				return r;
 			}			
 		};
-		languageValidator.addComponent(entryField, label);
 		entryField.addKeyListener(entryListener);
 		
 	}
@@ -134,17 +136,84 @@ public class VariantTableEditor extends JPanel implements ResourceDependent {
 	// LISTENER METHODS ********************************************
 	// *************************************************************
 	
-	public void addDataRetrievalListener(DataRetrievalListener l) {
-		if(l != null) listeners.add(l);
+//	public void addDataRetrievalListener(DataRetrievalListener l) {
+//		if(l != null) listeners.add(l);
+//	}
+//	
+//	public void removeDataRetrievalListener(DataRetrievalListener l) {
+//		listeners.remove(l);
+//	}
+//	
+//	protected void fireDataReady(Object source, Object data) {
+//		for(DataRetrievalListener l : listeners) l.dataReady(source, data);
+//	}
+	
+	protected void fireEditingCanceled(ChangeEvent e) {
+		for(CellEditorListener l: editorlisteners) l.editingCanceled(e);
 	}
 	
-	public void removeDataRetrievalListener(DataRetrievalListener l) {
-		listeners.remove(l);
+	protected void fireEditingStopped(ChangeEvent e) {
+		for(CellEditorListener l : editorlisteners) l.editingStopped(e);
+	}
+
+	// INTERFACE METHODS *******************************************
+	// *************************************************************
+	
+	@Override
+	public Component getTableCellEditorComponent(JTable table, Object value,
+			boolean isSelected, int row, int column) {
+		//Reset values
+		entryField.setText("");
+		entryField.requestFocusInWindow();
+		label.setIconVisible(false);
+		//If necessary, activate validation
+		if(row == 0) {
+			languageValidator.addComponent(entryField, label);
+			languageValidator.validate();
+		}
+		else languageValidator.removeComponent(entryField);
+		return this;
+	}
+
+	@Override
+	public void addCellEditorListener(CellEditorListener l) {
+		if(l!= null) editorlisteners.add(l);		
+	}
+
+	@Override
+	public void cancelCellEditing() {
+		fireEditingCanceled(new ChangeEvent(this));
+	}
+
+	@Override
+	public Object getCellEditorValue() {
+		return entryField.getText();
+	}
+
+	@Override
+	public boolean isCellEditable(EventObject anEvent) {
+		return true;
+	}
+
+	@Override
+	public void removeCellEditorListener(CellEditorListener l) {
+		editorlisteners.remove(l);		
+	}
+
+	@Override
+	public boolean shouldSelectCell(EventObject anEvent) {
+		return true;
+	}
+
+	@Override
+	public boolean stopCellEditing() {
+		if(languageValidator.validate().getOverallResult() != Result.INCORRECT) {
+			fireEditingStopped(new ChangeEvent(this));
+			return true;
+		}
+		return false;
 	}
 	
-	protected void fireDataReady(Object source, Object data) {
-		for(DataRetrievalListener l : listeners) l.dataReady(source, data);
-	}
 	
 	
 }

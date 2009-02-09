@@ -7,10 +7,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.TreeSet;
+import java.util.Vector;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -32,6 +34,7 @@ import org.dom4j.Document;
 import fs.gui.FrameworkDialog;
 import fs.gui.SwitchIconLabel;
 import fs.polyglot.model.PolyglotTableModel;
+import fs.polyglot.model.VariantTableModel;
 import fs.polyglot.validate.NonEmptyWarner;
 import fs.test.XMLDirectoryTest;
 import fs.validate.LabelIndicValidator;
@@ -71,7 +74,6 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 	
 	//Data
 	private PolyglotTableModel table;
-	private JList listOfSelected = null;
 	private HashSet<String> selected = new HashSet<String>();
 	private StringEditorConfiguration configuration;
 	private ArrayList<String> edits = new ArrayList<String>();
@@ -88,19 +90,6 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 	// EVENT HANDLING ********************************************
 	// ***********************************************************
 	
-	//Reloads the string list when selection is changed (and needed)
-	private ListSelectionListener selectionListener = new ListSelectionListener() {
-		@Override
-		public void valueChanged(ListSelectionEvent e) {
-			if(configuration.editOnlySelected) {
-				Object[] strings = listOfSelected.getSelectedValues();
-				selected.clear();
-				for(Object o : strings) {
-					selected.add(o.toString());
-				}
-			}
-		}
-	};
 	//Changes the enables-status of textGroup according to the check box
 	private ChangeListener checkGroupListener = new ChangeListener() {
 		@Override
@@ -117,21 +106,20 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 	 * disabled. All configuration parameters are then ignored. If it is null, the editor will create a list of editable strings from the
 	 * configuration data and fill all fields with the data of the first one. Navigational controls are activated, as well as Quick Navigation.
 	 * @param associatedTable The associated Table from which the data should be retrieved. If it is null, a null pointer exception is thrown
-	 * @param selectedStrings A list model from which to retrieve a list of selected strings. If only a single string is to be edited, this parameter is ignored
+	 * @param selectedStrings A list of selected strings. If only a single string is to be edited, this parameter is ignored
 	 * @param singleStringID Should be null, if the strings to be edited should be retrieved from the configuration data. Otherwise this stringID is edited and its data
 	 * retrieved from the table model
 	 * @param configuration The Configuration data. This specifies, which strings are to be edited. Usually this data is created by a StringEditorConfigurator. If null, default values are used
 	 */
-	public StringEditor(ResourceReference r, PolyglotStringLoader l, String lid, PolyglotTableModel associatedTable, JList selectedStrings, String singleStringID, StringEditorConfiguration configuration) {
+	public StringEditor(ResourceReference r, PolyglotStringLoader l, String lid, PolyglotTableModel associatedTable, HashSet<String> selectedStrings, String singleStringID, StringEditorConfiguration configuration) {
 		super(r, l, lid);
 		
 		//Copy data
 		if(associatedTable== null) throw new NullPointerException("Can't create editor for null table");
 		table = associatedTable;
-		listOfSelected = selectedStrings;
 		singleEditString = singleStringID;
 		this.configuration = configuration != null ? configuration : new StringEditorConfiguration(); 
-		if(listOfSelected != null) listOfSelected.getSelectionModel().addListSelectionListener(selectionListener);
+		this.selected = selectedStrings == null? null : new HashSet<String>(selectedStrings); 
 		
 		//Init all member components
 		textID = new JTextField();
@@ -143,7 +131,7 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 			checkGroup.addChangeListener(checkGroupListener);
 		generatedID = new JLabel("");
 			generatedID.setBorder(BorderFactory.createEtchedBorder());
-		tableVariants = new JTable(5,5);
+		tableVariants = new JTable();
 		jumpto = new JComboBox();
 		previous = new JButton("<-");
 		next = new JButton("->");
@@ -299,7 +287,7 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 	}
 
 	/**
-	 * If only a single string is edited by this instance, this has no effect. Otherwise, the list of edited strings and languages is reloaded. If 
+	 * If only a single string is edited by this instance, this has no effect. Otherwise, the list of edited strings and languages is loaded. If 
 	 * possible, the current selection is left unchanged and the last edit is performed before the update, if possible.
 	 */
 	public void updateData() {
@@ -334,10 +322,16 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 	protected void insertData() {
 		//Clear everything
 		textID.setText(""); textGroup.setText("");
-		//TODO: clear table and combo box
 		//If there are no strings, there is nothing to insert
-		if(edits.size() > 0) {
-			//TODO: Do something
+		if(edits.size() == 0) {
+			tableVariants.setModel(new VariantTableModel("",table,loader,languageID));
+			jumpto.setModel(new DefaultComboBoxModel(new Vector<String>()));
+		}
+		//Insert strings
+		else {
+			tableVariants.setModel(new VariantTableModel(edits.get(currentEdit),table,loader,languageID));
+			jumpto.setModel(new DefaultComboBoxModel(new Vector<String>(edits)));
+			//TODO: Continue...
 		}
 		
 	}
