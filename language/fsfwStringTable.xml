@@ -13,7 +13,8 @@
   <polyglotstring id="fs.global.ok" group="fs.global">
   	<variant lang="en">OK</variant></polyglotstring>
   <polyglotstring id="fs.global.cancel" group="fs.global">
-  	<variant lang="en">Cancel</variant></polyglotstring>
+  	<variant lang="en">Cancel</variant>
+  	<variant lang="de">Abbrechen</variant></polyglotstring>
   <polyglotstring id="fs.global.confirmoverwrite" group="fs.global">
   	<variant lang="en">
   		The file '%s' already exists. Do you really want to overwrite
@@ -289,6 +290,18 @@
 	<polyglotstring id="fs.polyglot.StringEditor.switchcancel"
 		group="fs.polyglot.StringEditor">
 		<variant lang="en">Cancels the current edit and jumps to the %s element.</variant>
+	</polyglotstring>
+	<polyglotstring id="fs.polyglot.StringEditor.doublevariant"
+		group="fs.polyglot.StringEditor">
+		<variant lang="en">Double variants are not allowed</variant>
+	</polyglotstring>
+	<polyglotstring id="fs.polyglot.StringEditor.emptylanguage"
+		group="fs.polyglot.StringEditor">
+		<variant lang="en">The empty language ID is not allowed</variant>
+	</polyglotstring>
+	<polyglotstring id="fs.polyglot.StringEditor.overwritevariant"
+		group="fs.polyglot.StringEditor">
+		<variant lang="en">There is already a variant for '%s'. It will be overwritten.</variant>
 	</polyglotstring>
 	<polyglotstring id="fs.polyglot.VariantTableModel.language"
 		group="fs.polyglot.VariantTableModel">

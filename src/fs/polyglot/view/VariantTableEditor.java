@@ -1,6 +1,8 @@
 package fs.polyglot.view;
 
+import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -18,7 +20,6 @@ import javax.swing.text.JTextComponent;
 
 import org.dom4j.Document;
 
-import fs.event.DataRetrievalListener;
 import fs.gui.SwitchIconLabel;
 import fs.polyglot.validate.TabooValidator;
 import fs.validate.ValidationResult.Result;
@@ -56,6 +57,7 @@ public class VariantTableEditor extends JPanel implements TableCellEditor, Resou
 	
 	//Data
 	private HashSet<String> tabooList;
+	private String initialValue;
 	
 	//Listeners
 	//private HashSet<DataRetrievalListener> listeners = new HashSet<DataRetrievalListener>();
@@ -83,7 +85,9 @@ public class VariantTableEditor extends JPanel implements TableCellEditor, Resou
 	
 	/**
 	 * Constructs an editor, that is a panel containing a SwitchIconLabel and a text field.  Edit stops are allowed /disallowed according to the validation status. 
-	 * @param taboos If this is null, every possible content is valid content. Otherwise the content may not be empty and not be contained in this list
+	 * @param The initial value for the text field. If this value is contained in the taboo list, it is still allowed.
+	 * @param taboos If this is null, every possible content is valid content. Otherwise the content may not be empty and not be contained in this list (The value
+	 * in the text field 
 	 */
 	public VariantTableEditor(HashSet<String> taboos, ResourceReference r, PolyglotStringLoader l, String lang) {
 		super();
@@ -93,6 +97,16 @@ public class VariantTableEditor extends JPanel implements TableCellEditor, Resou
 		tabooList = taboos == null? taboos : new HashSet<String>(taboos);
 		
 		//Init components
+		setBackground(new Color(255,255,255));
+		label = new SwitchIconLabel(warn);
+		entryField = new JTextField() {
+			@Override
+			public Dimension getPreferredSize() {
+				Dimension d = super.getPreferredSize();
+				JTextField mesurefield = new JTextField("standard text");
+				return new Dimension(mesurefield.getPreferredSize().width,d.height);
+			}
+		};
 		add(label); add(entryField);
 		languageValidator = new TabooValidator(null,warn,warn,tabooList,false) {
 			@Override
@@ -101,12 +115,20 @@ public class VariantTableEditor extends JPanel implements TableCellEditor, Resou
 				//Set Tooltips
 				switch(r) {
 				case INCORRECT: if(component.getText().trim().equals("")) setToolTipText(component,loader.getString(sgroup + ".nonempty", languageID));
-								else setToolTipText(component, loader.getString(loader + ".existant", languageID)); break;
+								else {
+									//If the text is the initial value, it IS correct.
+									if(component.getText().equals(initialValue)) {
+										setToolTipText(component, null);
+										return Result.CORRECT;
+									}
+									else setToolTipText(component, loader.getString(loader + ".existant", languageID)); break;
+								}
 				default: setToolTipText(component, null);
 				}
 				return r;
 			}			
 		};
+		languageValidator.addComponent(entryField, label);
 		entryField.addKeyListener(entryListener);
 		
 	}
@@ -163,15 +185,11 @@ public class VariantTableEditor extends JPanel implements TableCellEditor, Resou
 	public Component getTableCellEditorComponent(JTable table, Object value,
 			boolean isSelected, int row, int column) {
 		//Reset values
-		entryField.setText("");
+		entryField.setText(value.toString());
 		entryField.requestFocusInWindow();
-		label.setIconVisible(false);
+		initialValue = value.toString();
 		//If necessary, activate validation
-		if(row == 0) {
-			languageValidator.addComponent(entryField, label);
-			languageValidator.validate();
-		}
-		else languageValidator.removeComponent(entryField);
+		languageValidator.validate();
 		return this;
 	}
 

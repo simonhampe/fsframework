@@ -1,14 +1,18 @@
 package fs.polyglot.view;
 
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EventObject;
 import java.util.HashSet;
 import java.util.TreeSet;
 import java.util.Vector;
 
+import javax.swing.AbstractCellEditor;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -23,10 +27,18 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+import javax.swing.event.CellEditorListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
 import javax.swing.text.JTextComponent;
 
 import org.dom4j.Document;
@@ -44,6 +56,7 @@ import fs.validate.ValidationValidator;
 import fs.validate.ValidationResult.Result;
 import fs.xml.FsfwDefaultReference;
 import fs.xml.PolyglotStringLoader;
+import fs.xml.PolyglotStringTable;
 import fs.xml.ResourceDependent;
 import fs.xml.ResourceReference;
 import fs.xml.XMLDirectoryTree;
@@ -69,6 +82,8 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 	private JButton config;
 	private JButton ok;
 	private JButton cancel;
+	private JButton deleteRow;
+	
 	
 	private ImageIcon warnIcon;
 	
@@ -85,6 +100,7 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 	//Validation
 	private LabelIndicValidator<JTextField> groupWarner;
 	private LabelIndicValidator<JTextField> stringValidator;
+	private LabelIndicValidator<JTable> tableValidator;
 	private ValidationValidator summary;
 	
 	// EVENT HANDLING ********************************************
@@ -95,6 +111,26 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 		@Override
 		public void stateChanged(ChangeEvent e) {
 			textGroup.setEnabled(checkGroup.isSelected());
+		}
+	};
+	
+	//Updates the 'final ID' field, if the check box for generating the id is changed
+	private ChangeListener checkGenerateListener = new ChangeListener() {
+		@Override
+		public void stateChanged(ChangeEvent e) {
+			generatedID.setText(getFinalID());
+		}
+	};
+	
+	private DocumentListener checkGenerateEditListener = new DocumentListener() {
+		@Override
+		public void changedUpdate(DocumentEvent e) { update(); }
+		@Override
+		public void insertUpdate(DocumentEvent e) { update(); }
+		@Override
+		public void removeUpdate(DocumentEvent e) { update(); }
+		private void update() {
+			generatedID.setText(getFinalID());
 		}
 	};
 	
@@ -124,13 +160,16 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 		//Init all member components
 		textID = new JTextField();
 		textGroup = new JTextField();
+		textID.getDocument().addDocumentListener(checkGenerateEditListener);
+		textGroup.getDocument().addDocumentListener(checkGenerateEditListener);
 		checkGenerateID = new JCheckBox(loader.getString(sgroup + ".generateid", languageID), true);
+		checkGenerateID.addChangeListener(checkGenerateListener);
 		checkQuickNav = new JCheckBox(loader.getString(sgroup + ".quicknav", languageID),singleStringID == null); checkQuickNav.setEnabled(singleStringID == null);
 		checkGroup = new JCheckBox();
 			checkGroup.setSelected(table.getGroupID(singleStringID) != null);
 			checkGroup.addChangeListener(checkGroupListener);
 		generatedID = new JLabel("");
-			generatedID.setBorder(BorderFactory.createEtchedBorder());
+			generatedID.setForeground(new Color(0,0,255));
 		tableVariants = new JTable();
 		jumpto = new JComboBox();
 		previous = new JButton("<-");
@@ -138,6 +177,7 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 		config = new JButton(loader.getString(sgroup + ".config", languageID));
 		ok = new JButton(loader.getString("fs.global.ok", languageID));
 		cancel = new JButton(loader.getString("fs.global.cancel", languageID));
+		deleteRow = new JButton("x");
 		
 		//Load data
 		updateData();
@@ -147,6 +187,8 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 		labelID.setIconReference(warnIcon);
 		SwitchIconLabel labelGroup = new SwitchIconLabel(loader.getString(sgroup + ".groupid", languageID));
 		labelGroup.setIconReference(warnIcon);
+		SwitchIconLabel labelValidTable = new SwitchIconLabel("");
+			labelValidTable.setIconReference(warnIcon);
 		JLabel labelTable = new JLabel(loader.getString(sgroup + ".variants", languageID));
 		JLabel labelJump = new JLabel(loader.getString(sgroup + ".jumpto", languageID));
 		JScrollPane tablePane = new JScrollPane(tableVariants) {
@@ -173,10 +215,13 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 			line1.add(labelID); line1.add(textID); line1.add(labelGroup); line1.add(textGroup);line1.add(checkGroup);
 		Box line2 = new Box(BoxLayout.X_AXIS);
 		line2.setAlignmentX(LEFT_ALIGNMENT);
-			line2.add(checkGenerateID);line2.add(generatedID);
+			line2.add(checkGenerateID);
+		Box line2b = new Box(BoxLayout.X_AXIS);
+		line2b.setAlignmentX(LEFT_ALIGNMENT);
+			line2b.add(Box.createHorizontalGlue());line2b.add(generatedID);line2b.add(Box.createHorizontalGlue());
 		Box line3 = new Box(BoxLayout.X_AXIS);
 		line3.setAlignmentX(LEFT_ALIGNMENT);
-			line3.add(labelTable);
+			line3.add(labelTable);line3.add(labelValidTable);
 		Box line4 = new Box(BoxLayout.X_AXIS);
 		line4.setAlignmentX(LEFT_ALIGNMENT);
 			line4.add(tablePane);
@@ -192,12 +237,15 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 			line7.add(labelJump); line7.add(jumpto);line7.add(Box.createHorizontalGlue());
 			
 		lineBox.add(hfill);	
-		lineBox.add(line1);lineBox.add(line2);lineBox.add(line3); 
+		lineBox.add(line1);lineBox.add(line2);lineBox.add(line2b);lineBox.add(line3); 
 		lineBox.add(line4); lineBox.add(line5); lineBox.add(line6);
 		lineBox.add(hfill2);
 		lineBox.add(line7);
 		add(lineBox);
 		pack();
+		setResizable(false);
+		
+		//Now resize table columns
 		
 		//Init Validation
 		
@@ -258,6 +306,66 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 				return Result.CORRECT;
 			}
 		};
+		tableValidator = new LabelIndicValidator<JTable>(null, warnIcon, warnIcon) {
+			private TableModelListener listener = new TableModelListener() {
+				@Override
+				public void tableChanged(TableModelEvent e) {
+					fireStateChanged(new ChangeEvent(e.getSource()));
+				}
+			};
+			@Override
+			protected void registerToComponent(JTable component) {
+				component.getModel().addTableModelListener(listener);
+			}
+			@Override
+			protected void unregisterFromComponent(JTable component) {
+				component.getModel().removeTableModelListener(listener);
+			}
+			@Override
+			public Result validate(JTable component) {
+				ArrayList<String> languageList = new ArrayList<String>();
+				HashSet<String> originalList = new HashSet<String>();
+				try {
+					languageList = ((VariantTableModel)tableVariants.getModel()).getLanguageList();
+					originalList = ((VariantTableModel)tableVariants.getModel()).getOriginalLanguageList();
+				}
+				catch(ClassCastException ce) {
+					throw new UnsupportedOperationException("Can't load language id list from variant table. It seems this listener was used for a wrong table model.");
+				}
+				Result r = Result.CORRECT;
+				String tooltip = null;
+				//Check for variants that were not originally displayed, but exist already
+				for(String l : languageList) {
+					if(table.getSupportedLanguages(edits.get(currentEdit)).contains(l) && !originalList.contains(l)) {
+						r = Result.WARNING;
+						if(tooltip == null) tooltip = "<html>- ";
+						else tooltip += "<br>- ";
+						tooltip += loader.getString(sgroup + ".overwritevariant", languageID, l);
+					}
+				}
+				//Check for doublets
+				if((new HashSet<String>(languageList).size() < languageList.size())) {
+					if(tooltip == null) tooltip = "<html>- ";
+					else tooltip += "<br>- ";
+					tooltip += loader.getString(sgroup + ".doublevariant", languageID);
+					r = Result.INCORRECT;
+				}
+				//Check for empty language ids
+				for(String l : languageList) {
+					if(l.trim().equals("")) {
+						r = Result.INCORRECT;
+						if(tooltip == null) tooltip = "<html>- ";
+						else tooltip += "<br>- ";
+						tooltip += loader.getString(sgroup + ".emptylanguage", languageID);
+						break;
+					}
+				}
+				if(tooltip != null) tooltip += "</html>";
+				//Set tooltips
+				setToolTipText(component, tooltip);
+				return r;
+			}
+		};
 		//Dis/En-ables Ok-Button and changes tooltips
 		summary = new ValidationValidator() {
 			@Override
@@ -279,8 +387,10 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 		};
 		groupWarner.addComponent(textGroup, labelGroup);
 		stringValidator.addComponent(textID, labelID);
+		tableValidator.addComponent(tableVariants, labelValidTable);
 		summary.addValidator(groupWarner);
 		summary.addValidator(stringValidator);
+		summary.addValidator(tableValidator);
 		summary.validate();
 		
 		
@@ -324,16 +434,21 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 		textID.setText(""); textGroup.setText("");
 		//If there are no strings, there is nothing to insert
 		if(edits.size() == 0) {
-			tableVariants.setModel(new VariantTableModel("",table,loader,languageID));
+			tableVariants.setModel(new VariantTableModel("",configuration,table,loader,languageID));
 			jumpto.setModel(new DefaultComboBoxModel(new Vector<String>()));
 		}
 		//Insert strings
 		else {
-			tableVariants.setModel(new VariantTableModel(edits.get(currentEdit),table,loader,languageID));
+			tableVariants.setModel(new VariantTableModel(edits.get(currentEdit),configuration,table,loader,languageID));
 			jumpto.setModel(new DefaultComboBoxModel(new Vector<String>(edits)));
-			//TODO: Continue...
+			jumpto.setSelectedIndex(currentEdit);
+			//Extract string name
+			String cutString = PolyglotStringTable.cutGroupPath(edits.get(currentEdit));
+			if(cutString.startsWith(".")) cutString = cutString.substring(1);
+			textID.setText(checkGenerateID.isSelected()? cutString: edits.get(currentEdit));
+			textGroup.setText(table.getGroupID(edits.get(currentEdit)));
 		}
-		
+		//TODO: Implement buttons for deleting rows
 	}
 	
 	/**
@@ -349,7 +464,7 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 		}
 		//Set Group
 		table.setGroupID(newID, checkGroup.isSelected() ? textGroup.getText() : null);
-		//Set Variants (we wan't to reduce operations to a mininum)
+		//Set Variants (we want to reduce operations to a mininum)
 		//TODO: Finish
 		
 		
@@ -381,9 +496,6 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 		XMLDirectoryTree tree = new XMLDirectoryTree();
 		tree.addPath("graphics/StringEditor/warn.png");
 		return tree;
-	}
-	
-	
-	
+	}	
 	
 }

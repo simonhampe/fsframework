@@ -1,7 +1,6 @@
 package fs.polyglot.model;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.TreeSet;
 
@@ -9,6 +8,7 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
 
+import fs.polyglot.view.StringEditorConfiguration;
 import fs.xml.PolyglotStringLoader;
 import fs.xml.PolyglotStringTable;
 
@@ -22,24 +22,34 @@ public class VariantTableModel implements TableModel {
 
 	//A list of languages
 	private ArrayList<String> languages = new ArrayList<String>();
-	//A map mapping language ids to variants
-	private HashMap<String, String> variants = new HashMap<String, String>();	
+	//A list of languages before any user edit occurred
+	private ArrayList<String> originallist = new ArrayList<String>();
+	//A list of variants
+	private ArrayList<String> variants = new ArrayList<String>();
 	
 	private HashSet<TableModelListener> listeners = new HashSet<TableModelListener>();
 	
 	private PolyglotStringLoader loader = null;
 	private String languageID;
+	private StringEditorConfiguration config;
 	
 	// CONSTRUCTOR **********************************************************
 	// **********************************************************************
 	
-	public VariantTableModel(String stringID, PolyglotTableModel table, PolyglotStringLoader loader, String languageID) {
+	public VariantTableModel(String stringID,StringEditorConfiguration config, PolyglotTableModel table, PolyglotStringLoader loader, String languageID) {
 		this.loader = loader != null ? loader : PolyglotStringLoader.getDefaultLoader();
 		this.languageID = languageID != null ? languageID : PolyglotStringTable.getGlobalLanguageID();
+		this.config = config != null ? config : new StringEditorConfiguration();
 		if(!(table == null || stringID == null)) {
-			languages = new ArrayList<String>(new TreeSet<String>(table.getSupportedLanguages(stringID)));
-			for(String l : languages) {
-				variants.put(l, table.getUnformattedString(stringID, l));
+			TreeSet<String> lang = new TreeSet<String>(table.getSupportedLanguages(stringID));
+			languages = new ArrayList<String>();
+			for(String l : lang) {
+				if(this.config.excludeTheseLanguages == null || !this.config.excludeTheseLanguages.contains(l)) {
+					if(this.config.excludeTheseLanguages != null || this.config.onlyTheseLanguages == null || this.config.onlyTheseLanguages.contains(l)) 
+						languages.add(l);
+						originallist.add(l);
+						variants.add(table.getUnformattedString(stringID, l));
+				}
 			}
 			
 		}
@@ -77,7 +87,7 @@ public class VariantTableModel implements TableModel {
 	 */
 	@Override
 	public String getColumnName(int arg0) {
-		return loader.getString("fs.polyglot.VariantTableModel" + ((arg0 == 0) ? ".language" : "variant" ), languageID); 
+		return loader.getString("fs.polyglot.VariantTableModel" + ((arg0 == 0) ? ".language" : (arg0 == 1 ? ".variant" : "") ), languageID); 
 	}
 
 	/**
@@ -99,18 +109,18 @@ public class VariantTableModel implements TableModel {
 		}
 		else switch(arg1) {
 		case 0: return languages.get(arg0);
-		case 1: return variants.get(languages.get(arg0));
+		case 1: return variants.get(arg0);
 		case 2: return "";
 		default: return "";
 		}
 	}
 
 	/**
-	 * Returns true for all language/variant cells which are not in the last row and only for the language cell in the last row
+	 * Returns true for all cells which are not in the last row and only for the language cell in the last row
 	 */
 	@Override
 	public boolean isCellEditable(int arg0, int arg1) {
-		return (arg0 < languages.size() || arg1 == 0) && arg1 <= 1;
+		return (arg0 < languages.size() || arg1 == 0);
 	}
 
 	@Override
@@ -121,33 +131,46 @@ public class VariantTableModel implements TableModel {
 
 	/**
 	 * If the cell adressed is a cell in the first or second column, the following happens:<br>
-	 * - If an existing language or variant is changed, this change will be adopted and all listeners notified
+	 * - If an existing language or variant is changed, this change will be adopted and all listeners notified<br>
 	 * - If a language is added in the last row, it is added with an empty variant and all listeners are notified
-	 * @throws ArrayIndexOutOfBoundsException - If a third column cell is edited or the indices are out of bounds.
+	 * @throws ArrayIndexOutOfBoundsException - If the indices are out of bounds.
 	 */
 	@Override
 	public void setValueAt(Object value, int row, int col) {
-		if(col >= 2 || col < 0 || row < 0 || row > languages.size()) 
+		if(col > 2 || col < 0 || row < 0 || row > languages.size()) 
 			throw new ArrayIndexOutOfBoundsException("Can't edit cell at (" + row + ", " + col + "). Is not editable or does not exist.");
+		if(col == 2) return;
 		//Language added
 		if(row == languages.size() && col == 0) {
 			languages.add(value.toString());
-			variants.put(value.toString(), "");
-			fireTableChanged(new TableModelEvent(this, row,row+1,TableModelEvent.ALL_COLUMNS,TableModelEvent.INSERT));
+			variants.add("");
+			fireTableChanged(new TableModelEvent(this, row,row,TableModelEvent.ALL_COLUMNS,TableModelEvent.UPDATE));
+			fireTableChanged(new TableModelEvent(this, row+1,row+1, TableModelEvent.ALL_COLUMNS, TableModelEvent.INSERT));
 		}
 		//Change
 		else {
 			if(col == 0) {
-				String oldval = languages.get(row);
 				languages.set(row, value.toString());
-				variants.put(value.toString(), variants.get(oldval));
-				variants.remove(oldval);
 			}
 			else {
-				variants.put(languages.get(row), value.toString());
+				variants.set(row, value.toString());
 			}
 			fireTableChanged(new TableModelEvent(this, row,row,col));
 		}
+	}
+	
+	/**
+	 * Returns a list of all language IDs in the model
+	 */
+	public ArrayList<String> getLanguageList() {
+		return new ArrayList<String>(languages);
+	}
+	
+	/**
+	 * Returns a list of language IDs that were displayed before any edit occurred.
+	 */
+	public HashSet<String> getOriginalLanguageList() {
+		return new HashSet<String>(originallist);
 	}
 	
 	/**
