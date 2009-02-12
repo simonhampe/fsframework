@@ -39,6 +39,7 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumnModel;
 import javax.swing.text.JTextComponent;
 
 import org.dom4j.Document;
@@ -166,7 +167,6 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 		checkGenerateID.addChangeListener(checkGenerateListener);
 		checkQuickNav = new JCheckBox(loader.getString(sgroup + ".quicknav", languageID),singleStringID == null); checkQuickNav.setEnabled(singleStringID == null);
 		checkGroup = new JCheckBox();
-			checkGroup.setSelected(table.getGroupID(singleStringID) != null);
 			checkGroup.addChangeListener(checkGroupListener);
 		generatedID = new JLabel("");
 			generatedID.setForeground(new Color(0,0,255));
@@ -181,7 +181,9 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 		
 		//Load data
 		updateData();
-				
+		
+		checkGroup.setSelected(table.getGroupID(edits.get(currentEdit)) != null);
+		
 		//Init additional components
 		SwitchIconLabel labelID = new SwitchIconLabel(loader.getString(sgroup + ".stringid", languageID));
 		labelID.setIconReference(warnIcon);
@@ -202,6 +204,7 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 				return new Dimension(d.width, tableVariants.getPreferredSize().height*2);
 			}
 		};
+		
 		
 		
 		//Layout
@@ -242,10 +245,20 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 		lineBox.add(hfill2);
 		lineBox.add(line7);
 		add(lineBox);
+		
 		pack();
 		setResizable(false);
 		
 		//Now resize table columns
+		TableColumnModel cm = tableVariants.getColumnModel();
+		tableVariants.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+		cm.getColumn(2).setPreferredWidth(10);
+		cm.getColumn(1).setPreferredWidth(
+				tablePane.getPreferredSize().width-
+					cm.getColumn(2).getPreferredWidth() - cm.getColumn(0).getPreferredWidth());
+		cm.getColumn(1).setResizable(false);
+		cm.getColumn(2).setResizable(false); 
+		
 		
 		//Init Validation
 		
@@ -497,5 +510,30 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 		tree.addPath("graphics/StringEditor/warn.png");
 		return tree;
 	}	
+	
+	private class ButtonEditor extends AbstractCellEditor implements TableCellEditor, TableCellRenderer {
+
+		@Override
+		public Component getTableCellEditorComponent(JTable table,
+				Object value, boolean isSelected, int row, int column) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public Object getCellEditorValue() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public Component getTableCellRendererComponent(JTable table,
+				Object value, boolean isSelected, boolean hasFocus, int row,
+				int column) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+		
+	}
 	
 }
