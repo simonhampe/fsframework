@@ -303,6 +303,10 @@
 		group="fs.polyglot.StringEditor">
 		<variant lang="en">There is already a variant for '%s'. It will be overwritten.</variant>
 	</polyglotstring>
+	<polyglotstring id="fs.polyglot.StringEditor.deletevariant"
+		group="fs.polyglot.StringEditor">
+		<variant lang="en">Delete this variant</variant>
+	</polyglotstring>
 	<polyglotstring id="fs.polyglot.VariantTableModel.language"
 		group="fs.polyglot.VariantTableModel">
 		<variant lang="en">Language</variant>
@@ -310,14 +314,6 @@
 	<polyglotstring id="fs.polyglot.VariantTableModel.variant"
 		group="fs.polyglot.VariantTableModel">
 		<variant lang="en">Variant</variant>
-	</polyglotstring>
-	<polyglotstring id="fs.polyglot.VariantTableEditor.nonempty"
-		group="fs.polyglot.VariantTableEditor">
-		<variant lang="en">The empty language ID is not allowed</variant>
-	</polyglotstring>
-	<polyglotstring id="fs.polyglot.VariantTableEditor.existant"
-		group="fs.polyglot.VariantTableEditor">
-		<variant lang="en">This language ID exists already</variant>
 	</polyglotstring>
 
 </fsfw:polyglotstringtable>

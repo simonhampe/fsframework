@@ -55,6 +55,34 @@ public class VariantTableModel implements TableModel {
 		}
 	}
 	
+	// GETTER AND SETTER METHODS *********************************************
+	// ***********************************************************************
+	
+	/**
+	 * Returns a list of all language IDs in the model
+	 */
+	public ArrayList<String> getLanguageList() {
+		return new ArrayList<String>(languages);
+	}
+	
+	/**
+	 * Returns a list of language IDs that were displayed before any edit occurred.
+	 */
+	public HashSet<String> getOriginalLanguageList() {
+		return new HashSet<String>(originallist);
+	}
+	
+	/**
+	 * Removes the entry in the specified row, if 0 <= row < getRowCount-1 (the last row cannot be deleted)
+	 */
+	public void removeRow(int row) {
+		if(0 <= row && row < languages.size()) {
+			languages.remove(row);
+			variants.remove(row);
+			fireTableChanged(new TableModelEvent(this,row,row,TableModelEvent.ALL_COLUMNS,TableModelEvent.DELETE));
+		}
+	}
+	
 	// INTERFACE METHODS ****************************************************
 	// **********************************************************************
 	
@@ -159,19 +187,7 @@ public class VariantTableModel implements TableModel {
 		}
 	}
 	
-	/**
-	 * Returns a list of all language IDs in the model
-	 */
-	public ArrayList<String> getLanguageList() {
-		return new ArrayList<String>(languages);
-	}
 	
-	/**
-	 * Returns a list of language IDs that were displayed before any edit occurred.
-	 */
-	public HashSet<String> getOriginalLanguageList() {
-		return new HashSet<String>(originallist);
-	}
 	
 	/**
 	 * Notifies all listeners

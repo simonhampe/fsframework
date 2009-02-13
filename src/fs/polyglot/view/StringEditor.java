@@ -5,6 +5,8 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EventObject;
@@ -12,7 +14,9 @@ import java.util.HashSet;
 import java.util.TreeSet;
 import java.util.Vector;
 
+import javax.swing.AbstractAction;
 import javax.swing.AbstractCellEditor;
+import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -87,9 +91,11 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 	
 	
 	private ImageIcon warnIcon;
+	private ImageIcon deleteIcon;
 	
 	//Data
 	private PolyglotTableModel table;
+	private VariantTableModel model;
 	private HashSet<String> selected = new HashSet<String>();
 	private StringEditorConfiguration configuration;
 	private ArrayList<String> edits = new ArrayList<String>();
@@ -447,12 +453,12 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 		textID.setText(""); textGroup.setText("");
 		//If there are no strings, there is nothing to insert
 		if(edits.size() == 0) {
-			tableVariants.setModel(new VariantTableModel("",configuration,table,loader,languageID));
+			model = new VariantTableModel("",configuration,table,loader,languageID);
 			jumpto.setModel(new DefaultComboBoxModel(new Vector<String>()));
 		}
 		//Insert strings
 		else {
-			tableVariants.setModel(new VariantTableModel(edits.get(currentEdit),configuration,table,loader,languageID));
+			model = new VariantTableModel(edits.get(currentEdit),configuration,table,loader,languageID);
 			jumpto.setModel(new DefaultComboBoxModel(new Vector<String>(edits)));
 			jumpto.setSelectedIndex(currentEdit);
 			//Extract string name
@@ -461,7 +467,9 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 			textID.setText(checkGenerateID.isSelected()? cutString: edits.get(currentEdit));
 			textGroup.setText(table.getGroupID(edits.get(currentEdit)));
 		}
-		//TODO: Implement buttons for deleting rows
+		tableVariants.setModel(model);
+		tableVariants.getColumnModel().getColumn(2).setCellRenderer(new ButtonEditor());
+		tableVariants.getColumnModel().getColumn(2).setCellEditor(new ButtonEditor());
 	}
 	
 	/**
@@ -502,36 +510,53 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 	public void assignReference(ResourceReference r) {
 		super.assignReference(r);
 		warnIcon = new ImageIcon(resource.getFullResourcePath(this, "graphics/StringEditor/warn.png"));
+		deleteIcon = new ImageIcon(resource.getFullResourcePath(this, "graphics/StringEditor/delete.png"));
 	}
 
 	@Override
 	public Document getExpectedResourceStructure() {
 		XMLDirectoryTree tree = new XMLDirectoryTree();
 		tree.addPath("graphics/StringEditor/warn.png");
+		tree.addPath("graphics/StringEditor/delete.png");
 		return tree;
 	}	
 	
 	private class ButtonEditor extends AbstractCellEditor implements TableCellEditor, TableCellRenderer {
 
+		//The button which is returned as renderer / editor
+		private JButton deleteButton = new JButton();
+
+		//A renderer for the last cell
+		private DefaultTableCellRenderer renderer = new DefaultTableCellRenderer();
+	
+		public ButtonEditor() {
+			deleteButton.setIcon(deleteIcon);
+			deleteButton.setToolTipText(loader.getString(sgroup + ".deletevariant", languageID));
+		}
+		
 		@Override
 		public Component getTableCellEditorComponent(JTable table,
 				Object value, boolean isSelected, int row, int column) {
-			// TODO Auto-generated method stub
-			return null;
+			final int r = row;
+			deleteButton.setAction(new AbstractAction() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					model.removeRow(r);
+				}
+			});
+			return deleteButton;
 		}
 
 		@Override
 		public Object getCellEditorValue() {
-			// TODO Auto-generated method stub
-			return null;
+			return deleteButton;
 		}
 
 		@Override
 		public Component getTableCellRendererComponent(JTable table,
 				Object value, boolean isSelected, boolean hasFocus, int row,
 				int column) {
-			// TODO Auto-generated method stub
-			return null;
+			return row != model.getRowCount() - 1 ? deleteButton : renderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 		}
 		
 	}
