@@ -83,6 +83,8 @@ public class VariantTableModel implements TableModel {
 		}
 	}
 	
+	
+	
 	// INTERFACE METHODS ****************************************************
 	// **********************************************************************
 	

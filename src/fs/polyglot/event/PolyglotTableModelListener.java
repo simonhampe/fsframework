@@ -1,12 +1,14 @@
 package fs.polyglot.event;
 
+import java.util.EventListener;
+
 import fs.polyglot.model.PolyglotTableModel;
 
 /**
  * Listens to all possible changes in a PolyglotTableModel. This is very coarse-grained, since it would be a serious performance impact to calculate 
  * the exact changes
  */
-public interface PolyglotTableModelListener {
+public interface PolyglotTableModelListener extends EventListener {
 
 	/**
 	 * This method is called, when the table id has been changed.

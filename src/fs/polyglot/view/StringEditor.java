@@ -48,6 +48,7 @@ import javax.swing.text.JTextComponent;
 
 import org.dom4j.Document;
 
+import fs.event.DocumentChangeFlag;
 import fs.gui.FrameworkDialog;
 import fs.gui.SwitchIconLabel;
 import fs.polyglot.model.PolyglotTableModel;
@@ -141,6 +142,8 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 		}
 	};
 	
+	private DocumentChangeFlag flag = new DocumentChangeFlag();
+	
 	// CONSTRUCTOR ***********************************************
 	// ***********************************************************
 	
@@ -167,16 +170,21 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 		//Init all member components
 		textID = new JTextField();
 		textGroup = new JTextField();
-		textID.getDocument().addDocumentListener(checkGenerateEditListener);
-		textGroup.getDocument().addDocumentListener(checkGenerateEditListener);
+			textID.getDocument().addDocumentListener(checkGenerateEditListener);
+			textID.getDocument().addDocumentListener(flag);
+			textGroup.getDocument().addDocumentListener(checkGenerateEditListener);
+			textGroup.getDocument().addDocumentListener(flag);
 		checkGenerateID = new JCheckBox(loader.getString(sgroup + ".generateid", languageID), true);
-		checkGenerateID.addChangeListener(checkGenerateListener);
+			checkGenerateID.addChangeListener(checkGenerateListener);
+			checkGenerateID.addChangeListener(flag);
 		checkQuickNav = new JCheckBox(loader.getString(sgroup + ".quicknav", languageID),singleStringID == null); checkQuickNav.setEnabled(singleStringID == null);
 		checkGroup = new JCheckBox();
 			checkGroup.addChangeListener(checkGroupListener);
+			checkGroup.addChangeListener(flag);
 		generatedID = new JLabel("");
 			generatedID.setForeground(new Color(0,0,255));
 		tableVariants = new JTable();
+			tableVariants.getTableHeader().setReorderingAllowed(false);
 		jumpto = new JComboBox();
 		previous = new JButton("<-");
 		next = new JButton("->");
@@ -468,8 +476,11 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 			textGroup.setText(table.getGroupID(edits.get(currentEdit)));
 		}
 		tableVariants.setModel(model);
+		model.addTableModelListener(flag);
 		tableVariants.getColumnModel().getColumn(2).setCellRenderer(new ButtonEditor());
 		tableVariants.getColumnModel().getColumn(2).setCellEditor(new ButtonEditor());
+		//Reset change log
+		flag.setChangeFlag(false);
 	}
 	
 	/**
@@ -478,17 +489,24 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 	protected void applyData() {
 		//If the entries are not valid, return
 		if(summary.validate().getOverallResult() == Result.INCORRECT) return;
-		//Change string ID, if necessary
-		String newID = textID.getText();
-		if(!textID.getText().equals(edits.get(currentEdit))) {
-			table.renameString(edits.get(currentEdit), textID.getText());
+		//If there are no edits, a new entry is created
+		if(edits.size() == 0) {
+			table.addStringID(getFinalID());
+			if(checkGroup.isSelected()) table.setGroupID(textID.getText(), textGroup.getText());
+			for(int i = 0; i < model.getLanguageList().size(); i++) {
+				table.putString(getFinalID(), model.getValueAt(i, 0).toString(), model.getValueAt(i, 1).toString());
+			}
 		}
-		//Set Group
-		table.setGroupID(newID, checkGroup.isSelected() ? textGroup.getText() : null);
-		//Set Variants (we want to reduce operations to a mininum)
-		//TODO: Finish
-		
-		
+		//Otherwise...
+		else {
+			//Compare edited id to new id and potentially rename
+			if(!getFinalID().equals(edits.get(currentEdit))) {
+				table.renameString(edits.get(currentEdit), getFinalID());
+			}
+			//Set group anyway
+			table.setGroupID(getFinalID(), checkGroup.isSelected()? textGroup.getText() : null);
+			//
+		}
 	}
 	
 	/**
@@ -521,7 +539,16 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 		return tree;
 	}	
 	
+	// LOCAL CLASSES ********************************************************************
+	// **********************************************************************************
+	
+	//A class for rendering the delete buttons in the table
 	private class ButtonEditor extends AbstractCellEditor implements TableCellEditor, TableCellRenderer {
+
+		/**
+		 * compiler-generated version id
+		 */
+		private static final long serialVersionUID = 2908728669582358571L;
 
 		//The button which is returned as renderer / editor
 		private JButton deleteButton = new JButton();
@@ -539,9 +566,15 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 				Object value, boolean isSelected, int row, int column) {
 			final int r = row;
 			deleteButton.setAction(new AbstractAction() {
+				/**
+				 * compiler-generated version id
+				 */
+				private static final long serialVersionUID = 247392917500595587L;
+
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					model.removeRow(r);
+					fireEditingStopped();
 				}
 			});
 			return deleteButton;
@@ -557,7 +590,7 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 				Object value, boolean isSelected, boolean hasFocus, int row,
 				int column) {
 			return row != model.getRowCount() - 1 ? deleteButton : renderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-		}
+		}		
 		
 	}
 	
