@@ -7,6 +7,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.print.Paper;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EventObject;
@@ -81,6 +82,7 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 	private JCheckBox checkQuickNav;
 	private JCheckBox checkGroup;
 	private JLabel generatedID;
+	private JScrollPane tablePane;
 	private JTable tableVariants;
 	private JComboBox jumpto;
 	private JButton previous;
@@ -130,6 +132,7 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 		}
 	};
 	
+	//Registers any changes to the checkbox 'generate id'
 	private DocumentListener checkGenerateEditListener = new DocumentListener() {
 		@Override
 		public void changedUpdate(DocumentEvent e) { update(); }
@@ -142,6 +145,27 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 		}
 	};
 	
+	//Takes care of clicks on 'next' and 'previous' and 'jumpto'
+	private ActionListener jumpListener = new ActionListener() {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			//We only do this, if there are any edits to jump to
+			if(edits.size() > 0) {
+				if(e.getSource() == previous) {
+					selectID(currentEdit == 0? edits.get(edits.size()-1) : edits.get(currentEdit-1));
+				}
+				if(e.getSource() == next) {
+					selectID((currentEdit == edits.size() -1) ? edits.get(0) : edits.get(currentEdit+1));
+				}
+				if(e.getSource() == jumpto) {
+					selectID(jumpto.getSelectedItem().toString());
+				}
+			}
+		}
+	};
+	
+	
+	//Registers any changes to the current edit
 	private DocumentChangeFlag flag = new DocumentChangeFlag();
 	
 	// CONSTRUCTOR ***********************************************
@@ -187,27 +211,14 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 			tableVariants.getTableHeader().setReorderingAllowed(false);
 		jumpto = new JComboBox();
 		previous = new JButton("<-");
+			previous.addActionListener(jumpListener);
 		next = new JButton("->");
+			next.addActionListener(jumpListener);
 		config = new JButton(loader.getString(sgroup + ".config", languageID));
 		ok = new JButton(loader.getString("fs.global.ok", languageID));
 		cancel = new JButton(loader.getString("fs.global.cancel", languageID));
 		deleteRow = new JButton("x");
-		
-		//Load data
-		updateData();
-		
-		checkGroup.setSelected(table.getGroupID(edits.get(currentEdit)) != null);
-		
-		//Init additional components
-		SwitchIconLabel labelID = new SwitchIconLabel(loader.getString(sgroup + ".stringid", languageID));
-		labelID.setIconReference(warnIcon);
-		SwitchIconLabel labelGroup = new SwitchIconLabel(loader.getString(sgroup + ".groupid", languageID));
-		labelGroup.setIconReference(warnIcon);
-		SwitchIconLabel labelValidTable = new SwitchIconLabel("");
-			labelValidTable.setIconReference(warnIcon);
-		JLabel labelTable = new JLabel(loader.getString(sgroup + ".variants", languageID));
-		JLabel labelJump = new JLabel(loader.getString(sgroup + ".jumpto", languageID));
-		JScrollPane tablePane = new JScrollPane(tableVariants) {
+		tablePane = new JScrollPane(tableVariants) {
 			/**
 			 * compiler-generated version id
 			 */
@@ -220,6 +231,22 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 		};
 		
 		
+		//Load data
+		updateData();
+		
+		checkGroup.setSelected(table.getGroupID(edits.get(currentEdit)) != null);
+		jumpto.addActionListener(jumpListener);
+		
+		//Init additional components
+		SwitchIconLabel labelID = new SwitchIconLabel(loader.getString(sgroup + ".stringid", languageID));
+		labelID.setIconReference(warnIcon);
+		SwitchIconLabel labelGroup = new SwitchIconLabel(loader.getString(sgroup + ".groupid", languageID));
+		labelGroup.setIconReference(warnIcon);
+		SwitchIconLabel labelValidTable = new SwitchIconLabel("");
+			labelValidTable.setIconReference(warnIcon);
+		JLabel labelTable = new JLabel(loader.getString(sgroup + ".variants", languageID));
+		JLabel labelJump = new JLabel(loader.getString(sgroup + ".jumpto", languageID));
+				
 		
 		//Layout
 		Box lineBox = new Box(BoxLayout.Y_AXIS); //The box for all lines
@@ -254,7 +281,8 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 			line7.add(labelJump); line7.add(jumpto);line7.add(Box.createHorizontalGlue());
 			
 		lineBox.add(hfill);	
-		lineBox.add(line1);lineBox.add(line2);lineBox.add(line2b);lineBox.add(line3); 
+		lineBox.add(line1);lineBox.add(line2);lineBox.add(line2b);
+		lineBox.add(line3); 
 		lineBox.add(line4); lineBox.add(line5); lineBox.add(line6);
 		lineBox.add(hfill2);
 		lineBox.add(line7);
@@ -263,15 +291,15 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 		pack();
 		setResizable(false);
 		
-		//Now resize table columns
-		TableColumnModel cm = tableVariants.getColumnModel();
-		tableVariants.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-		cm.getColumn(2).setPreferredWidth(10);
-		cm.getColumn(1).setPreferredWidth(
-				tablePane.getPreferredSize().width-
-					cm.getColumn(2).getPreferredWidth() - cm.getColumn(0).getPreferredWidth());
-		cm.getColumn(1).setResizable(false);
-		cm.getColumn(2).setResizable(false); 
+//		//Now resize table columns
+//		TableColumnModel cm = tableVariants.getColumnModel();
+//		tableVariants.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+//		cm.getColumn(2).setPreferredWidth(10);
+//		cm.getColumn(1).setPreferredWidth(
+//				tablePane.getPreferredSize().width-
+//					cm.getColumn(2).getPreferredWidth() - cm.getColumn(0).getPreferredWidth());
+//		cm.getColumn(1).setResizable(false);
+//		cm.getColumn(2).setResizable(false); 
 		
 		
 		//Init Validation
@@ -423,6 +451,20 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 		
 	}
 
+	// CONTROL METHODS ************************************************************************************
+	// ****************************************************************************************************
+	
+	/**
+	 * Selects the specified ID (if it doesn't exist, won't change the currently selected id). In any case applies the current changes, if they are valid. 
+	 */
+	protected void selectID(String id) {
+		applyData();
+		if(edits.contains(id)) {
+			currentEdit = edits.indexOf(id);
+			insertData();
+		}
+	}
+
 	/**
 	 * If only a single string is edited by this instance, this has no effect. Otherwise, the list of edited strings and languages is loaded. If 
 	 * possible, the current selection is left unchanged and the last edit is performed before the update, if possible.
@@ -479,33 +521,57 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 		model.addTableModelListener(flag);
 		tableVariants.getColumnModel().getColumn(2).setCellRenderer(new ButtonEditor());
 		tableVariants.getColumnModel().getColumn(2).setCellEditor(new ButtonEditor());
+		
+		//Now resize table columns
+		TableColumnModel cm = tableVariants.getColumnModel();
+		tableVariants.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+		cm.getColumn(2).setPreferredWidth(10);
+		cm.getColumn(1).setPreferredWidth(
+				tablePane.getPreferredSize().width-
+					cm.getColumn(2).getPreferredWidth() - cm.getColumn(0).getPreferredWidth());
+		cm.getColumn(1).setResizable(false);
+		cm.getColumn(2).setResizable(false); 
+		validate();
 		//Reset change log
 		flag.setChangeFlag(false);
 	}
 	
 	/**
-	 * If the entries are valid, effects all changes
+	 * If the entries are valid, applies all changes
 	 */
 	protected void applyData() {
+		String finalid = getFinalID();
 		//If the entries are not valid, return
 		if(summary.validate().getOverallResult() == Result.INCORRECT) return;
 		//If there are no edits, a new entry is created
 		if(edits.size() == 0) {
-			table.addStringID(getFinalID());
+			table.addStringID(finalid);
 			if(checkGroup.isSelected()) table.setGroupID(textID.getText(), textGroup.getText());
 			for(int i = 0; i < model.getLanguageList().size(); i++) {
-				table.putString(getFinalID(), model.getValueAt(i, 0).toString(), model.getValueAt(i, 1).toString());
+				table.putString(finalid, model.getValueAt(i, 0).toString(), model.getValueAt(i, 1).toString());
 			}
 		}
 		//Otherwise...
 		else {
 			//Compare edited id to new id and potentially rename
-			if(!getFinalID().equals(edits.get(currentEdit))) {
-				table.renameString(edits.get(currentEdit), getFinalID());
+			if(!finalid.equals(edits.get(currentEdit))) {
+				table.renameString(edits.get(currentEdit), finalid);
 			}
 			//Set group anyway
-			table.setGroupID(getFinalID(), checkGroup.isSelected()? textGroup.getText() : null);
-			//
+			table.setGroupID(finalid, checkGroup.isSelected()? textGroup.getText() : null);
+			//Change variants:
+			HashSet<String> languages = new HashSet<String>(model.getLanguageList());
+			HashSet<String> oldlanguages = model.getOriginalLanguageList();
+			//Remove variants that are no longer present:
+			for(String old : oldlanguages) {
+				if(!languages.contains(old)){
+					table.putString(finalid, old, null);
+				}
+			}
+			//Put all variants
+			for(int i = 0; i < languages.size(); i++) {
+				table.putString(finalid, model.getValueAt(i, 0).toString(), model.getValueAt(i, 1).toString());
+			}
 		}
 	}
 	
