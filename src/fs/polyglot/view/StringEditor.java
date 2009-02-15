@@ -90,7 +90,6 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 	private JButton config;
 	private JButton ok;
 	private JButton cancel;
-	private JButton deleteRow;
 	
 	
 	private ImageIcon warnIcon;
@@ -217,16 +216,17 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 		config = new JButton(loader.getString(sgroup + ".config", languageID));
 		ok = new JButton(loader.getString("fs.global.ok", languageID));
 		cancel = new JButton(loader.getString("fs.global.cancel", languageID));
-		deleteRow = new JButton("x");
 		tablePane = new JScrollPane(tableVariants) {
 			/**
 			 * compiler-generated version id
 			 */
 			private static final long serialVersionUID = 3430793500371203460L;
 
+			private JTable mesureTable = new JTable(6,3);
+			
 			public Dimension getPreferredSize() {
 				Dimension d = super.getPreferredSize();
-				return new Dimension(d.width, tableVariants.getPreferredSize().height*2);
+				return new Dimension(d.width, mesureTable.getPreferredSize().height);
 			}
 		};
 		
@@ -458,7 +458,7 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 	 * Selects the specified ID (if it doesn't exist, won't change the currently selected id). In any case applies the current changes, if they are valid. 
 	 */
 	protected void selectID(String id) {
-		applyData();
+		if(flag.hasBeenChanged()) applyData();
 		if(edits.contains(id)) {
 			currentEdit = edits.indexOf(id);
 			insertData();
