@@ -20,7 +20,7 @@ import fs.xml.XMLWriteConfigurationException;
  * is found under (fsframework)/doc/Polyglot/manual.pdf. This class does nothing
  * more than to initialize fsframework and itself, possibly by reading
  * configurations from xml files and to construct the main frame, which in turn
- * will take care of the tab views
+ * will take care of the view
  * 
  * @author Simon Hampe
  * 
@@ -86,11 +86,12 @@ public class Polyglot implements ResourceDependent {
 
 		// Load configuration
 		options = new PolyglotOptions();
-		if (!configFile.exists()) {
-			polyglotLogger
+		if (configFile == null || !configFile.exists()) {
+			if(configFile != null) polyglotLogger
 					.warn("Configuration file "
 							+ configFile.getAbsolutePath()
 							+ " does not exist. Using default configuration but saving configuration to this file afterwards.");
+			else polyglotLogger.warn("No configuration file specified. No configuration will be saved.");
 		} else {
 			try {
 				Document optionsDocument = XMLToolbox.loadXMLFile(configFile);
@@ -107,7 +108,7 @@ public class Polyglot implements ResourceDependent {
 		options.applyConfiguration();
 
 		// Now load the main frame
-		// TODO: load main frame
+		mainFrame = new PolyglotFrame(null,null,null,options);
 
 	}
 
