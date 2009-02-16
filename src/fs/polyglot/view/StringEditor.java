@@ -26,11 +26,14 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.CellEditorListener;
 import javax.swing.event.ChangeEvent;
@@ -51,6 +54,7 @@ import javax.swing.undo.UndoManager;
 
 import org.dom4j.Document;
 
+import fs.event.DataRetrievalListener;
 import fs.event.DocumentChangeFlag;
 import fs.gui.FrameworkDialog;
 import fs.gui.SwitchIconLabel;
@@ -176,6 +180,31 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 		}
 	};
 	
+	//Takes care of ok and cancel
+	private Action disposalListener = new AbstractAction() {
+		/**
+		 * Compiler-generated version id
+		 */
+		private static final long serialVersionUID = -7756862192859052931L;
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			if(e.getSource() == ok) {
+				//Apply changes, if necessary
+				if(flag.hasBeenChanged()) {
+					applyData();
+				}
+			}
+			dispose();
+		}
+	};
+	
+	//Listens to the config button
+	private ActionListener configListener = new ActionListener() {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			configure();
+		}
+	};
 	
 	//Registers any changes to the current edit
 	private DocumentChangeFlag flag = new DocumentChangeFlag();
@@ -192,6 +221,7 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 	 * @param singleStringID Should be null, if the strings to be edited should be retrieved from the configuration data. Otherwise this stringID is edited and its data
 	 * retrieved from the table model
 	 * @param configuration The Configuration data. This specifies, which strings are to be edited. Usually this data is created by a StringEditorConfigurator. If null, default values are used
+	 * @param manager The UndoManager used to register the edits performed by this editor.
 	 */
 	public StringEditor(ResourceReference r, PolyglotStringLoader l, String lid, PolyglotTableModel associatedTable, HashSet<String> selectedStrings, String singleStringID, StringEditorConfiguration configuration, UndoManager manager) {
 		super(r, l, lid);
@@ -216,7 +246,8 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 		checkGenerateID = new JCheckBox(loader.getString(sgroup + ".generateid", languageID), true);
 			checkGenerateID.addChangeListener(checkGenerateListener);
 			checkGenerateID.addChangeListener(flag);
-		checkQuickNav = new JCheckBox(loader.getString(sgroup + ".quicknav", languageID),singleStringID == null); checkQuickNav.setEnabled(singleStringID == null);
+		checkQuickNav = new JCheckBox(loader.getString(sgroup + ".quicknav", languageID),singleStringID == null); 
+			checkQuickNav.setEnabled(singleStringID == null);
 		checkGroup = new JCheckBox();
 			checkGroup.addChangeListener(checkGroupListener);
 			checkGroup.addChangeListener(checkGenerateListener);
@@ -231,8 +262,16 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 		next = new JButton("->");
 			next.addActionListener(jumpListener);
 		config = new JButton(loader.getString(sgroup + ".config", languageID));
+			config.addActionListener(configListener);
 		ok = new JButton(loader.getString("fs.global.ok", languageID));
 		cancel = new JButton(loader.getString("fs.global.cancel", languageID));
+		
+		getRootPane().setDefaultButton(ok);
+		getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("ESCAPE"), "dispose");
+		getRootPane().getActionMap().put("dispose", disposalListener);
+		ok.addActionListener(disposalListener);
+		cancel.addActionListener(disposalListener);
+		
 		tablePane = new JScrollPane(tableVariants) {
 			/**
 			 * compiler-generated version id
@@ -252,6 +291,9 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 		
 		checkGroup.setSelected(table.getGroupID(edits.get(currentEdit)) != null);
 		jumpto.addActionListener(jumpListener);
+		previous.setEnabled(singleEditString == null);
+		next.setEnabled(singleEditString == null);
+		jumpto.setEnabled(singleEditString == null);
 		
 		//Init additional components
 		SwitchIconLabel labelID = new SwitchIconLabel(loader.getString(sgroup + ".stringid", languageID));
@@ -460,6 +502,34 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 	// ****************************************************************************************************
 	
 	/**
+	 * Shows a configuration dialog (after a confirmation dialog, if any changes were made) and configures the editor accordingly.
+	 */
+	protected void configure() {
+		//Ask for confirmation if valid changes have been made
+		if(flag.hasBeenChanged() && summary.validate().getOverallResult() != Result.INCORRECT) {	
+			int answer = JOptionPane.showConfirmDialog(this, loader.getString(sgroup + ".confirmconfig", languageID), 
+					loader.getString(sgroup + ".titleconfirm", languageID), JOptionPane.YES_NO_CANCEL_OPTION);
+			switch(answer) {
+			case JOptionPane.YES_OPTION:
+				applyData(); break;
+			case JOptionPane.CANCEL_OPTION: return;
+			}
+		}
+		StringEditorConfigurator configdialog = new StringEditorConfigurator(resource,loader,languageID,table,configuration);
+		configdialog.addDataRetrievalListener(new DataRetrievalListener() {
+			@Override
+			public void dataReady(Object source, Object data) {
+				StringEditorConfiguration newconfig = (StringEditorConfiguration) data;
+				configuration = newconfig;
+				updateData();
+				insertData();
+			}
+		});	
+		configdialog.setModalityType(ModalityType.APPLICATION_MODAL);
+		configdialog.setVisible(true);
+	}
+	
+	/**
 	 * Selects the specified ID (if it doesn't exist, won't change the currently selected id). In any case applies the current changes, if they are valid. 
 	 */
 	protected void selectID(String id) {
@@ -480,6 +550,7 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 		if(singleEditString != null) {
 			edits = new ArrayList<String>(Arrays.asList(singleEditString));
 			currentEdit = 0;
+			insertData();
 			return;
 		}
 		//Otherwise calculate edit list
@@ -546,7 +617,7 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 	}
 	
 	/**
-	 * If the entries are valid, applies all changes
+	 * If the entries are valid, applies all changes and resets the change flag
 	 */
 	protected void applyData() {
 		String finalid = getFinalID();
@@ -597,6 +668,7 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 		}
 		edit.end();
 		editFactory.postEdit(edit);
+		flag.setChangeFlag(false);
 	}
 	
 	/**

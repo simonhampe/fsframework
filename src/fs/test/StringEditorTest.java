@@ -26,7 +26,7 @@ public class StringEditorTest {
 		final PolyglotTableModel model;
 		try {
 			model = new PolyglotTableModel(XMLToolbox.loadXMLFile(new File("language/fsfwStringTable.xml")), null);
-			StringEditorConfigurator configurator = new StringEditorConfigurator(null,null,null, model);
+			StringEditorConfigurator configurator = new StringEditorConfigurator(null,null,null, model,null);
 			configurator.addDataRetrievalListener(new DataRetrievalListener() {
 			UndoManager manager = new UndoManager();
 				@Override

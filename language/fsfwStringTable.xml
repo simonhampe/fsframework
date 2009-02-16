@@ -309,6 +309,14 @@
 	</polyglotstring>
 	<polyglotstring id="fs.polyglot.StringEditor.title" group="fs.polyglot.StringEditor">
 		<variant lang="en">String editor</variant></polyglotstring>
+	<polyglotstring id="fs.polyglot.StringEditor.confirmconfig"
+		group="fs.polyglot.StringEditor">
+		<variant lang="en">The current string has been changed. Do you want to apply the changes you made before reconfiguring the editor?</variant>
+	</polyglotstring>
+	<polyglotstring id="fs.polyglot.StringEditor.titleconfirm"
+		group="fs.polyglot.StringEditor">
+		<variant lang="en">Confirmation dialog</variant>
+	</polyglotstring>
 	<polyglotstring id="fs.polyglot.VariantTableModel.language"
 		group="fs.polyglot.VariantTableModel">
 		<variant lang="en">Language</variant>

@@ -110,9 +110,10 @@ public class StringEditorConfigurator extends FrameworkDialog {
 	/**
 	 * Creates a StringEditorConfigurator dialog.
 	 * @param table The table from which to acquire a list of used languages
+	 * @param config A configuration to get initial values from. If it is null, default values are used
 	 */
 	public StringEditorConfigurator(ResourceReference r,
-			PolyglotStringLoader l, String lid, PolyglotTableModel table) {
+			PolyglotStringLoader l, String lid, PolyglotTableModel table, StringEditorConfiguration config) {
 		super(r, l, lid);
 		setTitle(loader.getString(sgroup + ".title", languageID));
 		setModalityType(ModalityType.APPLICATION_MODAL);
@@ -177,6 +178,36 @@ public class StringEditorConfigurator extends FrameworkDialog {
 		
 		excludelanguages.addChangeListener(selectListener);
 		onlylanguages.addChangeListener(selectListener);
+		
+		//Set values from config
+		if(config != null) {
+			incomplete.setSelected(config.editOnlyIncomplete);
+			selected.setSelected(config.editOnlySelected);
+			//Find out which list we have to copy
+			HashSet<String> listtocopyfrom = null;
+			JList listtocopyto = null;
+			if(config.excludeTheseLanguages != null) {
+				listtocopyfrom = config.excludeTheseLanguages;
+				listtocopyto = listExclude;
+				excludelanguages.setSelected(true);
+			}
+			else {
+				if(config.onlyTheseLanguages != null) {
+					listtocopyfrom = config.onlyTheseLanguages;
+					listtocopyto = listOnly;
+					onlylanguages.setSelected(true);
+				}
+			}
+			if(listtocopyfrom != null && listtocopyto != null) {
+				//Copy
+				for(Language lang : languages) {
+					if(listtocopyfrom.contains(lang.id)) {
+						int index = languages.indexOf(lang);
+						listtocopyto.addSelectionInterval(index, index);
+					}
+				}
+			}
+		}
 		
 	}
 
