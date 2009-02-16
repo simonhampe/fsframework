@@ -68,10 +68,7 @@ public class UndoableVariantEdit extends AbstractUndoableEdit {
 	/**
 	 * @return true, if and only if one of the following is true: <br>
 	 *         - Both values or the table are null <br>
-	 *         - This represents a removal and the old variant exists in the
-	 *         table <br>
-	 *         - This represents an addition and the new variant does not exist
-	 *         in the table <br>
+	 *         - This represents a removal or addition <br>
 	 *         - This represents a value change, both variants have the same
 	 *         string and language id, and the old variant exists in the table
 	 */
@@ -79,14 +76,8 @@ public class UndoableVariantEdit extends AbstractUndoableEdit {
 	public boolean canRedo() {
 		if ((table == null) || (oldValue == null && newValue == null))
 			return true;
-		// Addition
-		if (oldValue == null)
-			return table.getUnformattedString(newValue.stringID,
-					newValue.language.id) == null;
-		// Removal
-		if (newValue == null)
-			return table.getUnformattedString(oldValue.stringID,
-					oldValue.language.id) != null;
+		// Addition or removal
+		if (oldValue == null || newValue == null) return true;
 		// Value change
 		return (newValue.stringID.equals(oldValue.stringID)
 				&& newValue.language.id.equals(oldValue.language.id) && table
@@ -96,10 +87,7 @@ public class UndoableVariantEdit extends AbstractUndoableEdit {
 	/**
 	 * @return true, if and only if one of the following is true: <br>
 	 *         - Both values or the table are null <br>
-	 *         - This represents a removal and the old variant doesn't exist in
-	 *         the table <br>
-	 *         - This represents an addition and the new variant exists in the
-	 *         table <br>
+	 *         - This represents a removal or addition <br>
 	 *         - This represents a value change, both variants have the same
 	 *         string and language id, and the old variant exists in the table
 	 */
@@ -108,13 +96,7 @@ public class UndoableVariantEdit extends AbstractUndoableEdit {
 		if ((table == null) || (oldValue == null && newValue == null))
 			return true;
 		// Addition
-		if (oldValue == null)
-			return table.getUnformattedString(newValue.stringID,
-					newValue.language.id) != null;
-		// Removal
-		if (newValue == null)
-			return table.getUnformattedString(oldValue.stringID,
-					oldValue.language.id) == null;
+		if (oldValue == null || newValue == null) return true;
 		// Value change
 		return (newValue.stringID.equals(oldValue.stringID)
 				&& newValue.language.id.equals(oldValue.language.id) && table
@@ -220,15 +202,11 @@ public class UndoableVariantEdit extends AbstractUndoableEdit {
 			return;
 		// Addition
 		if (oldval == null) {
-			if (table.getUnformattedString(newval.stringID, newval.language.id) != null)
-				throw new UnsupportedOperationException();
 			table.putString(newval.stringID, newval.language.id, newval.value);
 			return;
 		}
 		// Removal
 		if (newval == null) {
-			if (table.getUnformattedString(oldval.stringID, oldval.language.id) == null)
-				throw new UnsupportedOperationException();
 			table.putString(oldval.stringID, oldval.language.id, null);
 			return;
 		}

@@ -46,14 +46,22 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumnModel;
 import javax.swing.text.JTextComponent;
+import javax.swing.undo.CompoundEdit;
+import javax.swing.undo.UndoManager;
 
 import org.dom4j.Document;
 
 import fs.event.DocumentChangeFlag;
 import fs.gui.FrameworkDialog;
 import fs.gui.SwitchIconLabel;
+import fs.polyglot.model.Language;
+import fs.polyglot.model.PolyglotString;
 import fs.polyglot.model.PolyglotTableModel;
+import fs.polyglot.model.Variant;
 import fs.polyglot.model.VariantTableModel;
+import fs.polyglot.undo.UndoableEditFactory;
+import fs.polyglot.undo.UndoablePolyglotStringEdit;
+import fs.polyglot.undo.UndoableVariantEdit;
 import fs.polyglot.validate.NonEmptyWarner;
 import fs.test.XMLDirectoryTest;
 import fs.validate.LabelIndicValidator;
@@ -69,7 +77,8 @@ import fs.xml.ResourceReference;
 import fs.xml.XMLDirectoryTree;
 
 /**
- * This class represents the most important tool for editing strings in a PolyglotStringTable. 
+ * This class represents the most important tool for editing strings in a PolyglotStringTable. It assumes that table data is only changed within this editor
+ * while it is open, so modality should not be changed (by default it is application modal).
  * @author Simon Hampe
  *
  */
@@ -106,6 +115,8 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 	
 	private static String sgroup = "fs.polyglot.StringEditor";
 	
+	private UndoableEditFactory editFactory;
+	
 	//Validation
 	private LabelIndicValidator<JTextField> groupWarner;
 	private LabelIndicValidator<JTextField> stringValidator;
@@ -128,6 +139,7 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 		@Override
 		public void stateChanged(ChangeEvent e) {
 			generatedID.setText(getFinalID());
+			repaint();
 		}
 	};
 	
@@ -141,6 +153,7 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 		public void removeUpdate(DocumentEvent e) { update(); }
 		private void update() {
 			generatedID.setText(getFinalID());
+			repaint();
 		}
 	};
 	
@@ -180,7 +193,7 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 	 * retrieved from the table model
 	 * @param configuration The Configuration data. This specifies, which strings are to be edited. Usually this data is created by a StringEditorConfigurator. If null, default values are used
 	 */
-	public StringEditor(ResourceReference r, PolyglotStringLoader l, String lid, PolyglotTableModel associatedTable, HashSet<String> selectedStrings, String singleStringID, StringEditorConfiguration configuration) {
+	public StringEditor(ResourceReference r, PolyglotStringLoader l, String lid, PolyglotTableModel associatedTable, HashSet<String> selectedStrings, String singleStringID, StringEditorConfiguration configuration, UndoManager manager) {
 		super(r, l, lid);
 		
 		//Copy data
@@ -189,8 +202,11 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 		singleEditString = singleStringID;
 		this.configuration = configuration != null ? configuration : new StringEditorConfiguration(); 
 		this.selected = selectedStrings == null? null : new HashSet<String>(selectedStrings); 
+		editFactory = new UndoableEditFactory(table,loader,languageID,manager);
 		
-		//Init all member components
+		//Init all membercomponents
+		setModalityType(ModalityType.APPLICATION_MODAL);
+		setTitle(loader.getString(sgroup + ".title",languageID));
 		textID = new JTextField();
 		textGroup = new JTextField();
 			textID.getDocument().addDocumentListener(checkGenerateEditListener);
@@ -203,6 +219,7 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 		checkQuickNav = new JCheckBox(loader.getString(sgroup + ".quicknav", languageID),singleStringID == null); checkQuickNav.setEnabled(singleStringID == null);
 		checkGroup = new JCheckBox();
 			checkGroup.addChangeListener(checkGroupListener);
+			checkGroup.addChangeListener(checkGenerateListener);
 			checkGroup.addChangeListener(flag);
 		generatedID = new JLabel("");
 			generatedID.setForeground(new Color(0,0,255));
@@ -228,8 +245,7 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 				Dimension d = super.getPreferredSize();
 				return new Dimension(d.width, mesureTable.getPreferredSize().height);
 			}
-		};
-		
+		};		
 		
 		//Load data
 		updateData();
@@ -290,17 +306,6 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 		
 		pack();
 		setResizable(false);
-		
-//		//Now resize table columns
-//		TableColumnModel cm = tableVariants.getColumnModel();
-//		tableVariants.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-//		cm.getColumn(2).setPreferredWidth(10);
-//		cm.getColumn(1).setPreferredWidth(
-//				tablePane.getPreferredSize().width-
-//					cm.getColumn(2).getPreferredWidth() - cm.getColumn(0).getPreferredWidth());
-//		cm.getColumn(1).setResizable(false);
-//		cm.getColumn(2).setResizable(false); 
-		
 		
 		//Init Validation
 		
@@ -448,7 +453,7 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 		summary.addValidator(tableValidator);
 		summary.validate();
 		
-		
+		flag.setChangeFlag(false);		
 	}
 
 	// CONTROL METHODS ************************************************************************************
@@ -459,6 +464,7 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 	 */
 	protected void selectID(String id) {
 		if(flag.hasBeenChanged()) applyData();
+		updateData();
 		if(edits.contains(id)) {
 			currentEdit = edits.indexOf(id);
 			insertData();
@@ -522,6 +528,9 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 		tableVariants.getColumnModel().getColumn(2).setCellRenderer(new ButtonEditor());
 		tableVariants.getColumnModel().getColumn(2).setCellEditor(new ButtonEditor());
 		
+		//Set check boxes and so on
+		checkGroup.setSelected(table.getGroupID(edits.get(currentEdit)) != null);
+		
 		//Now resize table columns
 		TableColumnModel cm = tableVariants.getColumnModel();
 		tableVariants.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
@@ -531,7 +540,7 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 					cm.getColumn(2).getPreferredWidth() - cm.getColumn(0).getPreferredWidth());
 		cm.getColumn(1).setResizable(false);
 		cm.getColumn(2).setResizable(false); 
-		validate();
+		repaint();
 		//Reset change log
 		flag.setChangeFlag(false);
 	}
@@ -541,38 +550,53 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 	 */
 	protected void applyData() {
 		String finalid = getFinalID();
+		String grouppath = checkGroup.isSelected()? textGroup.getText(): null;
 		//If the entries are not valid, return
 		if(summary.validate().getOverallResult() == Result.INCORRECT) return;
+		CompoundEdit edit = new CompoundEdit();
 		//If there are no edits, a new entry is created
 		if(edits.size() == 0) {
-			table.addStringID(finalid);
-			if(checkGroup.isSelected()) table.setGroupID(textID.getText(), textGroup.getText());
+			//Create String
+			UndoablePolyglotStringEdit stringadd = editFactory.createUndoablePolyglotStringEdit(null, new PolyglotString(grouppath,finalid,false));
+			stringadd.redo();
+			edit.addEdit(stringadd);
+			//Add variants
 			for(int i = 0; i < model.getLanguageList().size(); i++) {
-				table.putString(finalid, model.getValueAt(i, 0).toString(), model.getValueAt(i, 1).toString());
+				UndoableVariantEdit variantadd = editFactory.createUndoableVariantEdit(null, new Variant(grouppath, finalid, 
+						new Language(model.getValueAt(i,0).toString(), "", false, 0), model.getValueAt(i, 1).toString()));
+				variantadd.redo();
+				edit.addEdit(variantadd);
 			}
 		}
 		//Otherwise...
 		else {
-			//Compare edited id to new id and potentially rename
-			if(!finalid.equals(edits.get(currentEdit))) {
-				table.renameString(edits.get(currentEdit), finalid);
-			}
-			//Set group anyway
-			table.setGroupID(finalid, checkGroup.isSelected()? textGroup.getText() : null);
+			//Compare edited id to new id and potentially rename and set group
+			UndoablePolyglotStringEdit stringchange = editFactory.createUndoablePolyglotStringEdit(new PolyglotString(grouppath,edits.get(currentEdit),false), 
+						new PolyglotString(grouppath,finalid,false));
+			stringchange.redo();
+			edit.addEdit(stringchange);
+//			//Set group anyway
 			//Change variants:
 			HashSet<String> languages = new HashSet<String>(model.getLanguageList());
 			HashSet<String> oldlanguages = model.getOriginalLanguageList();
 			//Remove variants that are no longer present:
 			for(String old : oldlanguages) {
 				if(!languages.contains(old)){
-					table.putString(finalid, old, null);
+					UndoableVariantEdit variantremove = editFactory.createUndoableVariantEdit(new Variant(grouppath,finalid,new Language(old,"",false,0),""),null);
+					variantremove.redo();
+					edit.addEdit(variantremove);
 				}
 			}
 			//Put all variants
 			for(int i = 0; i < languages.size(); i++) {
-				table.putString(finalid, model.getValueAt(i, 0).toString(), model.getValueAt(i, 1).toString());
+				UndoableVariantEdit variantchange = editFactory.createUndoableVariantEdit(null, new Variant(grouppath, finalid, 
+						new Language(model.getValueAt(i,0).toString(), "", false, 0), model.getValueAt(i, 1).toString()));
+				variantchange.redo();
+				edit.addEdit(variantchange);
 			}
 		}
+		edit.end();
+		editFactory.postEdit(edit);
 	}
 	
 	/**
@@ -581,7 +605,9 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 	 * @return
 	 */
 	public String getFinalID() {
-		return checkGenerateID.isSelected() ? textGroup.getText() + "." + textID.getText() : textID.getText();
+		return checkGenerateID.isSelected() ? 
+			(checkGroup.isSelected()? textGroup.getText() + "." + textID.getText() : textID.getText() ): 
+			textID.getText();
 	}
 
 	// RESOURCEDEPENDENT METHODS ********************************************************

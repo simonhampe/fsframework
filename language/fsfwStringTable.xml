@@ -307,6 +307,8 @@
 		group="fs.polyglot.StringEditor">
 		<variant lang="en">Delete this variant</variant>
 	</polyglotstring>
+	<polyglotstring id="fs.polyglot.StringEditor.title" group="fs.polyglot.StringEditor">
+		<variant lang="en">String editor</variant></polyglotstring>
 	<polyglotstring id="fs.polyglot.VariantTableModel.language"
 		group="fs.polyglot.VariantTableModel">
 		<variant lang="en">Language</variant>

@@ -69,9 +69,20 @@ public class UndoableEditFactory {
 		this.manager = manager;
 	}
 
-	private void postEdit(UndoableEdit edit) {
-		if (manager != null)
+	/**
+	 * If there is an UndoManager associated to this factory, the specified event is added to it
+	 */
+	public void postEdit(UndoableEdit edit) {
+		if (manager != null && edit != null)
 			manager.addEdit(edit);
+	}
+	
+	/**
+	 * Performs the given edit (as redo) and adds it to the associated UndoManager (if there's any)
+	 */
+	public void performEdit(UndoableEdit edit) throws CannotRedoException {
+		edit.redo();
+		postEdit(edit);
 	}
 
 	public UndoableLanguageEdit createUndoableLanguageEdit(Language oldValue,

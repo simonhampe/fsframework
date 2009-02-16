@@ -11,7 +11,7 @@ import fs.xml.PolyglotStringTable;
 
 /**
  * This class represents a change in a polyglot string, i.e. an addition, a
- * removal or a change of its group (Changes to variants are represented by
+ * removal or a change of its group or name (Changes to variants are represented by
  * UndoableVariantEdit). Usually an instance of this class is not created
  * directly but via an UndoableEditFactory instance.
  * 
@@ -42,8 +42,8 @@ public class UndoablePolyglotStringEdit extends AbstractUndoableEdit {
 	 * @param newValue
 	 *            The new value. If null, this is considered an addition. If
 	 *            both are null, this operation has no effect and if both are
-	 *            non-null, this operation is only valid, if both have the same
-	 *            id. In this case this edit represents a group change
+	 *            non-null, this operation is either a group change (if both id's are equal) or 
+	 *            a renaming (if they are not)
 	 * @param table
 	 *            The table in which to perform the changes. If this is null,
 	 *            the edit has no effect.
@@ -74,8 +74,7 @@ public class UndoablePolyglotStringEdit extends AbstractUndoableEdit {
 	 *         table <br>
 	 *         - This represents an addition and the new string id does not
 	 *         exist in the table <br>
-	 *         - This represents a group change, both strings have the same id,
-	 *         which exists in the table
+	 *         - This represents a group change or rename and the id of oldValue exists in the table
 	 */
 	@Override
 	public boolean canRedo() {
@@ -87,11 +86,10 @@ public class UndoablePolyglotStringEdit extends AbstractUndoableEdit {
 		// Removal
 		if (newValue == null)
 			return table.containsStringID(oldValue.stringID);
-		// Group change
+		// Group change or rename
 		if (oldValue.stringID == null || newValue.stringID == null)
 			return false;
-		return (newValue.stringID.equals(oldValue.stringID) && table
-				.containsStringID(newValue.stringID));
+		return (table.containsStringID(oldValue.stringID));
 	}
 
 	/**
@@ -101,8 +99,7 @@ public class UndoablePolyglotStringEdit extends AbstractUndoableEdit {
 	 *         in the table <br>
 	 *         - This represents an addition and the new string id exists in the
 	 *         table <br>
-	 *         - This represents a group change, both strings have the same id,
-	 *         which exists in the table
+	 *         - This represents a group change or rename and the id of oldvalue exists in the table.
 	 */
 	@Override
 	public boolean canUndo() {
@@ -114,9 +111,10 @@ public class UndoablePolyglotStringEdit extends AbstractUndoableEdit {
 		// Removal
 		if (newValue == null)
 			return !table.containsStringID(oldValue.stringID);
-		// Group change
-		return (newValue.stringID.equals(oldValue.stringID) && table
-				.containsStringID(newValue.stringID));
+		// Group change or rename
+		if(oldValue.stringID == null || newValue.stringID == null)
+			return false;
+		return (table.containsStringID(newValue.stringID));
 	}
 
 	/**
@@ -230,15 +228,13 @@ public class UndoablePolyglotStringEdit extends AbstractUndoableEdit {
 			table.removeID(oldval.stringID);
 			return;
 		}
-		// Group change
-		if (newval.stringID.equals(oldval.stringID)) {
-			if (!table.containsStringID(oldval.stringID))
+		// Group change or rename
+		if (!table.containsStringID(oldval.stringID) || newval.stringID == null)
 				throw new UnsupportedOperationException();
-			table.setGroupID(oldval.stringID, newval.path);
-			return;
+		if(!oldval.stringID.equals(newval.stringID)) {
+			table.renameString(oldval.stringID, newval.stringID);
+			table.setGroupID(newval.stringID, newval.path);
 		}
-		// otherwise this is not a valid change
-		throw new UnsupportedOperationException();
+		else table.setGroupID(oldval.stringID, newval.path);
 	}
-
 }
