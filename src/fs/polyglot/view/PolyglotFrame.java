@@ -6,6 +6,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
+import java.util.Arrays;
 
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -56,9 +57,6 @@ public class PolyglotFrame extends JFrame implements ResourceDependent {
 	
 	// VIEW ****************************
 	// *********************************
-	private StringTreeView stringView;
-	private GroupTreeView treeView;
-	private LanguageListView languageView;
 	private JMenuBar menu;
 	private JMenu fileMenu;
 		private JMenuItem newFile;
@@ -104,6 +102,7 @@ public class PolyglotFrame extends JFrame implements ResourceDependent {
 		resource = FsfwDefaultReference.getDefaultReference();
 		loader = PolyglotStringLoader.getDefaultLoader();
 		languageID = PolyglotStringTable.getGlobalLanguageID();
+		tableFile = file;
 		
 		//Load table-------------------------------------------------
 		
@@ -144,8 +143,10 @@ public class PolyglotFrame extends JFrame implements ResourceDependent {
 			help	= new JMenuItem(loader.getString(sgroup + ".help", languageID));
 			help.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F1,0));
 			info 	= new JMenuItem(loader.getString(sgroup + ".info", languageID));
+		for(JMenu m : Arrays.asList(fileMenu, optionsMenu, helpMenu)) menu.add(m);
 		
 		//Views
+		
 			
 			
 		//Make visible
@@ -155,7 +156,12 @@ public class PolyglotFrame extends JFrame implements ResourceDependent {
 	// FILE CONTROL ********************
 	// *********************************
 
-	
+	/**
+	 * Tries to load the table represented by 
+	 */
+	protected void loadTable() {
+		
+	}
 	
 	// RESOURCEDEPENDENT METHODS ******************************
 	// ********************************************************
