@@ -108,7 +108,7 @@ public class Polyglot implements ResourceDependent {
 		options.applyConfiguration();
 
 		// Now load the main frame
-		mainFrame = new PolyglotFrame(null,null,null,options);
+		mainFrame = new PolyglotFrame(null, options);
 
 	}
 
