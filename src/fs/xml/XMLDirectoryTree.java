@@ -120,4 +120,34 @@ public class XMLDirectoryTree extends DefaultDocument {
 		n.detach();
 	}
 
+	/**
+	 * Adds all paths of t
+	 */
+	public void addTree(XMLDirectoryTree t) {
+		for(String p : t.getListOfPaths()) addPath(p);
+	}
+	
+	/**
+	 * Returns a list of all paths, i.e. a list of all paths to nodes without doubles
+	 */
+	public HashSet<String> getListOfPaths() {
+		return getPathsOfChildren(getRootElement());
+	}
+	
+	/**
+	 * Returns a list of paths of all children of this node
+	 */
+	@SuppressWarnings("unchecked")
+	protected HashSet<String> getPathsOfChildren(Node n) {
+		HashSet<String> paths = new HashSet<String>();
+		List l = n.selectNodes("./*");
+		//Recursively add children paths
+		for(Object o : l) {
+			if(o instanceof Node) paths.addAll(getPathsOfChildren(((Node)o)));
+		}
+		//If this is a leaf, add this path
+		if(paths.size() == 0) paths.add(n.getPath(getRootElement()));
+		return paths;
+	}
+	
 }

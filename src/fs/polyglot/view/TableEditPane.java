@@ -1,5 +1,7 @@
 package fs.polyglot.view;
 
+import java.util.HashSet;
+
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
@@ -51,10 +53,22 @@ public class TableEditPane extends JPanel implements ResourceDependent {
 	public TableEditPane(PolyglotTableModel model, ResourceReference r, PolyglotStringLoader l, String langID) {
 		//Copy data
 		assignReference(r);
-		this.languageID = langID != null? langID : PolyglotStringTable.getGlobalLanguageID();
+		languageID = langID != null? langID : PolyglotStringTable.getGlobalLanguageID();
 		loader = l!= null? l : PolyglotStringLoader.getDefaultLoader();
+		table = model != null? model : new PolyglotTableModel("","");
+		flag = new DocumentChangeFlag();
+		
+		//Init GUI ----------------------------------------
+		stringtree = new StringTreeView(resource, loader, languageID,table);
+		grouptree = new GroupTreeView(resource, loader, languageID, table);
+		languagelist = new LanguageListView(resource,loader,languageID, table);
 		
 		
+		//Init Eventhandling ------------------------------
+		
+				
+		//Reset change flag
+		flag.setChangeFlag(false);
 	}
 	
 	// RESOURCEDEPENDENT **************************
@@ -76,7 +90,9 @@ public class TableEditPane extends JPanel implements ResourceDependent {
 	@Override
 	public Document getExpectedResourceStructure() {
 		XMLDirectoryTree tree = new XMLDirectoryTree();
-		
+		tree.addTree((XMLDirectoryTree) stringtree.getExpectedResourceStructure());
+		tree.addTree((XMLDirectoryTree) grouptree.getExpectedResourceStructure());
+		tree.addTree((XMLDirectoryTree) languagelist.getExpectedResourceStructure());		
 		return tree;
 	}
 
