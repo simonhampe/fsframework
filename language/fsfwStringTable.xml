@@ -325,5 +325,9 @@
 		group="fs.polyglot.VariantTableModel">
 		<variant lang="en">Variant</variant>
 	</polyglotstring>
+	<polyglotstring id="fs.polyglot.TableEditPane.idlabel" group="fs.polyglot.TableEditPane">
+		<variant lang="en">Table ID:</variant></polyglotstring>
+	<polyglotstring id="fs.polyglot.TableEditPane.desclabel" group="fs.polyglot.TableEditPane">
+		<variant lang="en">Table description:</variant></polyglotstring>
 
 </fsfw:polyglotstringtable>
