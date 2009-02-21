@@ -69,6 +69,8 @@ public class PolyglotFrame extends JFrame implements ResourceDependent {
 	private JMenu helpMenu;
 		private JMenuItem help;
 		private JMenuItem info;
+		
+	private TableEditPane editPane;
 	
 	// EVENT HANDLING *****************************
 	// ********************************************
@@ -126,8 +128,9 @@ public class PolyglotFrame extends JFrame implements ResourceDependent {
 		//Init GUI --------------------------------------------------
 		
 		//Menu
+		menu = new JMenuBar();		
 		fileMenu 	= new JMenu(loader.getString(sgroup + ".filemenu", languageID));
-		fileMenu.setMnemonic(loader.getString(sgroup + ".filemnemonic", languageID).charAt(0));
+		//fileMenu.setMnemonic(loader.getString(sgroup + ".filemnemonic", languageID).charAt(0));
 			newFile		= new JMenuItem(loader.getString(sgroup + ".newfile", languageID));
 			newFile.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_DOWN_MASK));
 			loadFile 	= new JMenuItem(loader.getString(sgroup + ".loadfile", languageID));
@@ -144,10 +147,13 @@ public class PolyglotFrame extends JFrame implements ResourceDependent {
 			help.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F1,0));
 			info 	= new JMenuItem(loader.getString(sgroup + ".info", languageID));
 		for(JMenu m : Arrays.asList(fileMenu, optionsMenu, helpMenu)) menu.add(m);
+		setJMenuBar(menu);
 		
 		//Views
+		editPane = new TableEditPane(currentTable,resource,loader,languageID);
+		setContentPane(editPane);
 		
-			
+		pack();
 			
 		//Make visible
 		setVisible(true);

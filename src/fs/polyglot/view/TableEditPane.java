@@ -1,5 +1,6 @@
 package fs.polyglot.view;
 
+import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.util.HashSet;
@@ -113,6 +114,25 @@ public class TableEditPane extends JPanel implements ResourceDependent {
 		editPanel.add(stringtree);
 		editPanel.add(languagelist);
 		editPanel.add(grouptree);
+		
+		//Status bar
+		statusBar.setLayout(new BorderLayout());
+		statusBar.add(logAppender,BorderLayout.WEST);
+		statusBar.add(progressBar,BorderLayout.EAST);
+		
+		//Content pane
+		GridBagLayout gbl2 = new GridBagLayout();
+		setLayout(gbl2);
+		GridBagConstraints gcHeader = GUIToolbox.buildConstraints(0, 0, 1, 1);
+		GridBagConstraints gcEdit = GUIToolbox.buildConstraints(0, 1, 1, 1);
+			gcEdit.weighty = 100;
+		GridBagConstraints gcStatus = GUIToolbox.buildConstraints(0, 2, 1, 1);
+		gbl2.setConstraints(headerBox, gcHeader);
+		gbl2.setConstraints(editPanel, gcEdit);
+		gbl2.setConstraints(statusBar, gcStatus);
+		add(headerBox);
+		add(editPanel);
+		add(statusBar);
 		
 		//Init Eventhandling ------------------------------
 		

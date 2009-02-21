@@ -1,6 +1,7 @@
 package fs.polyglot;
 
 import java.io.*;
+import java.util.ArrayList;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
@@ -92,6 +93,11 @@ public class Polyglot implements ResourceDependent {
 							+ configFile.getAbsolutePath()
 							+ " does not exist. Using default configuration but saving configuration to this file afterwards.");
 			else polyglotLogger.warn("No configuration file specified. No configuration will be saved.");
+			//Use default
+			options.setDefaultDirectory(".");
+			options.setGlobalLanguageID("en");
+			options.setLastfiles(new ArrayList<File>());
+			options.setMaxfilenumber(5);
 		} else {
 			try {
 				Document optionsDocument = XMLToolbox.loadXMLFile(configFile);
