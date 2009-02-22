@@ -17,6 +17,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.plaf.basic.BasicBorders.SplitPaneBorder;
 
+import org.apache.log4j.Logger;
 import org.dom4j.Document;
 
 import fs.event.DocumentChangeFlag;
@@ -64,6 +65,9 @@ public class TableEditPane extends JPanel implements ResourceDependent {
 	private String languageID;
 	private final static String sgroup = "fs.polyglot.TableEditPane";
 	
+	//Log
+	private Logger logger = Logger.getLogger(this.getClass().getCanonicalName());
+	
 	// CONSTRUCTOR ********************************
 	// ********************************************
 	
@@ -85,6 +89,7 @@ public class TableEditPane extends JPanel implements ResourceDependent {
 			tabledesc.setLineWrap(true);
 			tabledesc.setRows(5);
 		logAppender = new SwingAppender(null,resource,loader, languageID);
+			Logger.getLogger("fs.polyglot").addAppender(logAppender.getModel());
 		progressBar = new JProgressBar();
 		
 		JPanel headerPanel = new JPanel();
@@ -125,7 +130,9 @@ public class TableEditPane extends JPanel implements ResourceDependent {
 		GridBagConstraints gcString = GUIToolbox.buildConstraints(0, 0, 1, 2);
 			gcString.weightx = 100;gcString.weighty = 100;
 		GridBagConstraints gcLang = GUIToolbox.buildConstraints(1, 0, 1, 1);
+			gcLang.weighty = 50;
 		GridBagConstraints gcGroup = GUIToolbox.buildConstraints(1, 1, 1, 1);
+			gcGroup.weighty = 50;
 		gbl.setConstraints(stringtree, gcString);
 		gbl.setConstraints(languagelist, gcLang);
 		gbl.setConstraints(grouptree, gcGroup);
@@ -157,6 +164,9 @@ public class TableEditPane extends JPanel implements ResourceDependent {
 				
 		//Reset change flag
 		flag.setChangeFlag(false);
+		
+		logger.info("Initialized editing interface");
+		logger.info(model == null? "Opened new table" : "Opened table" + table.getTableID());
 	}
 	
 	// RESOURCEDEPENDENT **************************
