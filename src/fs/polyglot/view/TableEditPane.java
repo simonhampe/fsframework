@@ -1,10 +1,12 @@
 package fs.polyglot.view;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.util.HashSet;
 
+import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
@@ -13,6 +15,7 @@ import javax.swing.JProgressBar;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.plaf.basic.BasicBorders.SplitPaneBorder;
 
 import org.dom4j.Document;
 
@@ -78,13 +81,17 @@ public class TableEditPane extends JPanel implements ResourceDependent {
 		languagelist = new LanguageListView(resource,loader,languageID, table);
 		tableid	= new JTextField(table.getTableID());
 		tabledesc = new JTextArea(table.getTableDescription());
+			tabledesc.setBorder(BorderFactory.createEtchedBorder());
+			tabledesc.setLineWrap(true);
+			tabledesc.setRows(5);
 		logAppender = new SwingAppender(null,resource,loader, languageID);
 		progressBar = new JProgressBar();
 		
 		JPanel headerPanel = new JPanel();
 		JPanel editPanel = new JPanel();
 		JPanel statusBar = new JPanel();
-		JSplitPane horizontalPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,headerPanel,editPanel);
+		JSplitPane horizontalPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+			horizontalPane.setOneTouchExpandable(true);
 		
 		JLabel tableidlabel = new JLabel(loader.getString(sgroup + ".idlabel", languageID));
 		JLabel tabledesclabel = new JLabel(loader.getString(sgroup + ".desclabel", languageID));
@@ -93,19 +100,30 @@ public class TableEditPane extends JPanel implements ResourceDependent {
 		
 		//Header Panel
 		Box headerBox = new Box(BoxLayout.Y_AXIS);
+		headerBox.setAlignmentX(Box.LEFT_ALIGNMENT);
 		Box idbox = new Box(BoxLayout.X_AXIS);
 			idbox.setAlignmentX(Box.LEFT_ALIGNMENT);
 			idbox.add(tableidlabel);idbox.add(tableid);
+			idbox.add(Box.createHorizontalGlue());
 		Box descbox = new Box(BoxLayout.X_AXIS);
 			descbox.setAlignmentX(Box.LEFT_ALIGNMENT);
-			descbox.add(tabledesclabel);descbox.add(tabledesc);
+			descbox.add(tabledesclabel);
+		Box descareabox = new Box(BoxLayout.X_AXIS);
+			descareabox.setAlignmentX(Box.LEFT_ALIGNMENT);
+			descareabox.add(tabledesc);
+		Box fillBox = new Box(BoxLayout.X_AXIS);
+			fillBox.add(Box.createRigidArea(new Dimension(5,5)));
+		headerBox.add(fillBox);
+		headerBox.add(idbox); 
+		headerBox.add(descbox);
+		headerBox.add(descareabox);
 		headerPanel.add(headerBox);
-		
+				
 		//Edit panel
 		GridBagLayout gbl = new GridBagLayout();
 		editPanel.setLayout(gbl);
 		GridBagConstraints gcString = GUIToolbox.buildConstraints(0, 0, 1, 2);
-			gcString.weightx = 100;
+			gcString.weightx = 100;gcString.weighty = 100;
 		GridBagConstraints gcLang = GUIToolbox.buildConstraints(1, 0, 1, 1);
 		GridBagConstraints gcGroup = GUIToolbox.buildConstraints(1, 1, 1, 1);
 		gbl.setConstraints(stringtree, gcString);
@@ -115,6 +133,10 @@ public class TableEditPane extends JPanel implements ResourceDependent {
 		editPanel.add(languagelist);
 		editPanel.add(grouptree);
 		
+		//Split panel
+		horizontalPane.setLeftComponent(headerBox);
+		horizontalPane.setRightComponent(editPanel);
+		
 		//Status bar
 		statusBar.setLayout(new BorderLayout());
 		statusBar.add(logAppender,BorderLayout.WEST);
@@ -123,15 +145,11 @@ public class TableEditPane extends JPanel implements ResourceDependent {
 		//Content pane
 		GridBagLayout gbl2 = new GridBagLayout();
 		setLayout(gbl2);
-		GridBagConstraints gcHeader = GUIToolbox.buildConstraints(0, 0, 1, 1);
-		GridBagConstraints gcEdit = GUIToolbox.buildConstraints(0, 1, 1, 1);
-			gcEdit.weighty = 100;gcEdit.weightx = 100;
-		GridBagConstraints gcStatus = GUIToolbox.buildConstraints(0, 2, 1, 1);
-		gbl2.setConstraints(headerBox, gcHeader);
-		gbl2.setConstraints(editPanel, gcEdit);
+		GridBagConstraints gcSplit = GUIToolbox.buildConstraints(0, 0, 1, 1);
+		GridBagConstraints gcStatus = GUIToolbox.buildConstraints(0, 1, 1, 1);
+		gbl2.setConstraints(horizontalPane, gcSplit);
 		gbl2.setConstraints(statusBar, gcStatus);
-		add(headerBox);
-		add(editPanel);
+		add(horizontalPane);
 		add(statusBar);
 		
 		//Init Eventhandling ------------------------------
