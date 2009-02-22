@@ -125,7 +125,7 @@ public class TableEditPane extends JPanel implements ResourceDependent {
 		setLayout(gbl2);
 		GridBagConstraints gcHeader = GUIToolbox.buildConstraints(0, 0, 1, 1);
 		GridBagConstraints gcEdit = GUIToolbox.buildConstraints(0, 1, 1, 1);
-			gcEdit.weighty = 100;
+			gcEdit.weighty = 100;gcEdit.weightx = 100;
 		GridBagConstraints gcStatus = GUIToolbox.buildConstraints(0, 2, 1, 1);
 		gbl2.setConstraints(headerBox, gcHeader);
 		gbl2.setConstraints(editPanel, gcEdit);

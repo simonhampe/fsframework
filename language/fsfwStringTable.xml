@@ -329,5 +329,46 @@
 		<variant lang="en">Table ID:</variant></polyglotstring>
 	<polyglotstring id="fs.polyglot.TableEditPane.desclabel" group="fs.polyglot.TableEditPane">
 		<variant lang="en">Table description:</variant></polyglotstring>
+	<polyglotstring id="fs.polyglot.PolyglotFrame.filemenu" group="fs.polyglot.PolyglotFrame">
+		<variant lang="en">File</variant></polyglotstring>
+	<polyglotstring id="fs.polyglot.PolyglotFrame.filemnemonic"
+		group="fs.polyglot.PolyglotFrame">
+		<variant lang="en">F</variant>
+	</polyglotstring>
+	<polyglotstring id="fs.polyglot.PolyglotFrame.newfile" group="fs.polyglot.PolyglotFrame">
+		<variant lang="en">New file...</variant></polyglotstring>
+	<polyglotstring id="fs.polyglot.PolyglotFrame.loadfile" group="fs.polyglot.PolyglotFrame">
+		<variant lang="en">Open file...</variant></polyglotstring>
+	<polyglotstring id="fs.polyglot.PolyglotFrame.savefile" group="fs.polyglot.PolyglotFrame">
+		<variant lang="en">Save file</variant></polyglotstring>
+	<polyglotstring id="fs.polyglot.PolyglotFrame.savefileas"
+		group="fs.polyglot.PolyglotFrame">
+		<variant lang="en">Save file as ...</variant>
+	</polyglotstring>
+	<polyglotstring id="fs.polyglot.PolyglotFrame.quit" group="fs.polyglot.PolyglotFrame">
+		<variant lang="en">Quit</variant></polyglotstring>
+	<polyglotstring id="fs.polyglot.PolyglotFrame.optionsMenu"
+		group="fs.polyglot.PolyglotFrame">
+		<variant lang="en">Options</variant>
+	</polyglotstring>
+	<polyglotstring id="fs.polyglot.PolyglotFrame.optionsmnemonic"
+		group="fs.polyglot.PolyglotFrame">
+		<variant lang="en">O</variant>
+	</polyglotstring>
+	<polyglotstring id="fs.polyglot.PolyglotFrame.optionitem"
+		group="fs.polyglot.PolyglotFrame">
+		<variant lang="en">Configure Polyglot...</variant>
+	</polyglotstring>
+	<polyglotstring id="fs.polyglot.PolyglotFrame.helpmenu" group="fs.polyglot.PolyglotFrame">
+		<variant lang="en">Help</variant></polyglotstring>
+	<polyglotstring id="fs.polyglot.PolyglotFrame.helpmnemonic"
+		group="fs.polyglot.PolyglotFrame">
+		<variant lang="en">H</variant>
+	</polyglotstring>
+	<polyglotstring id="fs.polyglot.PolyglotFrame.help" group="fs.polyglot.PolyglotFrame">
+		<variant lang="en">Help...</variant>
+	</polyglotstring>
+	<polyglotstring id="fs.polyglot.PolyglotFrame.info" group="fs.polyglot.PolyglotFrame">
+		<variant lang="en">Info...</variant></polyglotstring>
 
 </fsfw:polyglotstringtable>

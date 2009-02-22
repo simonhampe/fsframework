@@ -130,7 +130,8 @@ public class PolyglotFrame extends JFrame implements ResourceDependent {
 		//Menu
 		menu = new JMenuBar();		
 		fileMenu 	= new JMenu(loader.getString(sgroup + ".filemenu", languageID));
-		//fileMenu.setMnemonic(loader.getString(sgroup + ".filemnemonic", languageID).charAt(0));
+		String filemnemonic = loader.getString(sgroup + ".filemnemonic", languageID);
+		if(filemnemonic.length() > 0) fileMenu.setMnemonic(filemnemonic.charAt(0));
 			newFile		= new JMenuItem(loader.getString(sgroup + ".newfile", languageID));
 			newFile.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_DOWN_MASK));
 			loadFile 	= new JMenuItem(loader.getString(sgroup + ".loadfile", languageID));
@@ -140,12 +141,19 @@ public class PolyglotFrame extends JFrame implements ResourceDependent {
 			saveFileAs	= new JMenuItem(loader.getString(sgroup + ".savefileas", languageID));
 			quit 		= new JMenuItem(loader.getString(sgroup + ".quit", languageID));
 			quit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q,InputEvent.CTRL_DOWN_MASK));
+			for(JMenuItem i : Arrays.asList(newFile,loadFile,saveFile,saveFileAs,quit)) fileMenu.add(i);
 		optionsMenu = new JMenu(loader.getString(sgroup + ".optionsMenu", languageID));
+		String optionmnenmonic = loader.getString(sgroup + ".optionsmnemonic", languageID); 
+		if(optionmnenmonic.length() > 0) optionsMenu.setMnemonic(optionmnenmonic.charAt(0));
 			optionItem	= new JMenuItem(loader.getString(sgroup + ".optionitem", languageID));
+			optionsMenu.add(optionItem);
 		helpMenu 	= new JMenu(loader.getString(sgroup + ".helpmenu", languageID));
+		String helpmnemonic =loader.getString(sgroup + ".helpmnemonic", languageID); 
+		if(helpmnemonic.length() > 0) helpMenu.setMnemonic(helpmnemonic.charAt(0));
 			help	= new JMenuItem(loader.getString(sgroup + ".help", languageID));
 			help.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F1,0));
 			info 	= new JMenuItem(loader.getString(sgroup + ".info", languageID));
+			for(JMenuItem i : Arrays.asList(help,info)) helpMenu.add(i);
 		for(JMenu m : Arrays.asList(fileMenu, optionsMenu, helpMenu)) menu.add(m);
 		setJMenuBar(menu);
 		
