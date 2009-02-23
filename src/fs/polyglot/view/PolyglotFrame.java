@@ -17,6 +17,7 @@ import javax.swing.KeyStroke;
 
 import org.apache.log4j.Logger;
 import org.dom4j.Document;
+import org.dom4j.DocumentException;
 
 import fs.polyglot.model.PolyglotOptions;
 import fs.polyglot.model.PolyglotTableModel;
@@ -25,6 +26,7 @@ import fs.xml.PolyglotStringLoader;
 import fs.xml.PolyglotStringTable;
 import fs.xml.ResourceDependent;
 import fs.xml.ResourceReference;
+import fs.xml.XMLDirectoryTree;
 import fs.xml.XMLToolbox;
 import fs.xml.XMLWriteConfigurationException;
 
@@ -40,9 +42,7 @@ public class PolyglotFrame extends JFrame implements ResourceDependent {
 	// *********************************
 	
 	//The table currently edited
-	private PolyglotTableModel currentTable;
-	//The associated file
-	private File tableFile;
+	private TableEditPane editPane;
 	//The application options
 	private PolyglotOptions options;
 	
@@ -69,8 +69,6 @@ public class PolyglotFrame extends JFrame implements ResourceDependent {
 	private JMenu helpMenu;
 		private JMenuItem help;
 		private JMenuItem info;
-		
-	private TableEditPane editPane;
 	
 	// EVENT HANDLING *****************************
 	// ********************************************
@@ -104,13 +102,14 @@ public class PolyglotFrame extends JFrame implements ResourceDependent {
 		resource = FsfwDefaultReference.getDefaultReference();
 		loader = PolyglotStringLoader.getDefaultLoader();
 		languageID = PolyglotStringTable.getGlobalLanguageID();
-		tableFile = file;
 		
 		//Load table-------------------------------------------------
 		
+		PolyglotTableModel model;
 		if(file != null) {
 			try {
-				currentTable = new PolyglotTableModel(XMLToolbox.loadXMLFile(file),resource);
+				model = new PolyglotTableModel(XMLToolbox.loadXMLFile(file),resource);
+				editPane = new TableEditPane(model, resource, loader, languageID);
 			}
 			catch(Exception xe) {
 				String msg = "Couldn't open file " + file.getAbsolutePath() + ": " + 
@@ -122,7 +121,7 @@ public class PolyglotFrame extends JFrame implements ResourceDependent {
 			}
 		}
 		if(file == null) {
-			currentTable = new PolyglotTableModel("","");
+			editPane = new TableEditPane(null,resource,loader,languageID);
 		}
 		
 		//Init GUI --------------------------------------------------
@@ -158,7 +157,6 @@ public class PolyglotFrame extends JFrame implements ResourceDependent {
 		setJMenuBar(menu);
 		
 		//Views
-		editPane = new TableEditPane(currentTable,resource,loader,languageID);
 		setContentPane(editPane);
 		
 		pack();
@@ -171,9 +169,9 @@ public class PolyglotFrame extends JFrame implements ResourceDependent {
 	// *********************************
 
 	/**
-	 * Tries to load the table represented by 
+	 * Tries to load the table represented by the file f 
 	 */
-	protected void loadTable() {
+	protected void loadTable(File f) throws DocumentException {
 		
 	}
 	
@@ -182,13 +180,14 @@ public class PolyglotFrame extends JFrame implements ResourceDependent {
 
 	@Override
 	public void assignReference(ResourceReference r) {
-		// TODO Auto-generated method stub
-
+		throw new UnsupportedOperationException(
+			"Can't assign a resource reference to polyglot. The fsframework reference has to be used");
 	}
 
 	@Override
 	public Document getExpectedResourceStructure() {
-		// TODO Auto-generated method stub
-		return null;
+		if(editPane != null) 
+			return editPane.getExpectedResourceStructure();
+		else return new XMLDirectoryTree();
 	}
 }

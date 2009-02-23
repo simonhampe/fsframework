@@ -175,15 +175,17 @@ public class Polyglot implements ResourceDependent {
 	}
 
 	/**
-	 * Summarizes the resource needs of the complete application
+	 * Summarizes the resource needs of the complete application. In any case 
+	 * expects the fsframework string table.
 	 */
 	@Override
 	public Document getExpectedResourceStructure() {
+		XMLDirectoryTree tree = new XMLDirectoryTree();
+		tree.addPath("language/fsfwStringTable.xml");
 		// So far, only mainframe needs any resources
 		if (mainFrame != null)
-			return mainFrame.getExpectedResourceStructure();
-		else
-			return new XMLDirectoryTree();
+			tree.addTree((XMLDirectoryTree)mainFrame.getExpectedResourceStructure());
+		return new XMLDirectoryTree();
 	}
 
 }
