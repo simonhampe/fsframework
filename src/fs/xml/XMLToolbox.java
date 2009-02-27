@@ -1,5 +1,6 @@
 package fs.xml;
 
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.xml.transform.*;
 import javax.xml.transform.stream.*;
 import javax.xml.validation.*;
@@ -146,5 +147,10 @@ public class XMLToolbox {
 		writer.write(doc);
 		return output.toString();
 	}
+	
+	/**
+	 * A file filter for xml files, without description
+	 */
+	public final static FileNameExtensionFilter xmlFilter = new FileNameExtensionFilter(null,"xml");
 
 }

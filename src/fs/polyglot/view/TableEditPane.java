@@ -15,6 +15,7 @@ import javax.swing.JProgressBar;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.event.ChangeListener;
 import javax.swing.plaf.basic.BasicBorders.SplitPaneBorder;
 
 import org.apache.log4j.Logger;
@@ -23,6 +24,7 @@ import org.dom4j.Document;
 import fs.event.DocumentChangeFlag;
 import fs.gui.GUIToolbox;
 import fs.gui.SwingAppender;
+import fs.polyglot.event.PolyglotChangeFlag;
 import fs.polyglot.model.PolyglotTableModel;
 import fs.test.XMLDirectoryTest;
 import fs.xml.FsfwDefaultReference;
@@ -57,7 +59,6 @@ public class TableEditPane extends JPanel implements ResourceDependent {
 	
 	//Table data
 	private PolyglotTableModel table;
-	private DocumentChangeFlag flag;
 	
 	//Resource
 	private ResourceReference resource;
@@ -68,6 +69,12 @@ public class TableEditPane extends JPanel implements ResourceDependent {
 	//Log
 	private Logger logger = Logger.getLogger(this.getClass().getCanonicalName());
 	
+	// EVENT HANDLING *****************************
+	// ********************************************
+	
+	private PolyglotChangeFlag flag;
+	
+	
 	// CONSTRUCTOR ********************************
 	// ********************************************
 	
@@ -77,7 +84,8 @@ public class TableEditPane extends JPanel implements ResourceDependent {
 		languageID = langID != null? langID : PolyglotStringTable.getGlobalLanguageID();
 		loader = l!= null? l : PolyglotStringLoader.getDefaultLoader();
 		table = model != null? model : new PolyglotTableModel("","");
-		flag = new DocumentChangeFlag();
+		flag = new PolyglotChangeFlag();
+		table.addListener(flag);
 		
 		//Init GUI ----------------------------------------
 		stringtree = new StringTreeView(resource, loader, languageID,table);
@@ -153,7 +161,9 @@ public class TableEditPane extends JPanel implements ResourceDependent {
 		GridBagLayout gbl2 = new GridBagLayout();
 		setLayout(gbl2);
 		GridBagConstraints gcSplit = GUIToolbox.buildConstraints(0, 0, 1, 1);
+			gcSplit.weightx = 100;gcSplit.weighty = 100;
 		GridBagConstraints gcStatus = GUIToolbox.buildConstraints(0, 1, 1, 1);
+			gcStatus.weightx = 100;
 		gbl2.setConstraints(horizontalPane, gcSplit);
 		gbl2.setConstraints(statusBar, gcStatus);
 		add(horizontalPane);
@@ -167,6 +177,48 @@ public class TableEditPane extends JPanel implements ResourceDependent {
 		
 		logger.info("Initialized editing interface");
 		logger.info(model == null? "Opened new table" : "Opened table" + table.getTableID());
+	}
+	
+	// GETTERS AND SETTERS ************************
+	// ********************************************
+	
+	/**
+	 * Returns the table edited by this pane
+	 */
+	public PolyglotTableModel getTable() {
+		return table;
+	}
+	
+	// EVENT HANDLING METHODS *********************
+	// ********************************************
+	
+	/**
+	 * Listeners are notified of changes in the document and the document change flag
+	 * is passed on as source
+	 */
+	public void addChangeListener(ChangeListener c) {
+		if(c != null) flag.addChangeListener(c);
+	}
+	
+	/**
+	 * Removes listener from the document change flag
+	 */
+	public void removeChangeListener(ChangeListener c) {
+		flag.removeChangeListener(c);
+	}
+	
+	/**
+	 * Returns whether the document has been changed
+	 */
+	public boolean hasBeenChanged() {
+		return flag.hasBeenChanged();
+	}
+	
+	/**
+	 * Manually sets the change flag of this document
+	 */
+	public void setChangeFlag(boolean f) {
+		flag.setChangeFlag(f);
 	}
 	
 	// RESOURCEDEPENDENT **************************

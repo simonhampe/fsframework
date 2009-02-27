@@ -1,23 +1,32 @@
 package fs.polyglot.view;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.apache.log4j.Logger;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
+import org.dom4j.tree.DefaultDocument;
 
 import fs.polyglot.model.PolyglotOptions;
 import fs.polyglot.model.PolyglotTableModel;
@@ -27,6 +36,7 @@ import fs.xml.PolyglotStringTable;
 import fs.xml.ResourceDependent;
 import fs.xml.ResourceReference;
 import fs.xml.XMLDirectoryTree;
+import fs.xml.XMLReadConfigurationException;
 import fs.xml.XMLToolbox;
 import fs.xml.XMLWriteConfigurationException;
 
@@ -43,6 +53,8 @@ public class PolyglotFrame extends JFrame implements ResourceDependent {
 	
 	//The table currently edited
 	private TableEditPane editPane;
+	//The associated file
+	private File associatedFile;
 	//The application options
 	private PolyglotOptions options;
 	
@@ -73,11 +85,92 @@ public class PolyglotFrame extends JFrame implements ResourceDependent {
 	// EVENT HANDLING *****************************
 	// ********************************************
 	
+	//Opens a confirm dialog, if necessary and closes the application
 	private WindowListener closeListener = new WindowAdapter() {
 		@Override
 		public void windowClosing(WindowEvent e) {
-			super.windowClosing(e);
+			if(editPane.hasBeenChanged()) {
+				int ans = openSaveConfirmDialog();
+				switch(ans) {
+				case JOptionPane.YES_OPTION: 
+					try {
+						saveTable();
+					} catch (IOException e1) {
+						//Abort
+						return;
+					} break;
+				case JOptionPane.CANCEL_OPTION: return;
+				}
+			}
 			System.exit(0);
+		}
+	};
+	
+	//Listens to changes in the document and adjusts the frame title
+	private ChangeListener tableChangeListener = new ChangeListener() {
+		@Override
+		public void stateChanged(ChangeEvent e) {
+			if(editPane != null) {	
+				String title = "Polyglot - " + editPane.getTable().getTableID() + 
+					(editPane.hasBeenChanged()? "*" : "");
+				setTitle(title);
+			}
+		}
+	};
+	
+	//Action listeners for menu actions-------------------------------
+	
+	private ActionListener newListener = new ActionListener() {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			if(editPane.hasBeenChanged()) {
+				switch(openSaveConfirmDialog()) {
+				case JOptionPane.CANCEL_OPTION: return;
+				case JOptionPane.YES_OPTION: 
+					try {
+						saveTable();
+					} catch (IOException e1) { //Ignored
+					}
+				}
+			}
+			setTable(null);
+		}
+	};
+	
+	private ActionListener openListener = new ActionListener() {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			try {
+				openFile();
+			} catch (DocumentException e1) { //Ignored
+			}
+		}
+	};
+	
+	private ActionListener saveListener = new ActionListener() {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			try {
+				saveTable();
+			} catch (IOException e1) { //Ignored
+			}
+		}
+	};
+	
+	private ActionListener saveAsListener = new ActionListener() {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			try {
+				saveAs();
+			} catch (IOException e1) { //Ignored
+			}
+		}
+	};
+	
+	private ActionListener quitListener = new ActionListener() {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			closeListener.windowClosing(null);
 		}
 	};
 	
@@ -105,24 +198,15 @@ public class PolyglotFrame extends JFrame implements ResourceDependent {
 		
 		//Load table-------------------------------------------------
 		
-		PolyglotTableModel model;
-		if(file != null) {
-			try {
-				model = new PolyglotTableModel(XMLToolbox.loadXMLFile(file),resource);
-				editPane = new TableEditPane(model, resource, loader, languageID);
-			}
-			catch(Exception xe) {
-				String msg = "Couldn't open file " + file.getAbsolutePath() + ": " + 
-								xe.getMessage();
-				logger.error(msg);
-				JOptionPane.showMessageDialog(this, msg, "Error", ERROR);
-				//Instead, open an empty table:
-				file = null;
-			}
+		try {
+			if(file != null) loadTable(file);
+			else setTable(null);
+		} catch (DocumentException e) {
+			//If it doesn't work, open an empty table
+			file = null;
+			setTable(null);
 		}
-		if(file == null) {
-			editPane = new TableEditPane(null,resource,loader,languageID);
-		}
+		associatedFile = file;
 		
 		//Init GUI --------------------------------------------------
 		
@@ -156,11 +240,15 @@ public class PolyglotFrame extends JFrame implements ResourceDependent {
 		for(JMenu m : Arrays.asList(fileMenu, optionsMenu, helpMenu)) menu.add(m);
 		setJMenuBar(menu);
 		
-		//Views
-		setContentPane(editPane);
-		
 		pack();
 			
+		// Event handling -------------------------------------------
+		newFile.addActionListener(newListener);
+		loadFile.addActionListener(openListener);
+		saveFile.addActionListener(saveListener);
+		saveFileAs.addActionListener(saveAsListener);
+		quit.addActionListener(quitListener);
+		
 		//Make visible
 		setVisible(true);
 	}
@@ -169,10 +257,115 @@ public class PolyglotFrame extends JFrame implements ResourceDependent {
 	// *********************************
 
 	/**
-	 * Tries to load the table represented by the file f 
+	 * Opens a file chooser and tries to load the selected file
+	 * @throws DocumentException - If the selected file cannot be opened
 	 */
-	protected void loadTable(File f) throws DocumentException {
-		
+	protected void openFile() throws DocumentException {
+		//Ask if the user is sure, if the document has been modified
+		if(editPane.hasBeenChanged()) {
+			int ans = openSaveConfirmDialog();
+			switch(ans) {
+			case JOptionPane.CANCEL_OPTION: return;
+			case JOptionPane.YES_OPTION: 
+				try {
+					saveTable();
+				} catch (IOException e) {
+					//Abort, if anything goes wrong
+					return;
+				}
+			}
+		}
+		//Open dialog
+		JFileChooser chooser = new JFileChooser();
+		chooser.setFileFilter(XMLToolbox.xmlFilter);
+		int ret = chooser.showOpenDialog(this);
+		if(ret == JFileChooser.APPROVE_OPTION) {
+			loadTable(chooser.getSelectedFile());
+		}
+	}
+	
+	/**
+	 * Tries to load the table represented by the file f 
+	 * @throws DocumentException - If the document cannot be loaded
+	 */
+	protected void loadTable(File f) throws DocumentException{
+		try {
+			logger.info(loader.getString("fs.polyglot.log.loadingfile", languageID, f.getAbsolutePath()));
+			PolyglotTableModel newmodel = new PolyglotTableModel(XMLToolbox.loadXMLFile(f),resource);
+			setTable(newmodel);
+			logger.info(loader.getString("fs.polyglot.log.loadedfile", languageID, f.getAbsolutePath()));
+		}
+		catch(Exception e) {
+			String msg = loader.getString("fs.error.openfilefailed", languageID, f!= null? f.getAbsolutePath() : "", e.getMessage());
+			logger.error(msg);
+			JOptionPane.showMessageDialog(this, msg, loader.getString("fs.global.error", languageID), JOptionPane.ERROR_MESSAGE);
+			throw new DocumentException(e);
+		}
+	}
+	
+	/**
+	 * Constructs a new edit pane for the model m and inserts it into the frame. 
+	 */
+	protected void setTable(PolyglotTableModel m) {
+		if(editPane != null) editPane.removeChangeListener(tableChangeListener);
+		editPane= new TableEditPane(m, resource,loader,languageID);
+		setContentPane(editPane);
+		pack();
+		editPane.addChangeListener(tableChangeListener);
+		tableChangeListener.stateChanged(null);
+		repaint();
+	}
+	
+	/**
+	 * Opens a dialog showing 'The document has been modified. Do you want to save it?'
+	 * with a YES/NO/CANCEL option
+	 */
+	protected int openSaveConfirmDialog() {
+		return JOptionPane.showConfirmDialog(this, 
+				loader.getString("fs.global.saveordiscard",languageID),
+				loader.getString("fs.global.question", languageID),
+				JOptionPane.YES_NO_CANCEL_OPTION);
+	}
+	
+	/**
+	 * Saves the table under the associated file. If the file is null, a save as... 
+	 * dialog is opened
+	 * @throws IOException - If any I/O-errors occur
+	 */
+	protected void saveTable() throws IOException {
+		if(associatedFile == null) saveAs();
+		else {
+			Document tableDoc = new DefaultDocument();
+			try {
+				logger.info(loader.getString("fs.polyglot.log.savingfile", languageID, associatedFile.getAbsolutePath()));
+				tableDoc.setRootElement(editPane.getTable().getConfiguration());
+				XMLToolbox.saveXML(tableDoc, associatedFile.getAbsolutePath());
+				logger.info(loader.getString("fs.polyglot.log.savedfile", languageID, associatedFile.getAbsolutePath()));
+			} catch (XMLReadConfigurationException e) {
+				String msg = loader.getString("fs.polyglot.error.readconfig", languageID, e.getMessage());
+				JOptionPane.showMessageDialog(this, msg,loader.getString("fs.global.error", languageID),JOptionPane.ERROR_MESSAGE);
+				logger.error(msg);
+			} catch (IOException e) {
+				String msg = loader.getString("fs.error.savefailed", languageID, associatedFile.getAbsolutePath(),e.getMessage());
+				JOptionPane.showMessageDialog(this, msg,loader.getString("fs.global.error", languageID),JOptionPane.ERROR_MESSAGE);
+				logger.error(msg);
+			}
+			
+		}
+	}
+	
+	/**
+	 * Opens a 'Save As...'- Dialog, sets the associatedFile and calls saveTable
+	 * @throws IOException - If any I/O-errors occur
+	 */
+	protected void saveAs() throws IOException {
+		JFileChooser chooser = new JFileChooser(associatedFile.getPath());
+		chooser.setFileFilter(XMLToolbox.xmlFilter);
+		int ans = chooser.showSaveDialog(this);
+		if(ans == JFileChooser.APPROVE_OPTION) {
+			associatedFile = chooser.getSelectedFile();
+			saveTable();
+		}
 	}
 	
 	// RESOURCEDEPENDENT METHODS ******************************

@@ -10,6 +10,12 @@
   		<id>de</id>
   		<description>Deutsch</description>
   	</language></languagetable>
+  <polyglotstring id="fs.error.openfilefailed" group="fs.error">
+  	<variant lang="en">Could not open file %s: %s</variant></polyglotstring>
+  <polyglotstring id="fs.error.savefailed" group="fs.error">
+  	<variant lang="en">Could not save file %s: %s</variant></polyglotstring>
+  <polyglotstring id="fs.global.unnamed" group="fs.global">
+  	<variant lang="en">Unnamed</variant></polyglotstring>
   <polyglotstring id="fs.global.ok" group="fs.global">
   	<variant lang="en">OK</variant></polyglotstring>
   <polyglotstring id="fs.global.cancel" group="fs.global">
@@ -25,6 +31,8 @@
   		sie überschreiben wollen?
   	</variant>
   </polyglotstring>
+  <polyglotstring id="fs.global.saveordiscard" group="fs.global">
+  	<variant lang="en">The document has been modified. Do you want to save it?</variant></polyglotstring>
   <polyglotstring id="fs.global.confirmtitle" group="fs.global">
   	<variant lang="en">Confirm Overwrite</variant>
   	<variant lang="de">Bestätige Überschreiben</variant>
@@ -58,6 +66,16 @@
   	<variant lang="en">Click to open history</variant>
   	<variant lang="de">Klicken, um Verlauf zu öffnen</variant>
 </polyglotstring>
+	<polyglotstring id="fs.polyglot.error.readconfig" group="fs.polyglot.error">
+		<variant lang="en">Could not read table data: %s</variant></polyglotstring>
+	<polyglotstring id="fs.polyglot.log.savingfile" group="fs.polyglot.log">
+		<variant lang="en">Saving table to file %s...</variant></polyglotstring>
+	<polyglotstring id="fs.polyglot.log.savedfile" group="fs.polyglot.log">
+		<variant lang="en">Successfully saved table to file %s.</variant></polyglotstring>
+	<polyglotstring id="fs.polyglot.log.loadingfile" group="fs.polyglot.log">
+		<variant lang="en">Loading table %s...</variant></polyglotstring>
+	<polyglotstring id="fs.polyglot.log.loadedfile" group="fs.polyglot.log">
+		<variant lang="en">Loaded table %s.</variant></polyglotstring>
 	<polyglotstring id="fs.polyglot.LanguageListCellRenderer.nodescription" group="fs.polyglot.LanguageListCellRenderer">
 		<variant lang="en">(no description available)</variant>
 	</polyglotstring>
