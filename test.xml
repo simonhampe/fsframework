@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<fsfw:polyglotstringtable id="">
+  <description></description>
+  <languagetable>
+    <language>
+      <id>en</id>
+      <description></description>
+    </language>
+  </languagetable>
+</fsfw:polyglotstringtable>

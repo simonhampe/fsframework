@@ -102,6 +102,7 @@ public class PolyglotFrame extends JFrame implements ResourceDependent {
 				case JOptionPane.CANCEL_OPTION: return;
 				}
 			}
+			logger.info(loader.getString("fs.polyglot.log.closing", languageID));
 			System.exit(0);
 		}
 	};
@@ -111,8 +112,12 @@ public class PolyglotFrame extends JFrame implements ResourceDependent {
 		@Override
 		public void stateChanged(ChangeEvent e) {
 			if(editPane != null) {	
-				String title = "Polyglot - " + editPane.getTable().getTableID() + 
-					(editPane.hasBeenChanged()? "*" : "");
+				String tableID = editPane.getTable().getTableID();
+				String file = associatedFile == null? "" : ": " + associatedFile.getName();
+				String title = "Polyglot - " + 
+				(tableID.trim().equals("")? "..." : tableID) + 
+				file +
+				(editPane.hasBeenChanged()? "*" : "");
 				setTitle(title);
 			}
 		}
@@ -292,6 +297,7 @@ public class PolyglotFrame extends JFrame implements ResourceDependent {
 		try {
 			logger.info(loader.getString("fs.polyglot.log.loadingfile", languageID, f.getAbsolutePath()));
 			PolyglotTableModel newmodel = new PolyglotTableModel(XMLToolbox.loadXMLFile(f),resource);
+			associatedFile = f;
 			setTable(newmodel);
 			logger.info(loader.getString("fs.polyglot.log.loadedfile", languageID, f.getAbsolutePath()));
 		}
@@ -333,7 +339,7 @@ public class PolyglotFrame extends JFrame implements ResourceDependent {
 	 * @throws IOException - If any I/O-errors occur
 	 */
 	protected void saveTable() throws IOException {
-		if(associatedFile == null) saveAs();
+		if(associatedFile == null)	saveAs();
 		else {
 			Document tableDoc = new DefaultDocument();
 			try {
@@ -359,10 +365,21 @@ public class PolyglotFrame extends JFrame implements ResourceDependent {
 	 * @throws IOException - If any I/O-errors occur
 	 */
 	protected void saveAs() throws IOException {
-		JFileChooser chooser = new JFileChooser(associatedFile.getPath());
+		JFileChooser chooser = new JFileChooser(associatedFile != null? associatedFile.getPath() : ".");
 		chooser.setFileFilter(XMLToolbox.xmlFilter);
 		int ans = chooser.showSaveDialog(this);
 		if(ans == JFileChooser.APPROVE_OPTION) {
+			//Ask for confirmation before overwriting
+			if(chooser.getSelectedFile().exists()) {
+				int res = JOptionPane.showConfirmDialog(this, loader.getString("fs.global.confirmoverwrite", languageID,chooser.getSelectedFile().getAbsolutePath()),
+									loader.getString("fs.global.confirmtitle", languageID),JOptionPane.YES_NO_CANCEL_OPTION);
+				switch(res) {
+				case JOptionPane.CANCEL_OPTION: 
+				case JOptionPane.NO_OPTION:
+					return; //Abort
+				}
+			}
+			//Now save
 			associatedFile = chooser.getSelectedFile();
 			saveTable();
 		}

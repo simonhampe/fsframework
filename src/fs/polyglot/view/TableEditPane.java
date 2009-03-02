@@ -2,6 +2,7 @@ package fs.polyglot.view;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.util.HashSet;
@@ -9,6 +10,7 @@ import java.util.HashSet;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
@@ -17,6 +19,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.event.ChangeListener;
 import javax.swing.plaf.basic.BasicBorders.SplitPaneBorder;
+import javax.swing.undo.UndoManager;
 
 import org.apache.log4j.Logger;
 import org.dom4j.Document;
@@ -26,6 +29,8 @@ import fs.gui.GUIToolbox;
 import fs.gui.SwingAppender;
 import fs.polyglot.event.PolyglotChangeFlag;
 import fs.polyglot.model.PolyglotTableModel;
+import fs.polyglot.undo.TableUndoManager;
+import fs.polyglot.undo.UndoableEditFactory;
 import fs.test.XMLDirectoryTest;
 import fs.xml.FsfwDefaultReference;
 import fs.xml.PolyglotStringLoader;
@@ -53,6 +58,8 @@ public class TableEditPane extends JPanel implements ResourceDependent {
 	private JTextArea tabledesc;
 	private SwingAppender logAppender;
 	private JProgressBar progressBar;
+	private JButton undo;
+	private JButton redo;
 	
 	// DATA ***************************************
 	// ********************************************
@@ -99,12 +106,16 @@ public class TableEditPane extends JPanel implements ResourceDependent {
 		logAppender = new SwingAppender(null,resource,loader, languageID);
 			Logger.getLogger("fs.polyglot").addAppender(logAppender.getModel());
 		progressBar = new JProgressBar();
+		undo = new JButton(loader.getString("fs.global.undo", languageID));
+		redo = new JButton(loader.getString("fs.global.redo", languageID));
 		
 		JPanel headerPanel = new JPanel();
 		JPanel editPanel = new JPanel();
 		JPanel statusBar = new JPanel();
 		JSplitPane horizontalPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
 			horizontalPane.setOneTouchExpandable(true);
+		
+		JPanel toolBar = new JPanel();
 		
 		JLabel tableidlabel = new JLabel(loader.getString(sgroup + ".idlabel", languageID));
 		JLabel tabledesclabel = new JLabel(loader.getString(sgroup + ".desclabel", languageID));
@@ -131,7 +142,15 @@ public class TableEditPane extends JPanel implements ResourceDependent {
 		headerBox.add(descbox);
 		headerBox.add(descareabox);
 		headerPanel.add(headerBox);
-				
+		
+		//Toolbar
+		Box toolbarbox = new Box(BoxLayout.X_AXIS);
+		toolbarbox.setAlignmentX(Box.LEFT_ALIGNMENT);
+			toolbarbox.add(undo);
+			toolbarbox.add(redo);
+			toolbarbox.add(Box.createHorizontalGlue());
+		toolBar.add(toolbarbox);
+		
 		//Edit panel
 		GridBagLayout gbl = new GridBagLayout();
 		editPanel.setLayout(gbl);
@@ -160,12 +179,15 @@ public class TableEditPane extends JPanel implements ResourceDependent {
 		//Content pane
 		GridBagLayout gbl2 = new GridBagLayout();
 		setLayout(gbl2);
-		GridBagConstraints gcSplit = GUIToolbox.buildConstraints(0, 0, 1, 1);
+		GridBagConstraints gcTool = GUIToolbox.buildConstraints(0, 0, 1, 1);
+		GridBagConstraints gcSplit = GUIToolbox.buildConstraints(0, 1, 1, 1);
 			gcSplit.weightx = 100;gcSplit.weighty = 100;
-		GridBagConstraints gcStatus = GUIToolbox.buildConstraints(0, 1, 1, 1);
+		GridBagConstraints gcStatus = GUIToolbox.buildConstraints(0, 2, 1, 1);
 			gcStatus.weightx = 100;
+		gbl2.setConstraints(toolBar, gcTool);
 		gbl2.setConstraints(horizontalPane, gcSplit);
 		gbl2.setConstraints(statusBar, gcStatus);
+		add(toolBar);
 		add(horizontalPane);
 		add(statusBar);
 		

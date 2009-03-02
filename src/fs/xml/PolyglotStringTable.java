@@ -601,27 +601,14 @@ public class PolyglotStringTable implements ResourceDependent, XMLConfigurable {
 	 * this string table
 	 */
 	public Element getConfiguration() throws XMLReadConfigurationException {
-		// Create Document from Template
-		Document out;
-		try {
-			out = XMLToolbox.loadXMLFile(new File(resourceRef
-					.getFullResourcePath(this,
-							"templates/tmpl_PolyglotStringTable.xml")));
-		} catch (DocumentException e) {
-			throw new XMLReadConfigurationException(
-					"Can't load template document for configuration output: ");
-		}
-		Element root = out.getRootElement();
-		Element langtab = new DefaultElement("languagetable");
-		// The template node "languagetable" is in fact removed and
-		// replaced by a new one, since it can only be retrieved as
-		// a node, which does not have a "addElement"-method.
-		Node oldlangtab = root.selectSingleNode("./languagetable");
-		oldlangtab.detach();
-		// Add description and set id
-		root.selectSingleNode("./description").setText(description);
+		//Root node and basic table attributes
+		Element root = new DefaultElement("fsfw:polyglotstringtable");
+		Element desc = new DefaultElement("description");
+			desc.setText(description);
+		root.add(desc);
 		root.addAttribute("id", id);
-		// Add all languages
+		//Add language table
+		Element langtab = new DefaultElement("languagetable");
 		for (String lang : languageTable.keySet()) {
 			DefaultElement l = new DefaultElement("language");
 			DefaultElement lid = new DefaultElement("id");

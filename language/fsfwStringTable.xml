@@ -45,7 +45,11 @@
   	<variant lang="en">Error</variant>
   	<variant lang="de">Fehler</variant>
   </polyglotstring>
-  
+  <polyglotstring id="fs.global.undo" group="fs.global">
+  	<variant lang="en">Undo</variant></polyglotstring>
+  <polyglotstring id="fs.global.redo" group="fs.global">
+  	<variant lang="en">Redo</variant></polyglotstring>
+
   <polyglotstring id="fs.gui.LogHistoryWindow.defaulttitle" group="fs.gui.LogHistoryWindow">
   	<variant lang="en">Logging History</variant>
   	<variant lang="de">Logverlauf</variant>
@@ -76,6 +80,8 @@
 		<variant lang="en">Loading table %s...</variant></polyglotstring>
 	<polyglotstring id="fs.polyglot.log.loadedfile" group="fs.polyglot.log">
 		<variant lang="en">Loaded table %s.</variant></polyglotstring>
+	<polyglotstring id="fs.polyglot.log.closing" group="fs.polyglot.log">
+		<variant lang="en">Closing Polyglot... </variant></polyglotstring>
 	<polyglotstring id="fs.polyglot.LanguageListCellRenderer.nodescription" group="fs.polyglot.LanguageListCellRenderer">
 		<variant lang="en">(no description available)</variant>
 	</polyglotstring>

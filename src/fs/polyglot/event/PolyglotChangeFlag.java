@@ -13,22 +13,22 @@ public class PolyglotChangeFlag extends DocumentChangeFlag implements PolyglotTa
 
 	@Override
 	public void languageListChanged(PolyglotTableModel source) {
-		fireStatusChanged();
+		setChangeFlag(true);
 	}
 
 	@Override
 	public void stringTableChanged(PolyglotTableModel source) {
-		fireStatusChanged();
+		setChangeFlag(true);
 	}
 
 	@Override
 	public void tableDescriptionChanged(PolyglotTableModel source) {
-		fireStatusChanged();
+		setChangeFlag(true);
 	}
 
 	@Override
 	public void tableIDChanged(PolyglotTableModel source) {
-		fireStatusChanged();
+		setChangeFlag(true);
 	}
 
 }
