@@ -12,6 +12,7 @@ import org.dom4j.Document;
 
 import fs.polyglot.model.Group;
 import fs.polyglot.model.PolyglotString;
+import fs.polyglot.model.PolyglotTableModel;
 import fs.polyglot.model.TreeObject;
 import fs.polyglot.model.Variant;
 import fs.xml.FsfwDefaultReference;
@@ -40,8 +41,8 @@ public class GroupTreeCellRenderer implements TreeCellRenderer,
 	//Does this renderer cut group paths?
 	private boolean cutGroupPath;
 	
-	//Which text for the root node?
-	private String root = "";
+	//Which table for the name of the root node (= table id)?
+	private PolyglotTableModel table;
 	
 	//Icons
 	private ImageIcon group;
@@ -62,12 +63,12 @@ public class GroupTreeCellRenderer implements TreeCellRenderer,
 	 * string name (more precisely: '.' + portion of path after last occurrence of a point).
 	 * @param nullString The string to be displayed instead of a null string (i.e. for the root node, for example)
 	 */
-	public GroupTreeCellRenderer(ResourceReference r,PolyglotStringLoader loader, String languageID, boolean cutGroupPath, String nullString) {
+	public GroupTreeCellRenderer(ResourceReference r,PolyglotStringLoader loader, String languageID, boolean cutGroupPath, PolyglotTableModel model) {
 		assignReference(r);
 		this.languageID = languageID != null? languageID : PolyglotStringTable.getGlobalLanguageID();
 		this.loader = loader != null? loader : PolyglotStringLoader.getDefaultLoader();
 		this.cutGroupPath = cutGroupPath;
-		this.root = nullString;
+		this.table = model;
 	}
 	
 	
@@ -90,7 +91,7 @@ public class GroupTreeCellRenderer implements TreeCellRenderer,
 			case NONE: break;//Nothing to do.
 			case GROUP: label.setIcon(expanded? (((Group)value).isComplete? groupOpen : groupWarnOpen): (((Group)value).isComplete? group: groupWarn));
 					
-						if(((Group)value).path == null) { label.setText("<html><i>" + root + "</i></html>"); }
+						if(((Group)value).path == null) { label.setText("<html><i>" + (table!= null? table.getTableID() : "") + "</i></html>"); }
 						else { label.setText(cutGroupPath? PolyglotStringTable.cutGroupPath(((Group)value).path) : ((Group)value).path); }
 						
 						if(!((Group)value).isComplete) label.setToolTipText(loader.getString(sgroup + ".groupincomplete", languageID));
@@ -111,19 +112,6 @@ public class GroupTreeCellRenderer implements TreeCellRenderer,
 	// BEHAVIOR CONTROL *****************************************
 	// **********************************************************
 	
-	/**
-	 * This text is displayed, when a group path is null (usually this only occurs for the root node) in italic letters
-	 */
-	public void setNullString(String text) {
-		root = text;
-	}
-	
-	/**
-	 * @return The string which is displayed as label text instead of null paths
-	 */
-	public String getNullString() {
-		return root;
-	}
 
 	
 	// RESOURCE DEPENDENT ***************************************

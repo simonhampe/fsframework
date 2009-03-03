@@ -607,6 +607,9 @@ public class PolyglotStringTable implements ResourceDependent, XMLConfigurable {
 			desc.setText(description);
 		root.add(desc);
 		root.addAttribute("id", id);
+		root.addAttribute("xmlns:fsfw", "http://www.fsmathe.uni-kl.de/fsframework");
+		root.addAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
+		root.addAttribute("xsi:schemaLocation", "http://www.fsmathe.uni-kl.de/fsframework ../schema/PolyglotStringTable.xsd" );
 		//Add language table
 		Element langtab = new DefaultElement("languagetable");
 		for (String lang : languageTable.keySet()) {

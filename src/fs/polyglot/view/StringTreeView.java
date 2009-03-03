@@ -197,7 +197,7 @@ public class StringTreeView extends JPanel implements ResourceDependent {
 		
 		//Init GUI and layout ---------------------------------------------------------------
 		treemodel = new GroupTreeModel(associatedTable, true, true, false);
-		treerenderer = new GroupTreeCellRenderer(reference,loader,this.languageID,true,table.getTableID());
+		treerenderer = new GroupTreeCellRenderer(reference,loader,this.languageID,true,table);
 		stringtree.setModel(treemodel);
 		stringtree.setCellRenderer(treerenderer);
 		ToolTipManager.sharedInstance().registerComponent(stringtree);

@@ -5,6 +5,9 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.HashSet;
 
 import javax.swing.BorderFactory;
@@ -18,6 +21,10 @@ import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.event.UndoableEditEvent;
+import javax.swing.event.UndoableEditListener;
 import javax.swing.plaf.basic.BasicBorders.SplitPaneBorder;
 import javax.swing.undo.UndoManager;
 
@@ -79,8 +86,56 @@ public class TableEditPane extends JPanel implements ResourceDependent {
 	// EVENT HANDLING *****************************
 	// ********************************************
 	
+	//Registers changes in the table
 	private PolyglotChangeFlag flag;
 	
+	//Adjusts the 'undo' and 'redo' buttons
+	private UndoableEditListener undoListener = new UndoableEditListener() {
+		@Override
+		public void undoableEditHappened(UndoableEditEvent e) {
+			UndoManager mgr =TableUndoManager.getUndoManager(table); 
+			undo.setEnabled(mgr.canUndo());
+			undo.setToolTipText(mgr.canUndo()? mgr.getUndoPresentationName() : null);
+			redo.setEnabled(mgr.canRedo());
+			redo.setToolTipText(mgr.canRedo()? mgr.getRedoPresentationName() : null);
+		}
+	};
+	
+	//Undoes the last operation
+	private ActionListener undoButtonListener = new ActionListener()  {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			TableUndoManager.getUndoManager(table).undo();			
+		}
+	};
+	
+	//Redoes the last operation undone
+	private ActionListener redoButtonListener = new ActionListener() {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			TableUndoManager.getUndoManager(table).redo();
+		}
+	};
+	
+	//Registers chanegs to id and description
+	private DocumentListener tableAttributeListener = new DocumentListener() {
+		@Override
+		public void changedUpdate(DocumentEvent e) {
+			updateTable();	
+		}
+		@Override
+		public void insertUpdate(DocumentEvent e) {
+			updateTable();			
+		}
+		@Override
+		public void removeUpdate(DocumentEvent e) {
+			updateTable();			
+		}
+		public void updateTable() {
+			table.setTableID(tableid.getText());
+			table.setTableDescription(tabledesc.getText());
+		}
+	};
 	
 	// CONSTRUCTOR ********************************
 	// ********************************************
@@ -146,9 +201,10 @@ public class TableEditPane extends JPanel implements ResourceDependent {
 		//Toolbar
 		Box toolbarbox = new Box(BoxLayout.X_AXIS);
 		toolbarbox.setAlignmentX(Box.LEFT_ALIGNMENT);
+			toolbarbox.add(Box.createHorizontalGlue());
 			toolbarbox.add(undo);
 			toolbarbox.add(redo);
-			toolbarbox.add(Box.createHorizontalGlue());
+		toolBar.setLayout(new GridLayout(1,1));
 		toolBar.add(toolbarbox);
 		
 		//Edit panel
@@ -193,7 +249,14 @@ public class TableEditPane extends JPanel implements ResourceDependent {
 		
 		//Init Eventhandling ------------------------------
 		
-				
+		//Register for undo/redo changes
+		TableUndoManager.getUndoManager(table).addUndoableEditListener(undoListener);
+		undoListener.undoableEditHappened(null);
+		undo.addActionListener(undoButtonListener);
+		redo.addActionListener(redoButtonListener);
+		tableid.getDocument().addDocumentListener(tableAttributeListener);
+		tabledesc.getDocument().addDocumentListener(tableAttributeListener);
+		
 		//Reset change flag
 		flag.setChangeFlag(false);
 		

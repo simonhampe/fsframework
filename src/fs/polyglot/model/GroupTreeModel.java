@@ -232,6 +232,12 @@ public class GroupTreeModel implements TreeModel, PolyglotTableModelListener {
 			}
 		}
 		
+		//For technical reasons we always assume that the root node name has been changed
+		int[] rootind = {0};
+		Object[] rootobj = {root};
+		TreePath rootpath = null;
+		changes.add(new TreeModelEvent(this,rootpath,rootind,rootobj) );
+		
 		//Copy data
 		children = newchildren;
 		
@@ -542,7 +548,7 @@ public class GroupTreeModel implements TreeModel, PolyglotTableModelListener {
 	 */
 	@Override
 	public void tableIDChanged(PolyglotTableModel source) {
-		// Ignored
+		syncData();
 	}
 
 }

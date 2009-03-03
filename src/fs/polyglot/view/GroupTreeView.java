@@ -253,7 +253,7 @@ public class GroupTreeView extends JPanel implements ResourceDependent {
 		
 		//Tree
 		treemodel = new GroupTreeModel(this.table,false,false,false);
-		treerenderer = new GroupTreeCellRenderer(reference,loader, this.languageID,true, this.table.getTableID());
+		treerenderer = new GroupTreeCellRenderer(reference,loader, this.languageID,true, this.table);
 		grouptree.setModel(treemodel);
 		grouptree.setCellRenderer(treerenderer);
 		grouptree.getSelectionModel().setSelectionMode(

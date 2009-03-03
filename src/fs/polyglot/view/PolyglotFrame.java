@@ -281,7 +281,7 @@ public class PolyglotFrame extends JFrame implements ResourceDependent {
 			}
 		}
 		//Open dialog
-		JFileChooser chooser = new JFileChooser();
+		JFileChooser chooser = new JFileChooser(".");
 		chooser.setFileFilter(XMLToolbox.xmlFilter);
 		int ret = chooser.showOpenDialog(this);
 		if(ret == JFileChooser.APPROVE_OPTION) {
@@ -346,6 +346,7 @@ public class PolyglotFrame extends JFrame implements ResourceDependent {
 				logger.info(loader.getString("fs.polyglot.log.savingfile", languageID, associatedFile.getAbsolutePath()));
 				tableDoc.setRootElement(editPane.getTable().getConfiguration());
 				XMLToolbox.saveXML(tableDoc, associatedFile.getAbsolutePath());
+				editPane.setChangeFlag(false);
 				logger.info(loader.getString("fs.polyglot.log.savedfile", languageID, associatedFile.getAbsolutePath()));
 			} catch (XMLReadConfigurationException e) {
 				String msg = loader.getString("fs.polyglot.error.readconfig", languageID, e.getMessage());
