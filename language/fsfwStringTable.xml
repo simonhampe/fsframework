@@ -82,6 +82,12 @@
 		<variant lang="en">Loaded table %s.</variant></polyglotstring>
 	<polyglotstring id="fs.polyglot.log.closing" group="fs.polyglot.log">
 		<variant lang="en">Closing Polyglot... </variant></polyglotstring>
+	<polyglotstring id="fs.polyglot.log.interfaceinit" group="fs.polyglot.log">
+		<variant lang="en">Initialized editing interface</variant></polyglotstring>
+	<polyglotstring id="fs.polyglot.log.newtable" group="fs.polyglot.log">
+		<variant lang="en">Opened new table</variant></polyglotstring>
+	<polyglotstring id="fs.polyglot.log.opentable" group="fs.polyglot.log">
+		<variant lang="en">Opened table %s</variant></polyglotstring>
 	<polyglotstring id="fs.polyglot.LanguageListCellRenderer.nodescription" group="fs.polyglot.LanguageListCellRenderer">
 		<variant lang="en">(no description available)</variant>
 	</polyglotstring>

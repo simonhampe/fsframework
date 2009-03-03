@@ -196,6 +196,8 @@ public class TableEditPane extends JPanel implements ResourceDependent {
 		headerBox.add(idbox); 
 		headerBox.add(descbox);
 		headerBox.add(descareabox);
+		headerBox.add(Box.createVerticalGlue());
+		headerPanel.setLayout(new GridLayout(1,1));
 		headerPanel.add(headerBox);
 		
 		//Toolbar
@@ -260,8 +262,9 @@ public class TableEditPane extends JPanel implements ResourceDependent {
 		//Reset change flag
 		flag.setChangeFlag(false);
 		
-		logger.info("Initialized editing interface");
-		logger.info(model == null? "Opened new table" : "Opened table" + table.getTableID());
+		logger.info(loader.getString("fs.polyglot.log.interfaceinit", languageID));
+		logger.info(model == null? loader.getString("fs.polyglot.log.newtable", languageID) : 
+									loader.getString("fs.polyglot.log.opentable", languageID, table.getTableID()));
 	}
 	
 	// GETTERS AND SETTERS ************************

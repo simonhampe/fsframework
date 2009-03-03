@@ -190,7 +190,6 @@ public class PolyglotFrame extends JFrame implements ResourceDependent {
 	public PolyglotFrame(File file, PolyglotOptions options) {
 		//Basic initialization
 		super();
-		setSize(getMaximumSize());
 		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 		addWindowListener(closeListener);
 		
@@ -246,6 +245,7 @@ public class PolyglotFrame extends JFrame implements ResourceDependent {
 		setJMenuBar(menu);
 		
 		pack();
+		setExtendedState( MAXIMIZED_BOTH);
 			
 		// Event handling -------------------------------------------
 		newFile.addActionListener(newListener);
@@ -316,7 +316,6 @@ public class PolyglotFrame extends JFrame implements ResourceDependent {
 		if(editPane != null) editPane.removeChangeListener(tableChangeListener);
 		editPane= new TableEditPane(m, resource,loader,languageID);
 		setContentPane(editPane);
-		pack();
 		editPane.addChangeListener(tableChangeListener);
 		tableChangeListener.stateChanged(null);
 		repaint();
