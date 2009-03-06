@@ -289,7 +289,6 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 		//Load data
 		updateData();
 		
-		checkGroup.setSelected(table.getGroupID(edits.get(currentEdit)) != null);
 		jumpto.addActionListener(jumpListener);
 		previous.setEnabled(singleEditString == null);
 		next.setEnabled(singleEditString == null);
@@ -556,8 +555,9 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 		//Otherwise calculate edit list
 		String currentEditID = (edits == null || edits.size() == 0) ? null : edits.get(currentEdit);
 		TreeSet<String> sortedIDs = new TreeSet<String>(table.getIDList());
+		TreeSet<String> sortedIDsCopy = new TreeSet<String>(sortedIDs);
 		//Load strings and remove unused strings
-		for(String id : sortedIDs) {
+		for(String id : sortedIDsCopy) {
 			//only incomplete?
 			if(configuration.editOnlyIncomplete && table.isCompleteString(id)) sortedIDs.remove(id);
 			//only selected?
@@ -600,7 +600,7 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 		tableVariants.getColumnModel().getColumn(2).setCellEditor(new ButtonEditor());
 		
 		//Set check boxes and so on
-		checkGroup.setSelected(table.getGroupID(edits.get(currentEdit)) != null);
+		checkGroup.setSelected(edits.size() == 0? true : table.getGroupID(edits.get(currentEdit)) != null);
 		
 		//Now resize table columns
 		TableColumnModel cm = tableVariants.getColumnModel();

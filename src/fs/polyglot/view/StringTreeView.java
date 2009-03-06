@@ -8,8 +8,8 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Arrays;
+import java.util.HashSet;
 
-import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -23,9 +23,9 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
-import javax.swing.text.ChangedCharSetException;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
+import javax.swing.undo.CompoundEdit;
 
 import org.apache.log4j.Logger;
 import org.dom4j.Document;
@@ -33,9 +33,13 @@ import org.dom4j.Document;
 import fs.gui.GUIToolbox;
 import fs.polyglot.model.GroupTreeModel;
 import fs.polyglot.model.LanguageListModel;
+import fs.polyglot.model.PolyglotString;
 import fs.polyglot.model.PolyglotTableModel;
 import fs.polyglot.model.TreeObject;
+import fs.polyglot.model.Variant;
+import fs.polyglot.undo.TableUndoManager;
 import fs.polyglot.undo.UndoableEditFactory;
+import fs.polyglot.undo.UndoablePolyglotStringEdit;
 import fs.xml.FsfwDefaultReference;
 import fs.xml.PolyglotStringLoader;
 import fs.xml.PolyglotStringTable;
@@ -51,6 +55,10 @@ import fs.xml.XMLDirectoryTree;
  */
 public class StringTreeView extends JPanel implements ResourceDependent {
 
+	/**
+	 * compiler-generated version id
+	 */
+	private static final long serialVersionUID = 3073891130815953048L;
 	//Components
 	private JTree stringtree = new JTree();
 	private JButton add = new JButton();
@@ -182,6 +190,86 @@ public class StringTreeView extends JPanel implements ResourceDependent {
 	};
 	
 	
+	//Edit listeners --------------------------------------
+	
+	private ActionListener newListener = new ActionListener() {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			//Create configuration
+			StringEditorConfiguration config = new StringEditorConfiguration();
+			//Create string ID
+			int selcount = stringtree.getSelectionCount();
+			TreePath selpath = stringtree.getSelectionPath();
+			String stringID = selcount == 0 ? "" : (((TreeObject)selpath.getLastPathComponent()).path) + ".";
+			//Open editor
+			StringEditor editor = new StringEditor(reference, loader, languageID, table ,null, stringID, config,TableUndoManager.getUndoManager(table));
+			editor.setVisible(true);
+		}
+	};
+	
+	
+	private ActionListener deleteListener = new ActionListener() {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			TreePath[] selectedPaths = stringtree.getSelectionPaths();
+			for(TreePath p : selectedPaths) {
+				TreeObject ob = (TreeObject)p.getLastPathComponent();
+				switch(ob.getType()) {
+				case GROUP:
+					//Create compound edit to remove all strings in this group
+					HashSet<String> idsToRemove = table.getStringsInSubgroups(ob.path);
+					CompoundEdit removeEdit = new CompoundEdit();
+					for(String id : idsToRemove) {
+						UndoablePolyglotStringEdit rem = editFactory.createUndoablePolyglotStringEdit(new PolyglotString(ob.path,id,false), null);
+						rem.redo();
+						removeEdit.addEdit(rem);
+					}
+					removeEdit.end();
+					editFactory.postEdit(removeEdit);
+					break;
+				case POLYGLOTSTRING:
+					editFactory.performUndoablePolyglotStringEdit((PolyglotString)ob, null);
+					break;
+				case VARIANT:
+					editFactory.performUndoableVariantEdit((Variant)ob, null);
+					break;
+				}
+			}
+		}
+	};
+	
+	private ActionListener simpleEditListener = new ActionListener() {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			//Create config
+			StringEditorConfiguration config = new StringEditorConfiguration();
+				config.editOnlyIncomplete = treemodel.doesShowOnlyIncomplete();
+				config.editOnlySelected = true;
+			//Create Editor
+			StringEditor editor = new StringEditor(reference,loader,languageID,table,getSelectedStrings(),null,config,TableUndoManager.getUndoManager(table));
+			//Show editor
+			editor.setVisible(true);
+		}
+	};
+	private ActionListener multipledEditListener = new ActionListener() {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			//Create config
+			StringEditorConfiguration config = new StringEditorConfiguration();
+				config.editOnlyIncomplete = editIncomplete.isSelected();
+				config.editOnlySelected = editSelected.isSelected();
+				HashSet<String> langlist = new HashSet<String>();
+					for(Object o : languageList.getSelectedValues()) langlist.add(o.toString());
+				config.excludeTheseLanguages = excludeLanguages.isSelected()? langlist : null;
+				config.onlyTheseLanguages = onlyLanguages.isSelected()? langlist : null;
+			//Create editor
+			StringEditor editor = new StringEditor(reference,loader,languageID,table,getSelectedStrings(),null,config,TableUndoManager.getUndoManager(table));
+			//Show editor
+			editor.setVisible(true);
+		}
+	};
+	
+	
 	
 	// CONSTRUCTOR *****************************************************************************
 	// *****************************************************************************************
@@ -194,6 +282,7 @@ public class StringTreeView extends JPanel implements ResourceDependent {
 		loader = stringloader != null ? stringloader : PolyglotStringLoader.getDefaultLoader();
 		this.languageID = languageID != null? languageID : PolyglotStringTable.getGlobalLanguageID();
 		table = associatedTable == null ? new PolyglotTableModel("", "") : associatedTable;
+		editFactory = new UndoableEditFactory(table,loader,this.languageID,TableUndoManager.getUndoManager(table));
 		
 		//Init GUI and layout ---------------------------------------------------------------
 		treemodel = new GroupTreeModel(associatedTable, true, true, false);
@@ -305,6 +394,32 @@ public class StringTreeView extends JPanel implements ResourceDependent {
 		onlyLanguages.addChangeListener(toggleListener);
 		excludeLanguages.addChangeListener(toggleListener);
 		
+		add.addActionListener(newListener);
+		delete.addActionListener(deleteListener);
+		editsingle.addActionListener(simpleEditListener);
+		editmultiple.addActionListener(multipledEditListener );
+	}
+	
+	// GETTERS AND SETTERS *********************************************************************
+	// *****************************************************************************************
+	
+	/**
+	 * Returns a list of selected strings, i.e. a list of all strings which are either selected directly or whose group is selected.
+	 */
+	public HashSet<String> getSelectedStrings() {
+		TreePath[] paths = stringtree.getSelectionPaths();
+		if(paths == null || paths.length == 0) return new HashSet<String>();
+		else {
+			HashSet<String> selstrings = new HashSet<String>();
+			for(TreePath p : paths) {
+				TreeObject ob = (TreeObject)p.getLastPathComponent();
+				switch(ob.getType()) {
+				case GROUP: selstrings.addAll(table.getStringsInSubgroups(ob.path)); break;
+				case POLYGLOTSTRING: selstrings.add(((PolyglotString)ob).stringID);
+				}
+			}
+			return selstrings;
+		}
 	}
 	
 	// RESOURCEDEPENDENT METHODS ***************************************************************

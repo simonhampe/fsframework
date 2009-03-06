@@ -331,6 +331,14 @@ public class PolyglotStringTable implements ResourceDependent, XMLConfigurable {
 		}
 		return groups;
 	}
+	
+	/**
+	 * @return A mapping of all variants associated to this string id. The empty map is returned, if there are none
+	 * or the ID does not exist in this table
+	 */
+	public HashMap<String,String> getVariants(String stringID) {
+		return new HashMap<String,String>(stringTable.get(stringID));
+	}
 
 	/**
 	 * Returns true, if and only if for each string in this group and its

@@ -1,5 +1,6 @@
 package fs.polyglot.undo;
 
+import java.util.HashMap;
 import javax.swing.undo.AbstractUndoableEdit;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
@@ -28,6 +29,7 @@ public class UndoablePolyglotStringEdit extends AbstractUndoableEdit {
 	// Change parameters
 	PolyglotString oldValue;
 	PolyglotString newValue;
+	HashMap<String,String> variants; //This stores the variants if the string is removed
 	PolyglotTableModel table;
 
 	// Resource
@@ -65,6 +67,11 @@ public class UndoablePolyglotStringEdit extends AbstractUndoableEdit {
 				.getDefaultLoader();
 		this.languageID = languageID != null ? languageID : PolyglotStringTable
 				.getGlobalLanguageID();
+		//Store variants on a removal
+		if(table != null && oldValue != null && newValue == null) {
+			variants = table.getVariants(oldValue.stringID);
+		}
+		else variants = new HashMap<String, String>();
 	}
 
 	/**
@@ -177,7 +184,7 @@ public class UndoablePolyglotStringEdit extends AbstractUndoableEdit {
 	public void redo() throws CannotRedoException {
 		super.redo();
 		try {
-			performStringEdit(table, oldValue, newValue);
+			performStringEdit(table, oldValue, newValue,variants);
 		} catch (UnsupportedOperationException ue) {
 			throw new CannotRedoException();
 		}
@@ -193,7 +200,7 @@ public class UndoablePolyglotStringEdit extends AbstractUndoableEdit {
 	public void undo() throws CannotUndoException {
 		super.undo();
 		try {
-			performStringEdit(table, newValue, oldValue);
+			performStringEdit(table, newValue, oldValue,variants);
 		} catch (UnsupportedOperationException ue) {
 			throw new CannotUndoException();
 		}
@@ -201,7 +208,9 @@ public class UndoablePolyglotStringEdit extends AbstractUndoableEdit {
 
 	/**
 	 * This method tries to perform the change on the specified table as
-	 * indicated by the old and new values
+	 * indicated by the old and new values.
+	 * @param variantstoadd - If this represents an addition, these variants are all added to the new string. If this represents any other
+	 * change, this parameter is ignored.
 	 * 
 	 * @throws UnsupportedOperationException
 	 *             - If the operation cannot be performed. See the documentation
@@ -209,7 +218,7 @@ public class UndoablePolyglotStringEdit extends AbstractUndoableEdit {
 	 *             explanation.
 	 */
 	public static void performStringEdit(PolyglotTableModel table,
-			PolyglotString oldval, PolyglotString newval)
+			PolyglotString oldval, PolyglotString newval, HashMap<String,String> variantstoadd)
 			throws UnsupportedOperationException {
 		if (table == null || (oldval == null && newval == null))
 			return;
@@ -219,6 +228,11 @@ public class UndoablePolyglotStringEdit extends AbstractUndoableEdit {
 				throw new UnsupportedOperationException();
 			table.addStringID(newval.stringID);
 			table.setGroupID(newval.stringID, newval.path);
+			//If the variants map is not empty, the variants contained are added
+			if(variantstoadd != null) {
+				for(String lid : variantstoadd.keySet()) 
+						table.putString(newval.stringID, lid, variantstoadd.get(lid));
+			}
 			return;
 		}
 		// Removal
