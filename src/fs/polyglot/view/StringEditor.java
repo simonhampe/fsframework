@@ -142,7 +142,7 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 	private ChangeListener checkGenerateListener = new ChangeListener() {
 		@Override
 		public void stateChanged(ChangeEvent e) {
-			generatedID.setText(getFinalID());
+			setGeneratedID(getFinalID());
 			repaint();
 		}
 	};
@@ -156,7 +156,7 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 		@Override
 		public void removeUpdate(DocumentEvent e) { update(); }
 		private void update() {
-			generatedID.setText(getFinalID());
+			setGeneratedID(getFinalID());
 			repaint();
 		}
 	};
@@ -250,10 +250,12 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 			checkQuickNav.setEnabled(singleStringID == null);
 		checkGroup = new JCheckBox();
 			checkGroup.addChangeListener(checkGroupListener);
+				checkGroupListener.stateChanged(null);
 			checkGroup.addChangeListener(checkGenerateListener);
 			checkGroup.addChangeListener(flag);
 		generatedID = new JLabel("");
 			generatedID.setForeground(new Color(0,0,255));
+			checkGenerateEditListener.changedUpdate(null);
 		tableVariants = new JTable();
 			tableVariants.getTableHeader().setReorderingAllowed(false);
 		jumpto = new JComboBox();
@@ -674,7 +676,6 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 	/**
 	 * Returns the final string id depending on the state of the checkbox 'Generate ID...'. i.e. either the value of String ID or
 	 * Group + '.' + StringID
-	 * @return
 	 */
 	public String getFinalID() {
 		return checkGenerateID.isSelected() ? 
@@ -682,6 +683,13 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 			textID.getText();
 	}
 
+	/**
+	 * Sets the content of the label 'generated id'. If id is empty or the null string, a space will be inserted
+	 */
+	protected void setGeneratedID(String id) {
+		generatedID.setText((id == null | id.equals(""))? " " : id);
+	}
+	
 	// RESOURCEDEPENDENT METHODS ********************************************************
 	// **********************************************************************************
 	

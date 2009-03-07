@@ -710,10 +710,10 @@ public class PolyglotStringTable implements ResourceDependent, XMLConfigurable {
 	/**
 	 * @return true, if and only if: <br>
 	 *         - group == null or <br>
+	 *         - group, subgroup != null and strict == true and
+	 *         subgroup.startswith(group + ".") or <br>
 	 *         - group, subgroup != null and strict == false and
-	 *         subgroup.startswith(group) or <br>
-	 *         - group, subgroup != null and strict == false and
-	 *         subgroup.startswith(group) and !group.equals(subgroup)
+	 *         subgroup.startswith(group + ".") || subgroup.equals(group)
 	 */
 	public static boolean isSubgroupOf(String group, String subgroup,
 			boolean strict) {
@@ -721,12 +721,12 @@ public class PolyglotStringTable implements ResourceDependent, XMLConfigurable {
 			return true;
 		if (subgroup == null)
 			return false;
-		if (!subgroup.startsWith(group))
-			return false;
-		if (strict)
-			return !group.equals(subgroup);
-		else
-			return true;
+		if (strict) {
+			return subgroup.startsWith(group + ".");
+		}
+		else {
+			return subgroup.startsWith(group + ".") || subgroup.equals(group);
+		}
 	}
 
 	/**
