@@ -83,6 +83,14 @@ public class VariantTableModel implements TableModel {
 		}
 	}
 	
+	/**
+	 * @return The variant for the given language ID or null, if there is no such language ID in the table
+	 */
+	public String getVariant(String languageID) {
+		int index = languages.indexOf(languageID);
+		return index == -1 ? null : variants.get(index);
+	}
+	
 	
 	
 	// INTERFACE METHODS ****************************************************

@@ -402,7 +402,8 @@ public class StringTreeView extends JPanel implements ResourceDependent {
 	// *****************************************************************************************
 	
 	/**
-	 * Returns a list of selected strings, i.e. a list of all strings which are either selected directly or whose group is selected.
+	 * Returns a list of selected strings, i.e. a list of all strings which are either selected directly or whose group is selected or 
+	 * a variant of which is selected
 	 */
 	public HashSet<String> getSelectedStrings() {
 		TreePath[] paths = stringtree.getSelectionPaths();
@@ -413,7 +414,8 @@ public class StringTreeView extends JPanel implements ResourceDependent {
 				TreeObject ob = (TreeObject)p.getLastPathComponent();
 				switch(ob.getType()) {
 				case GROUP: selstrings.addAll(table.getStringsInSubgroups(ob.path)); break;
-				case POLYGLOTSTRING: selstrings.add(((PolyglotString)ob).stringID);
+				case POLYGLOTSTRING: selstrings.add(((PolyglotString)ob).stringID); break;
+				case VARIANT: selstrings.add(((Variant)ob).stringID);
 				}
 			}
 			return selstrings;

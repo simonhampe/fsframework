@@ -401,7 +401,7 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 				}
 				//If it exists already, issue a warning
 				String finalid = getFinalID();
-				if(!finalid.equals(edits.get(currentEdit)) && table.containsStringID(finalid)) {
+				if((edits.size() == 0 || !finalid.equals(edits.get(currentEdit))) && table.containsStringID(finalid)) {
 					setToolTipText(component, loader.getString(sgroup + ".stringwarn", languageID));
 					return Result.WARNING;
 				}
@@ -439,7 +439,7 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 				String tooltip = null;
 				//Check for variants that were not originally displayed, but exist already
 				for(String l : languageList) {
-					if(table.getSupportedLanguages(edits.get(currentEdit)).contains(l) && !originalList.contains(l)) {
+					if(!(edits.size() == 0) && table.getSupportedLanguages(edits.get(currentEdit)).contains(l) && !originalList.contains(l)) {
 						r = Result.WARNING;
 						if(tooltip == null) tooltip = "<html>- ";
 						else tooltip += "<br>- ";
@@ -645,47 +645,131 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 		//If the entries are not valid, return
 		if(summary.validate().getOverallResult() == Result.INCORRECT) return;
 		CompoundEdit edit = new CompoundEdit();
-		//If there are no edits, a new entry is created
-		if(edits.size() == 0) {
-			//Create String
-			UndoablePolyglotStringEdit stringadd = editFactory.createUndoablePolyglotStringEdit(null, new PolyglotString(grouppath,finalid,false));
-			stringadd.redo();
-			edit.addEdit(stringadd);
-			//Add variants
-			for(int i = 0; i < model.getLanguageList().size(); i++) {
-				UndoableVariantEdit variantadd = editFactory.createUndoableVariantEdit(null, new Variant(grouppath, finalid, 
-						new Language(model.getValueAt(i,0).toString(), "", false, 0), model.getValueAt(i, 1).toString()));
+		
+		//Calculate String edit ---------------------------------------
+		
+		UndoablePolyglotStringEdit stringrem = null; //Remove a string for overwriting it with a new one
+		UndoablePolyglotStringEdit stringadd = null; //Add a new string
+		UndoablePolyglotStringEdit stringchg = null; //Rename a string
+		//First case: We are adding a new string which is not already contained in the table
+		if(edits.size() == 0 && !table.containsStringID(finalid))
+			stringadd = editFactory.createUndoablePolyglotStringEdit(null, new PolyglotString(grouppath, finalid,false));
+		
+		//Second case: We are adding a new string which DOES already exist in the table (so we have to remove all variants. This is done by 
+		//simply deleting the string and adding it again afterwards
+		if(edits.size() == 0 && table.containsStringID(finalid)) { 
+			stringrem = editFactory.createUndoablePolyglotStringEdit(new PolyglotString(grouppath,finalid,false), null);
+			stringadd = editFactory.createUndoablePolyglotStringEdit(null, new PolyglotString(grouppath,finalid,false));
+		}
+		
+		//Third case: We are editing a string and changing its id
+		if(edits.size() != 0 && !edits.get(currentEdit).equals(finalid))
+			stringchg = editFactory.createUndoablePolyglotStringEdit(new PolyglotString(grouppath,edits.get(currentEdit),false), 
+					new PolyglotString(grouppath,finalid,false));
+		
+		//Execute
+		if(stringrem != null) { stringrem.redo(); edit.addEdit(stringrem);}
+		if(stringadd != null) { stringadd.redo(); edit.addEdit(stringadd);}
+		if(stringchg != null) { stringchg.redo(); edit.addEdit(stringchg);}
+		
+		// Calculate variant edits ---------------------------------------
+		
+		HashSet<String> languages = new HashSet<String>(model.getLanguageList());
+		HashSet<String> oldlanguages = model.getOriginalLanguageList();
+		
+		//If we are editing a string, we might have to remove variants that were deleted in the editor
+		if(edits.size() > 0) {
+			for(String oldlid : oldlanguages)
+				if(!languages.contains(oldlid)) {
+					UndoableVariantEdit variantrem = editFactory.createUndoableVariantEdit(new Variant(grouppath,finalid,new Language(oldlid,"",false,0),""),null);
+					variantrem.redo();
+					edit.addEdit(variantrem);
+				}
+		}
+		
+		//Change all variants that already existed to their new value (if they have changed at all) and add new ones
+		for(String newlid : languages) {
+			String oldval = table.getUnformattedString(finalid, newlid);
+			String newval = model.getVariant(newlid);
+			//Check if it exists already and is different
+			if(oldlanguages.contains(newlid)) {
+				if(!newval.equals(oldval)) {
+					UndoableVariantEdit variantchg = editFactory.createUndoableVariantEdit(new Variant(grouppath,finalid,new Language(newlid,"",false,0),oldval),
+							new Variant(grouppath,finalid,new Language(newlid,"",false,0),newval));
+					variantchg.redo();
+					edit.addEdit(variantchg);
+				}
+			}
+			//Otherwise just add it
+			else {
+				UndoableVariantEdit variantadd = editFactory.createUndoableVariantEdit(null, new Variant(grouppath,finalid, new Language(newlid,"",false,0),newval));
 				variantadd.redo();
 				edit.addEdit(variantadd);
 			}
 		}
-		//Otherwise...
-		else {
-			//Compare edited id to new id and potentially rename and set group
-			UndoablePolyglotStringEdit stringchange = editFactory.createUndoablePolyglotStringEdit(new PolyglotString(grouppath,edits.get(currentEdit),false), 
-						new PolyglotString(grouppath,finalid,false));
-			stringchange.redo();
-			edit.addEdit(stringchange);
+		
+		
+//		//If there are no edits, a new entry is created
+//		if(edits.size() == 0) {
+//			//If necessary, remove old string
+//			if(table.containsStringID(finalid)) {
+//				UndoablePolyglotStringEdit stringrem = editFactory.createUndoablePolyglotStringEdit(new PolyglotString(grouppath,finalid,false), null);
+//				stringrem.redo();
+//				edit.addEdit(stringrem);
+//			}
+//			//Create String
+//			UndoablePolyglotStringEdit stringadd = editFactory.createUndoablePolyglotStringEdit(null, new PolyglotString(grouppath,finalid,false));
+//			stringadd.redo();
+//			edit.addEdit(stringadd);
+//			//Add variants, which do not already exist and change the ones which are now different
+//			for(int i = 0; i < model.getLanguageList().size(); i++) {
+//				UndoableVariantEdit variantadd = null;
+//				String lid = model.getValueAt(i, 0).toString();
+//				Language l = new Language(lid, "", false, 0);
+//				//First case: Add a new variant
+//				if(!table.getVariants(finalid).containsKey(lid))
+//					variantadd = editFactory.createUndoableVariantEdit(null, new Variant(grouppath, finalid, 
+//						l, model.getValueAt(i, 1).toString()));
+//				//Second case: Change an existing variant
+//				else {
+//					if(!model.getValueAt(i, 1).equals(table.getUnformattedString(finalid, lid))) {
+//						variantadd = editFactory.createUndoableVariantEdit(new Variant(grouppath,finalid,l, table.getUnformattedString(finalid, lid)),
+//								new Variant(grouppath,finalid,l,model.getValueAt(i, 1).toString()));
+//					}
+//				}
+//				if(variantadd != null) {
+//					variantadd.redo();
+//					edit.addEdit(variantadd);
+//				}
+//			}
+//		}
+//		//Otherwise...
+//		else {
+//			//Compare edited id to new id and potentially rename and set group
+//			UndoablePolyglotStringEdit stringchange = editFactory.createUndoablePolyglotStringEdit(new PolyglotString(grouppath,edits.get(currentEdit),false), 
+//						new PolyglotString(grouppath,finalid,false));
+//			stringchange.redo();
+//			edit.addEdit(stringchange);
 //			//Set group anyway
-			//Change variants:
-			HashSet<String> languages = new HashSet<String>(model.getLanguageList());
-			HashSet<String> oldlanguages = model.getOriginalLanguageList();
-			//Remove variants that are no longer present:
-			for(String old : oldlanguages) {
-				if(!languages.contains(old)){
-					UndoableVariantEdit variantremove = editFactory.createUndoableVariantEdit(new Variant(grouppath,finalid,new Language(old,"",false,0),""),null);
-					variantremove.redo();
-					edit.addEdit(variantremove);
-				}
-			}
-			//Put all variants
-			for(int i = 0; i < languages.size(); i++) {
-				UndoableVariantEdit variantchange = editFactory.createUndoableVariantEdit(null, new Variant(grouppath, finalid, 
-						new Language(model.getValueAt(i,0).toString(), "", false, 0), model.getValueAt(i, 1).toString()));
-				variantchange.redo();
-				edit.addEdit(variantchange);
-			}
-		}
+//			//Change variants:
+//			HashSet<String> languages = new HashSet<String>(model.getLanguageList());
+//			HashSet<String> oldlanguages = model.getOriginalLanguageList();
+//			//Remove variants that are no longer present:
+//			for(String old : oldlanguages) {
+//				if(!languages.contains(old)){
+//					UndoableVariantEdit variantremove = editFactory.createUndoableVariantEdit(new Variant(grouppath,finalid,new Language(old,"",false,0),""),null);
+//					variantremove.redo();
+//					edit.addEdit(variantremove);
+//				}
+//			}
+//			//Put all variants
+//			for(int i = 0; i < languages.size(); i++) {
+//				UndoableVariantEdit variantchange = editFactory.createUndoableVariantEdit(null, new Variant(grouppath, finalid, 
+//						new Language(model.getValueAt(i,0).toString(), "", false, 0), model.getValueAt(i, 1).toString()));
+//				variantchange.redo();
+//				edit.addEdit(variantchange);
+//			}
+//		}
 		edit.end();
 		editFactory.postEdit(edit);
 		flag.setChangeFlag(false);
