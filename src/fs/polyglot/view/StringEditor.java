@@ -498,6 +498,24 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 		
 		flag.setChangeFlag(false);		
 	}
+	
+	/**
+	 * Constructs a string editor for creating a new string.
+	 * @param associatedTable The table in which the new string is created
+	 * @param groupID The group ID to fill into the group field
+	 * @param manager The undo manager to report changes to
+	 */
+	public StringEditor(ResourceReference r, PolyglotStringLoader l, String lid, PolyglotTableModel associatedTable, String groupID, UndoManager manager) {
+		this(r,l,lid,associatedTable,null,"",new StringEditorConfiguration(),manager);
+		//Now fill in data
+		edits = new ArrayList<String>();
+		currentEdit = 0;		
+		//Adapt components
+		checkGroup.setSelected(true);
+		textGroup.setText(groupID);
+		//Set change flag
+		flag.setChangeFlag(false);		
+	}
 
 	// CONTROL METHODS ************************************************************************************
 	// ****************************************************************************************************

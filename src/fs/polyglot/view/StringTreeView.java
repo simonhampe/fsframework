@@ -195,14 +195,12 @@ public class StringTreeView extends JPanel implements ResourceDependent {
 	private ActionListener newListener = new ActionListener() {
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			//Create configuration
-			StringEditorConfiguration config = new StringEditorConfiguration();
-			//Create string ID
+			//Create group ID
 			int selcount = stringtree.getSelectionCount();
 			TreePath selpath = stringtree.getSelectionPath();
-			String stringID = selcount == 0 ? "" : (((TreeObject)selpath.getLastPathComponent()).path) + ".";
+			String groupID = selcount == 0 ? "" : (((TreeObject)selpath.getLastPathComponent()).path);
 			//Open editor
-			StringEditor editor = new StringEditor(reference, loader, languageID, table ,null, stringID, config,TableUndoManager.getUndoManager(table));
+			StringEditor editor = new StringEditor(reference, loader, languageID, table , groupID,TableUndoManager.getUndoManager(table));
 			editor.setVisible(true);
 		}
 	};
