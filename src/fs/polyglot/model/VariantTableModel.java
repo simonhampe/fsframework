@@ -45,10 +45,11 @@ public class VariantTableModel implements TableModel {
 			languages = new ArrayList<String>();
 			for(String l : lang) {
 				if(this.config.excludeTheseLanguages == null || !this.config.excludeTheseLanguages.contains(l)) {
-					if(this.config.excludeTheseLanguages != null || this.config.onlyTheseLanguages == null || this.config.onlyTheseLanguages.contains(l)) 
+					if(this.config.excludeTheseLanguages != null || this.config.onlyTheseLanguages == null || this.config.onlyTheseLanguages.contains(l)) { 
 						languages.add(l);
 						originallist.add(l);
 						variants.add(table.getUnformattedString(stringID, l));
+					}
 				}
 			}
 			
