@@ -90,7 +90,7 @@ public class GroupTreeCellRenderer implements TreeCellRenderer,
 			switch(((TreeObject) value).getType()) {
 			case NONE: break;//Nothing to do.
 			case GROUP: label.setIcon(expanded? (((Group)value).isComplete? groupOpen : groupWarnOpen): (((Group)value).isComplete? group: groupWarn));
-					
+						
 						if(((Group)value).path == null) { label.setText("<html><i>" + (table!= null? table.getTableID() : "") + "</i></html>"); }
 						else { label.setText(cutGroupPath? PolyglotStringTable.cutGroupPath(((Group)value).path) : ((Group)value).path); }
 						

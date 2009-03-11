@@ -232,7 +232,7 @@ public class GroupTreeModel implements TreeModel, PolyglotTableModelListener {
 			}
 		}
 		
-		//For technical reasons we always assume that the root node name has been changed
+		//For technical reasons we always assume that the root node name / status has been changed
 		Object[] pathtoroot = {root};
 		changes.add(new TreeModelEvent(this,pathtoroot,null,null) );
 		

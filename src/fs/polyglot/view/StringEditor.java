@@ -708,68 +708,6 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 			}
 		}
 		
-		
-//		//If there are no edits, a new entry is created
-//		if(edits.size() == 0) {
-//			//If necessary, remove old string
-//			if(table.containsStringID(finalid)) {
-//				UndoablePolyglotStringEdit stringrem = editFactory.createUndoablePolyglotStringEdit(new PolyglotString(grouppath,finalid,false), null);
-//				stringrem.redo();
-//				edit.addEdit(stringrem);
-//			}
-//			//Create String
-//			UndoablePolyglotStringEdit stringadd = editFactory.createUndoablePolyglotStringEdit(null, new PolyglotString(grouppath,finalid,false));
-//			stringadd.redo();
-//			edit.addEdit(stringadd);
-//			//Add variants, which do not already exist and change the ones which are now different
-//			for(int i = 0; i < model.getLanguageList().size(); i++) {
-//				UndoableVariantEdit variantadd = null;
-//				String lid = model.getValueAt(i, 0).toString();
-//				Language l = new Language(lid, "", false, 0);
-//				//First case: Add a new variant
-//				if(!table.getVariants(finalid).containsKey(lid))
-//					variantadd = editFactory.createUndoableVariantEdit(null, new Variant(grouppath, finalid, 
-//						l, model.getValueAt(i, 1).toString()));
-//				//Second case: Change an existing variant
-//				else {
-//					if(!model.getValueAt(i, 1).equals(table.getUnformattedString(finalid, lid))) {
-//						variantadd = editFactory.createUndoableVariantEdit(new Variant(grouppath,finalid,l, table.getUnformattedString(finalid, lid)),
-//								new Variant(grouppath,finalid,l,model.getValueAt(i, 1).toString()));
-//					}
-//				}
-//				if(variantadd != null) {
-//					variantadd.redo();
-//					edit.addEdit(variantadd);
-//				}
-//			}
-//		}
-//		//Otherwise...
-//		else {
-//			//Compare edited id to new id and potentially rename and set group
-//			UndoablePolyglotStringEdit stringchange = editFactory.createUndoablePolyglotStringEdit(new PolyglotString(grouppath,edits.get(currentEdit),false), 
-//						new PolyglotString(grouppath,finalid,false));
-//			stringchange.redo();
-//			edit.addEdit(stringchange);
-//			//Set group anyway
-//			//Change variants:
-//			HashSet<String> languages = new HashSet<String>(model.getLanguageList());
-//			HashSet<String> oldlanguages = model.getOriginalLanguageList();
-//			//Remove variants that are no longer present:
-//			for(String old : oldlanguages) {
-//				if(!languages.contains(old)){
-//					UndoableVariantEdit variantremove = editFactory.createUndoableVariantEdit(new Variant(grouppath,finalid,new Language(old,"",false,0),""),null);
-//					variantremove.redo();
-//					edit.addEdit(variantremove);
-//				}
-//			}
-//			//Put all variants
-//			for(int i = 0; i < languages.size(); i++) {
-//				UndoableVariantEdit variantchange = editFactory.createUndoableVariantEdit(null, new Variant(grouppath, finalid, 
-//						new Language(model.getValueAt(i,0).toString(), "", false, 0), model.getValueAt(i, 1).toString()));
-//				variantchange.redo();
-//				edit.addEdit(variantchange);
-//			}
-//		}
 		edit.end();
 		editFactory.postEdit(edit);
 		flag.setChangeFlag(false);
@@ -790,6 +728,20 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 	 */
 	protected void setGeneratedID(String id) {
 		generatedID.setText((id == null | id.equals(""))? " " : id);
+	}
+	
+	/**
+	 * Returns whether the current string has been edited in any way
+	 */
+	public boolean hasBeenChanged() {
+		return flag.hasBeenChanged();
+	}
+	
+	/**
+	 * Manually sets the change flag, i.e. the flag indicating whether the current string has been edited.
+	 */
+	public void setChangeFlag(boolean f) {
+		flag.setChangeFlag(f);
 	}
 	
 	// RESOURCEDEPENDENT METHODS ********************************************************

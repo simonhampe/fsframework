@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<fsfw:polyglotstringtable id="">
+<fsfw:polyglotstringtable id="" xmlns:fsfw="http://www.fsmathe.uni-kl.de/fsframework" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.fsmathe.uni-kl.de/fsframework ../schema/PolyglotStringTable.xsd">
   <description></description>
   <languagetable>
     <language>
-      <id>en</id>
+      <id>de</id>
       <description></description>
     </language>
   </languagetable>
+  <polyglotstring id="bla">
+    <variant lang="en"></variant>
+  </polyglotstring>
 </fsfw:polyglotstringtable>

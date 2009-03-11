@@ -202,6 +202,7 @@ public class StringTreeView extends JPanel implements ResourceDependent {
 			//Open editor
 			StringEditor editor = new StringEditor(reference, loader, languageID, table , groupID,TableUndoManager.getUndoManager(table));
 			editor.setVisible(true);
+			editor.setChangeFlag(false);
 		}
 	};
 	
@@ -247,6 +248,7 @@ public class StringTreeView extends JPanel implements ResourceDependent {
 			StringEditor editor = new StringEditor(reference,loader,languageID,table,getSelectedStrings(),null,config,TableUndoManager.getUndoManager(table));
 			//Show editor
 			editor.setVisible(true);
+			editor.setChangeFlag(false);
 		}
 	};
 	private ActionListener multipledEditListener = new ActionListener() {
@@ -264,6 +266,7 @@ public class StringTreeView extends JPanel implements ResourceDependent {
 			StringEditor editor = new StringEditor(reference,loader,languageID,table,getSelectedStrings(),null,config,TableUndoManager.getUndoManager(table));
 			//Show editor
 			editor.setVisible(true);
+			editor.setChangeFlag(false);
 		}
 	};
 	
