@@ -57,6 +57,8 @@ public class PolyglotFrame extends JFrame implements ResourceDependent {
 	private File associatedFile;
 	//The application options
 	private PolyglotOptions options;
+	//The configuration file
+	private File configFile;
 	
 	//Resource
 	private ResourceReference resource;
@@ -186,8 +188,9 @@ public class PolyglotFrame extends JFrame implements ResourceDependent {
 	 * Constructs a main frame for POLYGLOT
 	 * @param file The table to be opened. If null, an empty table is opened
 	 * @param options The application options.
+	 * @param configurationFile The file to which the options should be saved, when changed. If null, the options are not saved.
 	 */
-	public PolyglotFrame(File file, PolyglotOptions options) {
+	public PolyglotFrame(File file, PolyglotOptions options, File configurationFile) {
 		//Basic initialization
 		super();
 		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -196,6 +199,7 @@ public class PolyglotFrame extends JFrame implements ResourceDependent {
 		//Copy data-------------------------------------------------
 		
 		this.options = options == null? new PolyglotOptions() : options;
+		configFile = configurationFile;
 		resource = FsfwDefaultReference.getDefaultReference();
 		loader = PolyglotStringLoader.getDefaultLoader();
 		languageID = PolyglotStringTable.getGlobalLanguageID();

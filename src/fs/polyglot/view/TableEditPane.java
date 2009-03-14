@@ -2,13 +2,11 @@ package fs.polyglot.view;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.HashSet;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -25,20 +23,16 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.UndoableEditEvent;
 import javax.swing.event.UndoableEditListener;
-import javax.swing.plaf.basic.BasicBorders.SplitPaneBorder;
 import javax.swing.undo.UndoManager;
 
 import org.apache.log4j.Logger;
 import org.dom4j.Document;
 
-import fs.event.DocumentChangeFlag;
 import fs.gui.GUIToolbox;
 import fs.gui.SwingAppender;
 import fs.polyglot.event.PolyglotChangeFlag;
 import fs.polyglot.model.PolyglotTableModel;
 import fs.polyglot.undo.TableUndoManager;
-import fs.polyglot.undo.UndoableEditFactory;
-import fs.test.XMLDirectoryTest;
 import fs.xml.FsfwDefaultReference;
 import fs.xml.PolyglotStringLoader;
 import fs.xml.PolyglotStringTable;
@@ -57,6 +51,11 @@ public class TableEditPane extends JPanel implements ResourceDependent {
 
 	// VIEW ***************************************
 	// ********************************************
+	
+	/**
+	 * compiler-generated version id
+	 */
+	private static final long serialVersionUID = 6397871914197118728L;
 	
 	private StringTreeView stringtree;
 	private GroupTreeView  grouptree;
@@ -121,17 +120,17 @@ public class TableEditPane extends JPanel implements ResourceDependent {
 	private DocumentListener tableAttributeListener = new DocumentListener() {
 		@Override
 		public void changedUpdate(DocumentEvent e) {
-			updateTable();	
+			updateTable(e.getDocument());	
 		}
 		@Override
 		public void insertUpdate(DocumentEvent e) {
-			updateTable();			
+			updateTable(e.getDocument());			
 		}
 		@Override
 		public void removeUpdate(DocumentEvent e) {
-			updateTable();			
+			updateTable(e.getDocument());			
 		}
-		public void updateTable() {
+		public void updateTable(Object source) {
 			table.setTableID(tableid.getText());
 			table.setTableDescription(tabledesc.getText());
 		}

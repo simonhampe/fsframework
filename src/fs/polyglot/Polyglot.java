@@ -1,5 +1,8 @@
 package fs.polyglot;
 
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.io.*;
 import java.util.ArrayList;
 
@@ -48,7 +51,7 @@ public class Polyglot implements ResourceDependent {
 	 * The polyglot options file
 	 */
 	private File configFile = null;
-
+	
 	/**
 	 * Starts the application.
 	 * 
@@ -114,7 +117,7 @@ public class Polyglot implements ResourceDependent {
 		options.applyConfiguration();
 
 		// Now load the main frame
-		mainFrame = new PolyglotFrame(null, options);
+		mainFrame = new PolyglotFrame(null, options,configFile);
 
 	}
 
