@@ -234,7 +234,8 @@ public class GroupTreeModel implements TreeModel, PolyglotTableModelListener {
 		
 		//For technical reasons we always assume that the root node name / status has been changed
 		Object[] pathtoroot = {root};
-		changes.add(new TreeModelEvent(this,pathtoroot,null,null) );
+		TreeModelEvent rootevent = new TreeModelEvent(this,pathtoroot,null,null) ;
+		changes.add(rootevent);
 		
 		//Copy data
 		children = newchildren;
@@ -389,31 +390,6 @@ public class GroupTreeModel implements TreeModel, PolyglotTableModelListener {
 		} while( p != null);
 		return new TreePath(path.toArray());
 	}
-
-//	/**
-//	 * Returns true if there is a group in the associated table which has this
-//	 * path or is a subgroup of this path (i.e. path must be a substring of a
-//	 * group id). As null is considered the root node, it is always a valid path
-//	 */
-//	public boolean isValidTreePath(String path) {
-//		if (table == null)
-//			return false;
-//		if (path == null)
-//			return true;
-//		for (String gid : table.getGroupList()) {
-//			if (gid.startsWith(path))
-//				return true;
-//		}
-//		return false;
-//	}
-//
-//	/**
-//	 * Returns true, if this object is an object of this tree model, i.e. it is
-//	 * of type TreeObject and has a valid tree path.
-//	 */
-//	public boolean isOfThisTree(Object o) {
-//		return (o != null && o instanceof TreeObject && isValidTreePath(((TreeObject) o).path));
-//	}
 
 	// TREE MODEL INTERFACE **********************************
 	// *******************************************************

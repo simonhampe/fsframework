@@ -91,7 +91,13 @@ public class GroupTreeCellRenderer implements TreeCellRenderer,
 			case NONE: break;//Nothing to do.
 			case GROUP: label.setIcon(expanded? (((Group)value).isComplete? groupOpen : groupWarnOpen): (((Group)value).isComplete? group: groupWarn));
 						
-						if(((Group)value).path == null) { label.setText("<html><i>" + (table!= null? table.getTableID() : "") + "</i></html>"); }
+						//If this is the root node, we have to extract all information from the table, since it seems that
+						//the root node is not reloaded as object from the model when treeNodesChanged is called
+						if(((Group)value).path == null) { 
+							label.setText("<html><i>" + (table!= null? table.getTableID() : "") + "</i></html>");
+							boolean isComplete = table != null? table.isCompleteGroup(null) : true;
+							label.setIcon(expanded? (isComplete? groupOpen : groupWarnOpen) :(isComplete? group : groupWarn));
+						}
 						else { label.setText(cutGroupPath? PolyglotStringTable.cutGroupPath(((Group)value).path) : ((Group)value).path); }
 						
 						if(!((Group)value).isComplete) label.setToolTipText(loader.getString(sgroup + ".groupincomplete", languageID));

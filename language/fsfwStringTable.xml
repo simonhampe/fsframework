@@ -526,7 +526,7 @@
   </polyglotstring>
   <polyglotstring id="fs.global.ok" group="fs.global">
     <variant lang="de">Ok</variant>
-    <variant lang="en">OK</variant>
+    <variant lang="en">Ok</variant>
   </polyglotstring>
   <polyglotstring id="fs.polyglot.log.savingfile" group="fs.polyglot.log">
     <variant lang="de">Speichere Tabelle in Datei %s ...</variant>
