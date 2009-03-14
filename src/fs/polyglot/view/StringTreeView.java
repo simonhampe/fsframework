@@ -27,7 +27,6 @@ import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import javax.swing.undo.CompoundEdit;
 
-import org.apache.log4j.Logger;
 import org.dom4j.Document;
 
 import fs.gui.GUIToolbox;
@@ -110,8 +109,6 @@ public class StringTreeView extends JPanel implements ResourceDependent {
 	// Undo factory
 	UndoableEditFactory editFactory = null;
 
-	//Log
-	private org.apache.log4j.Logger logger = Logger.getLogger(this.getClass().getCanonicalName());
 	
 	// LISTENERS *******************************************************************************
 	// *****************************************************************************************

@@ -9,6 +9,7 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import javax.swing.JFileChooser;
@@ -17,17 +18,17 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JSeparator;
 import javax.swing.KeyStroke;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.filechooser.FileFilter;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.apache.log4j.Logger;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.tree.DefaultDocument;
 
+import fs.event.DataRetrievalListener;
 import fs.polyglot.model.PolyglotOptions;
 import fs.polyglot.model.PolyglotTableModel;
 import fs.xml.FsfwDefaultReference;
@@ -38,7 +39,6 @@ import fs.xml.ResourceReference;
 import fs.xml.XMLDirectoryTree;
 import fs.xml.XMLReadConfigurationException;
 import fs.xml.XMLToolbox;
-import fs.xml.XMLWriteConfigurationException;
 
 /**
  * This is the main window of Polyglot. It contains a menu and the main views
@@ -48,8 +48,14 @@ import fs.xml.XMLWriteConfigurationException;
  */
 public class PolyglotFrame extends JFrame implements ResourceDependent {
 
+	/**
+	 *compiler-generated version id 
+	 */
+	private static final long serialVersionUID = 4356391951333174447L;
+	
 	// DATA ****************************
 	// *********************************
+	
 	
 	//The table currently edited
 	private TableEditPane editPane;
@@ -59,6 +65,11 @@ public class PolyglotFrame extends JFrame implements ResourceDependent {
 	private PolyglotOptions options;
 	//The configuration file
 	private File configFile;
+	//A list of JMenuItems for the last n files opened
+	private ArrayList<JMenuItem> lastFilesOpened;
+	//A mapping of JMenuItems of last files to file names
+	private ArrayList<File> lastFiles;
+	
 	
 	//Resource
 	private ResourceReference resource;
@@ -105,6 +116,11 @@ public class PolyglotFrame extends JFrame implements ResourceDependent {
 				}
 			}
 			logger.info(loader.getString("fs.polyglot.log.closing", languageID));
+			try {
+				saveConfiguration();
+			} catch (IOException e1) {
+				//Ignored
+			}
 			System.exit(0);
 		}
 	};
@@ -181,6 +197,56 @@ public class PolyglotFrame extends JFrame implements ResourceDependent {
 		}
 	};
 	
+	//Opens the polyglot configurator
+	private ActionListener configuratorListener = new ActionListener() {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			PolyglotConfigurator diag = new PolyglotConfigurator(options,PolyglotStringTable.getFsfwTable(),resource,loader,languageID);
+			diag.addDataRetrievalListener(new DataRetrievalListener() {
+				@Override
+				public void dataReady(Object source, Object data) {
+					options = (PolyglotOptions)data;
+					try  {
+						saveConfiguration();
+					}
+					catch(IOException e) {
+						//Nothing further to do
+					}
+				}
+			});
+			diag.setVisible(true);
+		}
+		
+	};
+	
+	//Opens the selected file (i.e. selected from the 'last files'-list in the file menu
+	private ActionListener lastFileListener = new ActionListener() {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			//Retrieve file 
+			File fileToOpen = lastFiles.get(lastFilesOpened.indexOf(e.getSource()));
+			//Ask if the user is sure, if the document has been modified
+			if(editPane.hasBeenChanged()) {
+				int ans = openSaveConfirmDialog();
+				switch(ans) {
+				case JOptionPane.CANCEL_OPTION: return;
+				case JOptionPane.YES_OPTION: 
+					try {
+						saveTable();
+					} catch (IOException ex) {
+						//Abort, if anything goes wrong
+						return;
+					}
+				}
+			}
+			try {
+				loadTable(fileToOpen);
+			} catch (DocumentException e1) {				
+				//Ignored
+			}
+		}
+	};
+	
 	// CONSTRUCTOR *********************
 	// *********************************
 
@@ -233,6 +299,8 @@ public class PolyglotFrame extends JFrame implements ResourceDependent {
 			quit 		= new JMenuItem(loader.getString(sgroup + ".quit", languageID));
 			quit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q,InputEvent.CTRL_DOWN_MASK));
 			for(JMenuItem i : Arrays.asList(newFile,loadFile,saveFile,saveFileAs,quit)) fileMenu.add(i);
+			fileMenu.add(new JSeparator());
+			populateFileMenu();
 		optionsMenu = new JMenu(loader.getString(sgroup + ".optionsMenu", languageID));
 		String optionmnenmonic = loader.getString(sgroup + ".optionsmnemonic", languageID); 
 		if(optionmnenmonic.length() > 0) optionsMenu.setMnemonic(optionmnenmonic.charAt(0));
@@ -257,6 +325,7 @@ public class PolyglotFrame extends JFrame implements ResourceDependent {
 		saveFile.addActionListener(saveListener);
 		saveFileAs.addActionListener(saveAsListener);
 		quit.addActionListener(quitListener);
+		optionItem.addActionListener(configuratorListener);
 		
 		//Make visible
 		setVisible(true);
@@ -290,6 +359,7 @@ public class PolyglotFrame extends JFrame implements ResourceDependent {
 		int ret = chooser.showOpenDialog(this);
 		if(ret == JFileChooser.APPROVE_OPTION) {
 			loadTable(chooser.getSelectedFile());
+			pushFile(chooser.getSelectedFile());
 		}
 	}
 	
@@ -386,6 +456,75 @@ public class PolyglotFrame extends JFrame implements ResourceDependent {
 			//Now save
 			associatedFile = chooser.getSelectedFile();
 			saveTable();
+		}
+	}
+	
+	/**
+	 * Saves the current options to the configuration file, if possible.
+	 * @throws IOException - If any I/O-Errors occur
+	 */
+	protected void saveConfiguration() throws IOException {
+		try {
+			if(configFile == null) {
+				String msg = loader.getString("fs.polyglot.error.noconfigfile", languageID);
+				logger.warn(msg);
+				throw new IOException(msg);
+			}
+			logger.info(loader.getString("fs.polyglot.log.savingconfig", languageID,configFile.getAbsolutePath()));
+			Document d = new DefaultDocument();
+			d.setRootElement(options.getConfiguration());
+			XMLToolbox.saveXML(d, configFile.getAbsolutePath());
+		} 
+		catch (Exception e) {
+			String msg = loader.getString("fs.polyglot.error.saveconfigfailed", languageID, e.getMessage());
+			logger.error(msg);
+			JOptionPane.showMessageDialog(this, msg, loader.getString("fs.global.error", languageID	), JOptionPane.ERROR_MESSAGE);
+			throw new IOException(e);
+		}
+		logger.info(loader.getString("fs.polyglot.log.savedconfig", languageID,configFile.getAbsolutePath()));
+	}
+	
+	// CONTROL METHODS ****************************************
+	// ********************************************************
+	
+	/**
+	 * Removes and inserts JMenuItems in the File menu, such that there is a list of the last n files opened available, where n is determined
+	 * by the current configuration
+	 */
+	protected void populateFileMenu() {
+		//Remove all items, if necessary
+		if(lastFilesOpened != null ) {
+			for(JMenuItem i : lastFilesOpened) fileMenu.remove(i);
+		}
+		//Reset lists
+		lastFilesOpened = new ArrayList<JMenuItem>(options.getLastfiles().size());
+		lastFiles = new ArrayList<File>(options.getLastfiles());
+		//Create items
+		int index = 1;
+		for(File f : lastFiles) {
+			JMenuItem i = new JMenuItem(f.getName());
+			i.setToolTipText(f.getAbsolutePath());
+			i.addActionListener(lastFileListener);
+			if(index <= 9) i.setAccelerator(KeyStroke.getKeyStroke(new Character(new String("" + index).charAt(0)), KeyEvent.CTRL_DOWN_MASK));
+			fileMenu.add(i);
+			lastFilesOpened.add(i);
+			index++;
+		}
+	}
+	
+	/**
+	 * Adds a file to the front of the 'Last files opened'-list (if it isn't already in the list) and repopulates the file menu. If f == null, this call is ignored
+	 */
+	protected void pushFile(File f) {
+		if(f != null && !options.getLastfiles().contains(f)) {
+			ArrayList<File> list = new ArrayList<File>(options.getLastfiles());
+			list.add(0,f);
+			//Remove the last element until the size is valid
+			while(list.size() > options.getMaxfilenumber()) {
+				list.remove(list.size()-1);
+			}
+			options.setLastfiles(list);
+			populateFileMenu();
 		}
 	}
 	

@@ -1,9 +1,6 @@
 package fs.polyglot;
 
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
-import java.io.*;
+import java.io.File;
 import java.util.ArrayList;
 
 import org.apache.log4j.BasicConfigurator;
@@ -11,8 +8,8 @@ import org.apache.log4j.Logger;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 
-import fs.polyglot.model.*;
-import fs.polyglot.view.*;
+import fs.polyglot.model.PolyglotOptions;
+import fs.polyglot.view.PolyglotFrame;
 import fs.xml.ResourceDependent;
 import fs.xml.ResourceReference;
 import fs.xml.XMLDirectoryTree;
@@ -90,12 +87,15 @@ public class Polyglot implements ResourceDependent {
 
 		// Load configuration
 		options = new PolyglotOptions();
-		if (configFile == null || !configFile.exists()) {
-			if(configFile != null) polyglotLogger
-					.warn("Configuration file "
+		if(configFile == null) {
+			String defaultConfig = System.getProperty("user.home") + "/.polyglotconfig";
+			configFile = new File(defaultConfig);
+			polyglotLogger.warn("No configuration file specified. Trying " + defaultConfig);
+		}
+		if (!configFile.exists()) {
+			polyglotLogger.warn("Configuration file "
 							+ configFile.getAbsolutePath()
 							+ " does not exist. Using default configuration but saving configuration to this file afterwards.");
-			else polyglotLogger.warn("No configuration file specified. No configuration will be saved.");
 			//Use default
 			options.setDefaultDirectory(".");
 			options.setGlobalLanguageID("en");

@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<fsfw:optionlist xmlns:fsfw="http://www.fsmathe.uni-kl.de/fsframework" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.fsmathe.uni-kl.de/fsframework ../schema/PolyglotOptions.xsd ">
+
+<propertylist>
   <globalLanguageID>en</globalLanguageID>
   <defaultDirectory>.</defaultDirectory>
-  <maxfilenumber>10</maxfilenumber>
+  <maxfilenumber>5</maxfilenumber>
+  <lastfile>/home/talio/eclipse/workspace/fsframework/test.xml</lastfile>
+  <lastfile>/home/talio/eclipse/workspace/fsframework/test2.xml</lastfile>
+  <lastfile>/home/talio/eclipse/workspace/fsframework/language/fsfwStringTable.xml</lastfile>
   <lastfile>/home/user/stringtables/MyStringTable.xml</lastfile>
-</fsfw:optionlist>
+</propertylist>
