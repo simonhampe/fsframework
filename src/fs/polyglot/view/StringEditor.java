@@ -3,14 +3,12 @@ package fs.polyglot.view;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.print.Paper;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.EventObject;
 import java.util.HashSet;
 import java.util.TreeSet;
 import java.util.Vector;
@@ -18,7 +16,6 @@ import java.util.Vector;
 import javax.swing.AbstractAction;
 import javax.swing.AbstractCellEditor;
 import javax.swing.Action;
-import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultComboBoxModel;
@@ -28,27 +25,21 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
-import javax.swing.ListSelectionModel;
-import javax.swing.event.CellEditorListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumnModel;
-import javax.swing.text.JTextComponent;
 import javax.swing.undo.CompoundEdit;
 import javax.swing.undo.UndoManager;
 
@@ -66,14 +57,10 @@ import fs.polyglot.model.VariantTableModel;
 import fs.polyglot.undo.UndoableEditFactory;
 import fs.polyglot.undo.UndoablePolyglotStringEdit;
 import fs.polyglot.undo.UndoableVariantEdit;
-import fs.polyglot.validate.NonEmptyWarner;
-import fs.test.XMLDirectoryTest;
 import fs.validate.LabelIndicValidator;
-import fs.validate.SingleButtonValidator;
 import fs.validate.ValidationResult;
 import fs.validate.ValidationValidator;
 import fs.validate.ValidationResult.Result;
-import fs.xml.FsfwDefaultReference;
 import fs.xml.PolyglotStringLoader;
 import fs.xml.PolyglotStringTable;
 import fs.xml.ResourceDependent;
@@ -88,6 +75,11 @@ import fs.xml.XMLDirectoryTree;
  */
 public class StringEditor extends FrameworkDialog implements ResourceDependent{
 
+	/**
+	 * Compiler-generated version id
+	 */
+	private static final long serialVersionUID = -5555732302359916858L;
+	
 	//Components
 	private JTextField textID;
 	private JTextField textGroup;
@@ -246,6 +238,7 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 		checkGenerateID = new JCheckBox(loader.getString(sgroup + ".generateid", languageID), true);
 			checkGenerateID.addChangeListener(checkGenerateListener);
 			checkGenerateID.addChangeListener(flag);
+			checkGenerateID.setFocusable(false);
 		checkQuickNav = new JCheckBox(loader.getString(sgroup + ".quicknav", languageID),singleStringID == null); 
 			checkQuickNav.setEnabled(singleStringID == null);
 		checkGroup = new JCheckBox();
@@ -253,11 +246,23 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 				checkGroupListener.stateChanged(null);
 			checkGroup.addChangeListener(checkGenerateListener);
 			checkGroup.addChangeListener(flag);
+			checkGroup.setFocusable(false);
 		generatedID = new JLabel("");
 			generatedID.setForeground(new Color(0,0,255));
 			checkGenerateEditListener.changedUpdate(null);
 		tableVariants = new JTable();
 			tableVariants.getTableHeader().setReorderingAllowed(false);
+			tableVariants.addFocusListener(new FocusAdapter() {
+				@Override
+				public void focusGained(FocusEvent e) {
+					super.focusGained(e);
+					//If no row is selected select the first cell
+					if(tableVariants.getSelectedRowCount() == 0) {
+						tableVariants.getSelectionModel().setSelectionInterval(0, 0);
+					}
+					tableVariants.editCellAt(tableVariants.getSelectedRow(), 0);
+				}
+			});
 		jumpto = new JComboBox();
 		previous = new JButton("<-");
 			previous.addActionListener(jumpListener);
@@ -553,7 +558,7 @@ public class StringEditor extends FrameworkDialog implements ResourceDependent{
 	 */
 	protected void selectID(String id) {
 		if(flag.hasBeenChanged()) applyData();
-		updateData();
+		//updateData();
 		if(edits.contains(id)) {
 			currentEdit = edits.indexOf(id);
 			insertData();

@@ -159,7 +159,7 @@ public class TableEditPane extends JPanel implements ResourceDependent {
 			tabledesc.setRows(5);
 		logAppender = new SwingAppender(null,resource,loader, languageID);
 			Logger.getLogger("fs.polyglot").addAppender(logAppender.getModel());
-		progressBar = new JProgressBar();
+		progressBar = PolyglotProgressBarManager.getProgressBar(table);
 		undo = new JButton(loader.getString("fs.global.undo", languageID));
 		redo = new JButton(loader.getString("fs.global.redo", languageID));
 		

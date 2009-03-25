@@ -220,6 +220,7 @@
     <variant lang="en">Confirmation dialog</variant>
   </polyglotstring>
   <polyglotstring id="fs.polyglot.PolyglotConfigurator.emptyconfigfile" group="fs.polyglot.PolyglotConfigurator">
+    <variant lang="de">Sie müssen einen Dateinamen angeben</variant>
     <variant lang="en">You must specify a file name.</variant>
   </polyglotstring>
   <polyglotstring id="fs.polyglot.StringEditor.jumpto" group="fs.polyglot.StringEditor">
@@ -534,6 +535,7 @@
     <variant lang="en">Couldn't save configuration file: %s</variant>
   </polyglotstring>
   <polyglotstring id="fs.polyglot.PolyglotConfigurator.configfile" group="fs.polyglot.PolyglotConfigurator">
+    <variant lang="de">Konfigurationsdatei</variant>
     <variant lang="en">Configuration file:</variant>
   </polyglotstring>
   <polyglotstring id="fs.polyglot.undo.groupgeneral" group="fs.polyglot.undo">
