@@ -31,6 +31,7 @@ import org.dom4j.Document;
 
 import fs.gui.GUIToolbox;
 import fs.polyglot.model.GroupTreeModel;
+import fs.polyglot.model.Language;
 import fs.polyglot.model.LanguageListModel;
 import fs.polyglot.model.PolyglotString;
 import fs.polyglot.model.PolyglotTableModel;
@@ -256,7 +257,7 @@ public class StringTreeView extends JPanel implements ResourceDependent {
 				config.editOnlyIncomplete = editIncomplete.isSelected();
 				config.editOnlySelected = editSelected.isSelected();
 				HashSet<String> langlist = new HashSet<String>();
-					for(Object o : languageList.getSelectedValues()) langlist.add(o.toString());
+					for(Object o : languageList.getSelectedValues()) langlist.add(((Language)o).id);
 				config.excludeTheseLanguages = excludeLanguages.isSelected()? langlist : null;
 				config.onlyTheseLanguages = onlyLanguages.isSelected()? langlist : null;
 			//Create editor

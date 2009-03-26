@@ -8,6 +8,10 @@
       <description>Deutsch</description>
     </language>
     <language>
+      <id>fr</id>
+      <description>Français</description>
+    </language>
+    <language>
       <id>en</id>
       <description>English</description>
     </language>
@@ -66,6 +70,7 @@
   </polyglotstring>
   <polyglotstring id="fs.error.openfilefailed" group="fs.error">
     <variant lang="de">Konnte Datei %s nicht öffnen: %s</variant>
+    <variant lang="fr">Le fichier %s ne pouvait pas être ouvert: %s</variant>
     <variant lang="en">Could not open file %s: %s</variant>
   </polyglotstring>
   <polyglotstring id="fs.polyglot.log.newtable" group="fs.polyglot.log">
@@ -161,6 +166,7 @@
     <variant lang="en">If the new group already exists, the strings are simply added.</variant>
   </polyglotstring>
   <polyglotstring id="fs.polyglot.error.noconfigfile" group="fs.polyglot.error">
+    <variant lang="de">Keine Konfigurationsdatei wurde angegeben. Die derzeitige Konfiguration wird nicht gespeichert.</variant>
     <variant lang="en">No configuration file has been specified. The current configuration will not be saved.</variant>
   </polyglotstring>
   <polyglotstring id="fs.polyglot.undo.stringadd" group="fs.polyglot.undo">
@@ -252,10 +258,12 @@
     <variant lang="en">There are variants missing for strings in this group</variant>
   </polyglotstring>
   <polyglotstring id="fs.polyglot.PolyglotConfigurator.language" group="fs.polyglot.PolyglotConfigurator">
+    <variant lang="de">Sprache (Neustart notwendig):</variant>
     <variant lang="en">Language (needs restart):</variant>
   </polyglotstring>
   <polyglotstring id="fs.global.confirmtitle" group="fs.global">
     <variant lang="de">Bestätige Überschreiben</variant>
+    <variant lang="fr">Confirmer pour écraser</variant>
     <variant lang="en">Confirm Overwrite</variant>
   </polyglotstring>
   <polyglotstring id="fs.polyglot.StringEditor.groupwarn" group="fs.polyglot.StringEditor">
@@ -293,6 +301,7 @@
   </polyglotstring>
   <polyglotstring id="fs.error.savefailed" group="fs.error">
     <variant lang="de">Konnte Datei %s nicht speichern: %s</variant>
+    <variant lang="fr">Le fichier %s ne pouvait pas être sauvegardé</variant>
     <variant lang="en">Could not save file %s: %s</variant>
   </polyglotstring>
   <polyglotstring id="fs.polyglot.StringTreeView.togglestring" group="fs.polyglot.StringTreeView">
@@ -308,7 +317,7 @@
     <variant lang="en">Edit only strings with missing variants</variant>
   </polyglotstring>
   <polyglotstring id="fs.global.error" group="fs.global">
-    <variant lang="de">Fehler</variant>
+    <variant lang="de">Erreur</variant>
     <variant lang="en">Error</variant>
   </polyglotstring>
   <polyglotstring id="fs.polyglot.StringTreeView.delete" group="fs.polyglot.StringTreeView">
@@ -317,6 +326,7 @@
   </polyglotstring>
   <polyglotstring id="fs.global.cantperform" group="fs.global">
     <variant lang="de">Kann Operation nicht ausführen: %s</variant>
+    <variant lang="fr">L'operation ne peut pas être effectuée: %s</variant>
     <variant lang="en">Can't perform operation: %s</variant>
   </polyglotstring>
   <polyglotstring id="fs.polyglot.PolyglotFrame.helpmenu" group="fs.polyglot.PolyglotFrame">
@@ -372,6 +382,7 @@
     <variant lang="en">Delete selected language from list</variant>
   </polyglotstring>
   <polyglotstring id="fs.polyglot.PolyglotConfigurator.lastfiles" group="fs.polyglot.PolyglotConfigurator">
+    <variant lang="de">Anzahl der sichtbaren, zuletzt offenen Dateien:</variant>
     <variant lang="en">Number of last files displayed:</variant>
   </polyglotstring>
   <polyglotstring id="fs.gui.SwingAppender.tooltip" group="fs.gui.SwingAppender">
@@ -387,6 +398,7 @@
     <variant lang="en">Add string ID</variant>
   </polyglotstring>
   <polyglotstring id="fs.polyglot.log.savedconfig" group="fs.polyglot.log">
+    <variant lang="de">Konfigurationsdatei %s wurde erfolgreich gespeichert.</variant>
     <variant lang="en">Successfully saved configuration file %s.</variant>
   </polyglotstring>
   <polyglotstring id="fs.polyglot.VariantTableModel.language" group="fs.polyglot.VariantTableModel">
@@ -430,6 +442,7 @@
     <variant lang="en">Save file as ...</variant>
   </polyglotstring>
   <polyglotstring id="fs.polyglot.PolyglotConfigurator.title" group="fs.polyglot.PolyglotConfigurator">
+    <variant lang="de">Konfiguriere Polyglot</variant>
     <variant lang="en">Configure Polyglot</variant>
   </polyglotstring>
   <polyglotstring id="fs.polyglot.undo.stringgeneral" group="fs.polyglot.undo">
@@ -437,6 +450,7 @@
     <variant lang="en">Change string %s to %s</variant>
   </polyglotstring>
   <polyglotstring id="fs.polyglot.log.savingconfig" group="fs.polyglot.log">
+    <variant lang="de">Speichere Konfigurationsdatei %s...</variant>
     <variant lang="en">Saving configuration file %s...</variant>
   </polyglotstring>
   <polyglotstring id="fs.polyglot.StringEditor.confirmconfig" group="fs.polyglot.StringEditor">
@@ -504,7 +518,7 @@
     <variant lang="en">Renames all string ids which start with the old group path to start with the new one</variant>
   </polyglotstring>
   <polyglotstring id="fs.global.confirmoverwrite" group="fs.global">
-    <variant lang="de">Die Datei '%s' existiert bereits. Sind Sie sicher, dass Sie sie überschreiben wollen?</variant>
+    <variant lang="de">Le fichier '%s'existe déjà. Est-ce que vous êtes sûr, que vous voulez l'écraser?</variant>
     <variant lang="en">The file '%s' already exists. Do you really want to overwrite it?</variant>
   </polyglotstring>
   <polyglotstring id="fs.polyglot.undo.languageadd" group="fs.polyglot.undo">
@@ -525,6 +539,7 @@
   </polyglotstring>
   <polyglotstring id="fs.global.perform" group="fs.global">
     <variant lang="de">Führe Operation durch: %s ...</variant>
+    <variant lang="fr">Effectuant l'operation: %s ...</variant>
     <variant lang="en">Performing operation: %s ...</variant>
   </polyglotstring>
   <polyglotstring id="fs.polyglot.log.loadedfile" group="fs.polyglot.log">
@@ -532,6 +547,7 @@
     <variant lang="en">Loaded table %s.</variant>
   </polyglotstring>
   <polyglotstring id="fs.polyglot.error.saveconfigfailed" group="fs.polyglot.error">
+    <variant lang="de">Konnte Konfigurationsdatei nicht speichern: %s</variant>
     <variant lang="en">Couldn't save configuration file: %s</variant>
   </polyglotstring>
   <polyglotstring id="fs.polyglot.PolyglotConfigurator.configfile" group="fs.polyglot.PolyglotConfigurator">
@@ -556,6 +572,7 @@
   </polyglotstring>
   <polyglotstring id="fs.global.ok" group="fs.global">
     <variant lang="de">Ok</variant>
+    <variant lang="fr">Ok</variant>
     <variant lang="en">Ok</variant>
   </polyglotstring>
   <polyglotstring id="fs.polyglot.log.savingfile" group="fs.polyglot.log">
