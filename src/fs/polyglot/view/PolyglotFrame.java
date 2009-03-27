@@ -311,6 +311,7 @@ public class PolyglotFrame extends JFrame implements ResourceDependent {
 		if(helpmnemonic.length() > 0) helpMenu.setMnemonic(helpmnemonic.charAt(0));
 			help	= new JMenuItem(loader.getString(sgroup + ".help", languageID));
 			help.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F1,0));
+			help.setEnabled(false);
 			info 	= new JMenuItem(loader.getString(sgroup + ".info", languageID));
 			for(JMenuItem i : Arrays.asList(help,info)) helpMenu.add(i);
 		for(JMenu m : Arrays.asList(fileMenu, optionsMenu, helpMenu)) menu.add(m);

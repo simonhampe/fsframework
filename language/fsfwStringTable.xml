@@ -518,7 +518,7 @@
     <variant lang="en">Renames all string ids which start with the old group path to start with the new one</variant>
   </polyglotstring>
   <polyglotstring id="fs.global.confirmoverwrite" group="fs.global">
-    <variant lang="de">Le fichier '%s'existe déjà. Est-ce que vous êtes sûr, que vous voulez l'écraser?</variant>
+    <variant lang="de">Die Datei '%s' existiert bereits. Wollen Sie sie wirklich überschreiben?</variant>
     <variant lang="en">The file '%s' already exists. Do you really want to overwrite it?</variant>
   </polyglotstring>
   <polyglotstring id="fs.polyglot.undo.languageadd" group="fs.polyglot.undo">
