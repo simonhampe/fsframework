@@ -36,6 +36,7 @@ public class LogHistoryTest {
 
 	}
 
+	@SuppressWarnings("serial")
 	private static class MoreLevels extends Level {
 		public MoreLevels(String name, int value) {
 			super(value, name, value);

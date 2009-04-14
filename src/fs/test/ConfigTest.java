@@ -1,12 +1,7 @@
 package fs.test;
 
-import org.dom4j.*;
-import org.dom4j.tree.*;
-
-import java.io.*;
-import java.util.*;
-
-import fs.xml.*;
+import fs.xml.PolyglotStringTable;
+import fs.xml.XMLConfigureFile;
 
 /**
  * Tests the XMLConfigurable and ConfigureFileWriter

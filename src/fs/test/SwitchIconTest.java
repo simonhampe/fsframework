@@ -11,12 +11,14 @@ import javax.swing.JLabel;
 
 import fs.gui.SwitchIconLabel;
 
+@SuppressWarnings("serial")
 public class SwitchIconTest extends JFrame {
 
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		@SuppressWarnings("unused")
 		SwitchIconTest app = new SwitchIconTest("test");
 	}
 

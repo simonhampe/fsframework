@@ -1,12 +1,14 @@
 package fs.test;
 
-import org.dom4j.*;
-import org.dom4j.tree.*;
+import java.io.File;
+import java.util.Arrays;
 
-import java.io.*;
-import java.util.*;
+import org.dom4j.Document;
 
-import fs.xml.*;
+import fs.xml.ResourceDependent;
+import fs.xml.ResourceDirectory;
+import fs.xml.ResourceReference;
+import fs.xml.XMLToolbox;
 
 /**
  * Tests all the Resource* classes

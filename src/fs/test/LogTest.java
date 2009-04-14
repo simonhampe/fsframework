@@ -1,10 +1,9 @@
 package fs.test;
 
-import org.apache.log4j.*;
-import org.apache.log4j.net.*;
-import org.apache.log4j.xml.*;
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Logger;
 
-import fs.log.*;
+import fs.log.DefaultLogHistoryWindowModel;
 
 /**
  * Tests features of the log4j api

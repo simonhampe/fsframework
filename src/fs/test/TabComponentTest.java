@@ -1,18 +1,22 @@
 package fs.test;
 
-import javax.swing.*;
-import javax.swing.event.*;
-import javax.swing.plaf.synth.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
-import java.awt.*;
-import java.awt.event.*;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
+import javax.swing.JTextField;
 
-import java.beans.*;
-
-import java.io.*;
-
-import fs.gui.*;
-import fs.xml.*;
+import fs.gui.EditCloseTabComponent;
+import fs.gui.TabComponent;
+import fs.xml.XMLToolbox;
 
 /**
  * Tests the tab component classes
@@ -20,6 +24,7 @@ import fs.xml.*;
  * @author Simon Hampe
  * 
  */
+@SuppressWarnings("serial")
 public class TabComponentTest extends JFrame {
 
 	public static void main(String[] args) {
@@ -29,6 +34,7 @@ public class TabComponentTest extends JFrame {
 			 * FileInputStream("stuff/synthtest.xml"), TabComponentTest.class);
 			 * UIManager.setLookAndFeel(laf);
 			 */
+			@SuppressWarnings("unused")
 			TabComponentTest app = new TabComponentTest("Testframe");
 		} catch (Exception e) {
 			System.out.println(e.getClass().toString() + ": " + e.getMessage());
