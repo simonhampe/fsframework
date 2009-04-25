@@ -1,3 +1,12 @@
+fs.event
 fs.gui
+fs.log
+fs.polyglot
+fs.polyglot.event
+fs.polyglot.model
+fs.polyglot.undo
+fs.polyglot.validate
+fs.polyglot.view
 fs.test
+fs.validate
 fs.xml
