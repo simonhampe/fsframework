@@ -45,6 +45,13 @@ public class FsfwDefaultReference implements ResourceReference {
 	public static void setFsfwDirectory(String newDirectory) {
 		basedir = newDirectory == null ? "" : newDirectory;
 	}
+	
+	/**
+	 * @return The current base directory of fsframework
+	 */
+	public static String getFsfwDirectory() {
+		return basedir;
+	}
 
 	/**
 	 * Always returns (base path) + "/" + path
