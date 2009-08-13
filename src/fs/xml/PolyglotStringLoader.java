@@ -207,6 +207,16 @@ public class PolyglotStringLoader {
 		precheckDelegate();
 		return internalTable.getLanguageList();
 	}
+	
+	/**
+	 * @return Delegates the call to the internal table
+	 * @throws UnsupportedOperationException - if no table is associated
+	 * @see fs.xml.PolyglotStringTable#getSupport(String)
+	 */
+	public int getSupport(String languageID) {
+		precheckDelegate();
+		return internalTable.getSupport(languageID);
+	}
 
 	/**
 	 * @return Delegates the call to the internal table
