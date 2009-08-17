@@ -149,6 +149,33 @@ public class XMLToolbox {
 	}
 	
 	/**
+	 * Transforms a document with a given xsl file and saves the result to the given file.
+	 * @param doc The document to transform. If null, the call is ignored
+	 * @param xslFile The xsl file to use. If the file does not exist, cannot be read or is invalid in some other form, this will
+	 * produce an {@link IOException}
+	 * @param output The file to which this is saved.
+	 * @throws IOException - If any I/O-error occurs
+	 * @throws TransformerConfigurationException - if the xsl file is invalid
+	 * @throws TransformerException - if the document cannot be transformed
+	 */
+	public static void transformDocument(Document doc, File xslFile, File output) 
+					throws IOException, TransformerConfigurationException, TransformerException{
+		//Check parameters
+		if(doc == null) return;
+		if(!xslFile.exists()) {
+			throw new IOException("Cannot read format file");
+		}
+		//Transform
+		TransformerFactory factory = TransformerFactory.newInstance();
+		Transformer transformer = factory.newTransformer( new StreamSource(xslFile.getAbsolutePath()));
+		DocumentSource source = new DocumentSource(doc);
+		FileWriter writer = new FileWriter(output);
+		StreamResult result = new StreamResult( writer);
+		transformer.transform(source, result);
+		writer.close();
+	}
+	
+	/**
 	 * A file filter for xml files, without description
 	 */
 	public final static FileNameExtensionFilter xmlFilter = new FileNameExtensionFilter(null,"xml");
