@@ -77,13 +77,14 @@ public class LanguageListCellRenderer implements ListCellRenderer,
 		final JProgressBar bar = new JProgressBar();
 		JPanel sumPanel = new JPanel();
 		sumPanel.setBackground(label.getBackground());
-		sumPanel.setBorder(label.getBorder());
+		sumPanel.setBorder(null);//label.getBorder());
 		label.setBorder(null);
 
 		// If the object is not of type Language, return the empty label,
 		// otherwise copy values
 		if (value instanceof Language) {
 			Language lang = (Language) value;
+			label.setOpaque(false);
 			label.setIcon(lang.isOnlyUsed ? undescribedIcon : (lang
 					.isFullySupported() ? okIcon : warnIcon));
 			String color = lang.isFullySupported() ? fullySupportedHTML
