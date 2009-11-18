@@ -186,19 +186,19 @@ public class SwitchIconLabel extends JLabel {
 			return width;
 		}
 
-		/**
-		 * Sets the width of the dummy icon to max(0,w)
-		 */
-		public void setWidth(int w) {
-			width = 0 >= w ? 0 : w;
-		}
-
-		/**
-		 * Sets the height of the dummy icon to max(0,h)
-		 */
-		public void setHeight(int h) {
-			height = 0 >= h ? 0 : h;
-		}
+//		/**
+//		 * Sets the width of the dummy icon to max(0,w)
+//		 */
+//		public void setWidth(int w) {
+//			width = 0 >= w ? 0 : w;
+//		}
+//
+//		/**
+//		 * Sets the height of the dummy icon to max(0,h)
+//		 */
+//		public void setHeight(int h) {
+//			height = 0 >= h ? 0 : h;
+//		}
 
 		/**
 		 * Sets the dummy icon's width and height to those of i
