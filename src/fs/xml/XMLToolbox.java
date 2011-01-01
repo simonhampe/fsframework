@@ -11,6 +11,7 @@ import org.dom4j.*;
 import org.dom4j.io.*;
 
 import java.io.*;
+import java.nio.charset.Charset;
 
 /**
  * This class contains a variety of useful static functions that implement
@@ -108,7 +109,7 @@ public class XMLToolbox {
 
 	/**
 	 * Tries to save an org.dom4j.Document object in the specified file in the
-	 * standard "pretty format".
+	 * standard "pretty format". It uses an OutputStreamWriter with the XMLWriter that ensures encoding UTF-8.
 	 * 
 	 * @throws IOException
 	 *             - if an I/O-error occured during saving
@@ -116,14 +117,16 @@ public class XMLToolbox {
 	public static void saveXML(Document doc, String filename)
 			throws IOException {
 		OutputFormat format = OutputFormat.createPrettyPrint();
-		XMLWriter writer = new XMLWriter(new FileWriter(filename), format);
+		FileOutputStream fos = new FileOutputStream(new File(filename));
+		XMLWriter writer = new XMLWriter(new OutputStreamWriter(fos, Charset.forName("UTF-8")), format);
 		writer.write(doc);
 		writer.close();
 	}
 
 	/**
 	 * Tries to open the specified XML file. If succesful, it will be stored in
-	 * a Document object and returned
+	 * a Document object and returned. This method assumes that the document has been encoded using UTF-8. If
+	 * this is not the case, the method may fail (especially if the document contains special characters like ä,ö,ü)
 	 * 
 	 * @throws DocumentException
 	 *             - If the XML file can not be opened or is not a valid XML
